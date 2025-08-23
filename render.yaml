@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: artbat-prague-admin
+    name: gigster-admin
     env: node
     plan: free
     buildCommand: npm install

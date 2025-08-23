@@ -26,11 +26,11 @@ const ADMIN_CREDENTIALS = {
 
 // FTP configuration
 const FTP_CONFIG = {
-  host: process.env.FTP_HOST || 'gigster.pro',
-  user: process.env.FTP_USER || 'somos',
-  password: process.env.FTP_PASSWORD || 'your-ftp-password',
+  host: process.env.FTP_HOST || 'somos.ftp.tools',
+  user: process.env.FTP_USER || 'somos_cursor',
+  password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
   port: process.env.FTP_PORT || 21,
-  remotePath: process.env.FTP_REMOTE_PATH || '/www/artbat-prague'
+  remotePath: process.env.FTP_REMOTE_PATH || '/artbat-prague'
 };
 
 // Multer configuration for file uploads
@@ -167,6 +167,33 @@ app.post('/admin/api/config', authenticateToken, async (req, res) => {
   }
 });
 
+// Alias for client compatibility
+app.post('/admin/api/config/save', authenticateToken, async (req, res) => {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const localPath = path.join(__dirname, 'temp', 'config.json');
+      const remotePath = `${FTP_CONFIG.remotePath}/config.json`;
+      
+      // Сохраняем локально
+      await fs.mkdir(path.dirname(localPath), { recursive: true });
+      await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
+      
+      // Загружаем на FTP
+      const uploaded = await ftp.uploadFile(localPath, remotePath);
+      if (!uploaded) {
+        throw new Error('Failed to upload config to FTP');
+      }
+      
+      return { message: 'Config saved successfully to FTP' };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Config save error:', error);
+    res.status(500).json({ error: 'Ошибка сохранения конфигурации' });
+  }
+});
+
 // Get translations from FTP
 app.get('/admin/api/translations', authenticateToken, async (req, res) => {
   try {
@@ -192,6 +219,31 @@ app.get('/admin/api/translations', authenticateToken, async (req, res) => {
 
 // Save translations to FTP
 app.post('/admin/api/translations', authenticateToken, async (req, res) => {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const localPath = path.join(__dirname, 'temp', 'translations.json');
+      const remotePath = `${FTP_CONFIG.remotePath}/translations.json`;
+      
+      await fs.mkdir(path.dirname(localPath), { recursive: true });
+      await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
+      
+      const uploaded = await ftp.uploadFile(localPath, remotePath);
+      if (!uploaded) {
+        throw new Error('Failed to upload translations to FTP');
+      }
+      
+      return { message: 'Translations saved successfully to FTP' };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Translations save error:', error);
+    res.status(500).json({ error: 'Ошибка сохранения переводов' });
+  }
+});
+
+// Alias for client compatibility
+app.post('/admin/api/translations/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'translations.json');
@@ -263,6 +315,31 @@ app.post('/admin/api/updates', authenticateToken, async (req, res) => {
   }
 });
 
+// Alias for client compatibility
+app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const localPath = path.join(__dirname, 'temp', 'updates.json');
+      const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
+      
+      await fs.mkdir(path.dirname(localPath), { recursive: true });
+      await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
+      
+      const uploaded = await ftp.uploadFile(localPath, remotePath);
+      if (!uploaded) {
+        throw new Error('Failed to upload updates to FTP');
+      }
+      
+      return { message: 'Updates saved successfully to FTP' };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Updates save error:', error);
+    res.status(500).json({ error: 'Ошибка сохранения обновлений' });
+  }
+});
+
 // Get HTML content from FTP
 app.get('/admin/api/html', authenticateToken, async (req, res) => {
   try {
@@ -288,6 +365,31 @@ app.get('/admin/api/html', authenticateToken, async (req, res) => {
 
 // Save HTML content to FTP
 app.post('/admin/api/html', authenticateToken, async (req, res) => {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const localPath = path.join(__dirname, 'temp', 'index.html');
+      const remotePath = `${FTP_CONFIG.remotePath}/index.html`;
+      
+      await fs.mkdir(path.dirname(localPath), { recursive: true });
+      await fs.writeFile(localPath, req.body.content);
+      
+      const uploaded = await ftp.uploadFile(localPath, remotePath);
+      if (!uploaded) {
+        throw new Error('Failed to upload HTML to FTP');
+      }
+      
+      return { message: 'HTML saved successfully to FTP' };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('HTML save error:', error);
+    res.status(500).json({ error: 'Ошибка сохранения HTML' });
+  }
+});
+
+// Alias for client compatibility
+app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
@@ -437,6 +539,89 @@ app.post('/admin/api/upload', authenticateToken, upload.single('file'), async (r
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Ошибка загрузки файла' });
+  }
+});
+
+// Media upload endpoint (alias for client compatibility)
+app.post('/admin/api/media/upload', authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Файл не загружен' });
+    }
+
+    const result = await withFTP(async (ftp) => {
+      const targetDir = req.query.dir || 'uploads';
+      const remotePath = `${FTP_CONFIG.remotePath}/assets/${targetDir}/${req.file.filename}`;
+      
+      // Создаем папку на FTP если нужно
+      await ftp.createDirectory(`${FTP_CONFIG.remotePath}/assets/${targetDir}`);
+      
+      // Загружаем файл на FTP
+      const uploaded = await ftp.uploadFile(req.file.path, remotePath);
+      if (!uploaded) {
+        throw new Error('Failed to upload file to FTP');
+      }
+      
+      return { 
+        message: 'Файл загружен успешно на FTP',
+        filename: req.file.filename,
+        path: `/assets/${targetDir}/${req.file.filename}`
+      };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Media upload error:', error);
+    res.status(500).json({ error: 'Ошибка загрузки файла' });
+  }
+});
+
+// Media directory endpoint
+app.get('/admin/api/media/directory', authenticateToken, async (req, res) => {
+  try {
+    const { dir } = req.query;
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/assets/${dir || ''}`;
+      const files = await ftp.listFiles(remotePath);
+      
+      return files.filter(file => 
+        /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
+      ).map(file => ({
+        name: file.name,
+        path: `assets/${dir || ''}/${file.name}`,
+        size: file.size,
+        type: 'file'
+      }));
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Media directory error:', error);
+    res.status(500).json({ error: 'Ошибка чтения папки медиа' });
+  }
+});
+
+// Delete media file
+app.delete('/admin/api/media/:filename', authenticateToken, async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const { dir } = req.query;
+    
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/assets/${dir || ''}/${filename}`;
+      const deleted = await ftp.deleteFile(remotePath);
+      
+      if (!deleted) {
+        throw new Error('Failed to delete file from FTP');
+      }
+      
+      return { message: 'Файл удален успешно с FTP' };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Media delete error:', error);
+    res.status(500).json({ error: 'Ошибка удаления файла' });
   }
 });
 

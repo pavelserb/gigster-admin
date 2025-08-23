@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: artbat-prague-admin
+    name: gigster-admin
     env: node
     plan: free
-    rootDir: .
+    rootDir: render-admin
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -12,14 +12,14 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FTP_HOST
-        value: gigster.pro
+        value: somos.ftp.tools
       - key: FTP_USER
-        value: somos
+        value: somos_cursor
       - key: FTP_PASSWORD
-        sync: false
+        value: Pr6LUx9h45
       - key: FTP_PORT
         value: "21"
       - key: FTP_REMOTE_PATH
-        value: /www/artbat-prague
+        value: /artbat-prague
     healthCheckPath: /admin/api/status
     autoDeploy: true

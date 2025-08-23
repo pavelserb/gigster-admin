@@ -1,0 +1,21 @@
+{
+  "name": "ARTBAT Prague",
+  "short_name": "ARTBAT",
+  "description": "ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0e",
+  "theme_color": "#27e1b9",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}

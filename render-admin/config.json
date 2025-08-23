@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "username": "admin",
+    "passwordHash": "$2b$10$bcFFgJjEGfpFF3sHXhFIIe3RYlJvFQ4ZRAYha6UkXFz5DGLvmgZbK"
+  },
+  "server": {
+    "port": 3001,
+    "jwtSecret": "your-secret-key-change-this-in-production"
+  }
+}

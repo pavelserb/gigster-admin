@@ -1,0 +1,45 @@
+{
+  "gtm": [
+    {
+      "name": "GTM Container",
+      "id": "GTM-WLKNKXZ3",
+      "enabled": false
+    },
+    {
+      "name": "GTM Container 2",
+      "id": "GTM-NZGBZR5R",
+      "enabled": false
+    }
+  ],
+  "ga": [
+    {
+      "name": "GA4 Property",
+      "id": "G-HF1Y44ZDD2",
+      "enabled": false
+    }
+  ],
+  "fb": [
+    {
+      "name": "Gigster",
+      "id": "336818115853433",
+      "enabled": true
+    },
+    {
+      "name": "FB Pixel",
+      "id": "897576728064985",
+      "enabled": false
+    }
+  ],
+  "tt": [
+    {
+      "name": "TikTok Pixel",
+      "id": "CRT7TA3C77U61CV1GO00",
+      "enabled": false
+    }
+  ],
+  "custom": [],
+  "settings": {
+    "respectConsent": false,
+    "debugMode": false
+  }
+}

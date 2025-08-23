@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show</title>
+  <meta name="description" content="Join ARTBAT in Prague on Sep 5, 2025 for an unforgettable open-air electronic music experience at Areál7. Tickets available now from official partners." />
+  <meta name="theme-color" content="#0b0b0e">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://gigster.pro/artbat-prague/">
+
+  <!-- Critical CSS inline for performance -->
+  <style>
+    /* Critical CSS - загружается inline для улучшения производительности */
+    :root {
+      --bg: #0b0b0e;
+      --fg: #f2f2f3;
+      --brand: #27e1b9;
+      --accent: #f8da2f;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Roboto Flex", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    header.site {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 68px;
+      z-index: 1000;
+      background: rgba(10, 10, 14, 0.38);
+      backdrop-filter: saturate(1.1) blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    
+    .container {
+      max-width: clamp(620px, calc(100vw - 2 * clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem)), 1200px);
+      margin: 0 auto;
+      padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem);
+    }
+    
+    .hdr {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+    
+    .brand img {
+      height: 32px;
+      width: auto;
+    }
+    
+    .primary {
+      display: none;
+    }
+    
+    @media (min-width: 768px) {
+      .primary {
+        display: flex;
+        gap: 2rem;
+      }
+      
+      .hamb {
+        display: none;
+      }
+    }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 68px;
+    }
+    
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn.primary {
+      background: var(--brand);
+      color: var(--bg);
+    }
+    
+    .btn.primary:hover {
+      background: #1fc89f;
+      transform: translateY(-2px);
+    }
+    
+    .floating-cta {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+    }
+    
+    .cta-main {
+      background: var(--brand);
+      color: var(--bg);
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 8px 32px rgba(39, 225, 185, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .cta-main:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(39, 225, 185, 0.4);
+    }
+    
+    #mnav {
+      position: fixed;
+      top: 68px;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-top: 1px solid #24242a;
+      z-index: 999;
+    }
+    
+    #mnav[hidden] {
+      display: none;
+    }
+    
+    #mnav nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+    
+    h1, h2, h3 {
+      margin: 0 0 1rem 0;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+    }
+    
+    h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+    
+    p {
+      margin: 0 0 1rem 0;
+      line-height: 1.6;
+    }
+  </style>
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="assets/video/hero.mp4" as="video" type="video/mp4">
+  <link rel="preload" href="assets/icons/g.svg" as="image" type="image/svg+xml">
+  
+  <!-- Fonts with display=swap for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+
+  <!-- Non-critical CSS loaded asynchronously -->
+  <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="css/styles.css"></noscript>
+
+  <!-- Icons / Manifest -->
+  <link rel="manifest" href="assets/icons/site.webmanifest">
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+
+  <!-- Analytics Pixels - Load early in head -->
+  <script src="js/pixels.js" defer></script>
+
+  <!-- Open Graph / Social preview -->
+  <meta property="og:title" content="ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show">
+  <meta property="og:description" content="Join ARTBAT in Prague on Sep 5, 2025 for an unforgettable open‑air electronic music experience at Areál7. Tickets available now.">
+  <meta property="og:image" content="https://gigster.pro/artbat-prague/assets/images/hero-poster.jpg">
+  <meta property="og:url" content="https://gigster.pro/artbat-prague/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show">
+  <meta name="twitter:description" content="Immersive open-air show in Prague. Tickets available now.">
+  <meta name="twitter:image" content="https://gigster.pro/artbat-prague/assets/images/hero-poster.jpg">
+</head>
+<body>
+  <a class="skip" href="#about" data-i18n="skip">Skip to content</a>
+
+  <header class="site">
+    <!-- mobile drawer -->
+    <div id="mnav" hidden>
+      <div class="container" style="padding-bottom:16px">
+        <nav aria-label="Mobile">
+          <a class="btn" href="#about" data-i18n="nav.about">About</a>
+          <a class="btn" href="#artists" data-i18n="nav.artists">Artists</a>
+          <a class="btn" href="#tickets" data-i18n="nav.tickets">Tickets</a>
+          <a class="btn" href="#location" data-i18n="nav.location">Location</a>
+          <a class="btn" href="#faqs" data-i18n="nav.faqs">FAQs</a>
+          <a class="btn" href="#connect" data-i18n="nav.connect">Connect</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="container hdr">
+      <div class="brand" aria-label="Site logo">
+        <a href="#"><img class="g" alt="g" src="assets/icons/g.svg"></a>
+      </div>
+      <nav class="primary" aria-label="Primary">
+        <a href="#about" data-i18n="nav.about">About</a>
+        <a href="#artists" data-i18n="nav.artists">Artists</a>
+        <a href="#tickets" data-i18n="nav.tickets">Tickets</a>
+        <a href="#location" data-i18n="nav.location">Location</a>
+        <a href="#faqs" data-i18n="nav.faqs">FAQs</a>
+        <a href="#connect" data-i18n="nav.connect">Connect</a>
+      </nav>
+      <div class="spacer"></div>
+
+      <div class="hdr-actions">
+        <button id="hambBtn" class="btn icon hamb" aria-expanded="false" aria-controls="mnav" aria-label="Open menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Floating Tickets island -->
+  <div class="floating-cta" role="region" aria-label="Quick tickets">
+    <div class="cta-bar" role="group" aria-label="Tickets actions">
+      <a id="ticketsPrimary" class="cta-main" href="#tickets" aria-label="Get tickets" data-i18n="cta.tickets">
+        Tickets
+      </a>
+      <button id="ticketsToggle" class="cta-toggle" aria-expanded="false" aria-controls="ticketsMenu" aria-label="More ticket vendors">
+        ▲
+      </button>
+    </div>
+  </div>
+
+  <!-- Main content will be loaded here -->
+  <main id="main-content">
+    <!-- Content will be dynamically loaded -->
+  </main>
+
+  <!-- Load non-critical JavaScript asynchronously -->
+  <script>
+    // Inline critical JavaScript for immediate functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile navigation toggle
+      const hambBtn = document.getElementById('hambBtn');
+      const mnav = document.getElementById('mnav');
+      
+      if (hambBtn && mnav) {
+        hambBtn.addEventListener('click', function() {
+          const isHidden = mnav.hasAttribute('hidden');
+          mnav.hidden = !isHidden;
+          hambBtn.setAttribute('aria-expanded', !isHidden);
+        });
+      }
+      
+      // Load main content
+      loadMainContent();
+    });
+    
+    async function loadMainContent() {
+      try {
+        const response = await fetch('index.html');
+        const html = await response.text();
+        
+        // Extract main content (everything between <body> and </body>)
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+        if (bodyMatch) {
+          const bodyContent = bodyMatch[1];
+          
+          // Remove header and floating CTA (already present)
+          const mainContent = bodyContent
+            .replace(/<header[\s\S]*?<\/header>/gi, '')
+            .replace(/<div class="floating-cta"[\s\S]*?<\/div>/gi, '')
+            .replace(/<a class="skip"[\s\S]*?<\/a>/gi, '');
+          
+          document.getElementById('main-content').innerHTML = mainContent;
+          
+          // Initialize remaining functionality
+          if (typeof initSite === 'function') {
+            initSite();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading main content:', error);
+        // Fallback: redirect to original page
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+
+  <!-- Load remaining JavaScript -->
+  <script src="js/main.js" defer></script>
+  <script src="js/i18n.js" defer></script>
+  <script src="js/updates.js" defer></script>
+</body>
+</html>

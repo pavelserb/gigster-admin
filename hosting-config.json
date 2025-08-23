@@ -1,0 +1,43 @@
+{
+  "hosting": {
+    "type": "shared_hosting",
+    "path": "/home/somos/gigster.pro/www/artbat-prague/",
+    "url": "ftp://somos_cursor@somos.ftp.tools:21/",
+    "server": "apache", 
+    "ftp": {
+      "enabled": true,
+      "host": "somos.ftp.tools",
+      "username": "somos_cursor",
+      "password": "Pr6LUx9h45"
+    },
+    "ssh": {
+      "enabled": false,
+      "host": "ssh.gigster.pro",
+      "username": "your_username"
+    }
+  },
+  "deployment": {
+    "method": "file_copy", 
+    "backup": true,
+    "backup_path": "./backups",
+    "auto_deploy": false
+  },
+  "optimization": {
+    "images": true,
+    "css_minify": true,
+    "js_minify": true,
+    "html_minify": true,
+    "gzip": true,
+    "brotli": false
+  },
+  "cdn": {
+    "enabled": false,
+    "url": "https://cdn.yourdomain.com",
+    "subdomain": "cdn"
+  },
+  "ssl": {
+    "enabled": true,
+    "auto_redirect": true,
+    "hsts": true
+  }
+}

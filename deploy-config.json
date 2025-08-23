@@ -1,0 +1,26 @@
+{
+  "production": {
+    "cdn": "https://cdn.yourdomain.com",
+    "analytics": {
+      "enabled": true,
+      "tracking_id": "YOUR_GA_ID"
+    },
+    "performance": {
+      "image_optimization": true,
+      "lazy_loading": true,
+      "preload_critical": true
+    }
+  },
+  "staging": {
+    "cdn": "https://staging.yourdomain.com",
+    "analytics": {
+      "enabled": false
+    }
+  },
+  "deployment": {
+    "platform": "vercel",
+    "auto_deploy": true,
+    "branch": "main",
+    "environment": "production"
+  }
+}

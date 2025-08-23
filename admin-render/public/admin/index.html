@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTBAT Prague - Онлайн админка (Render)</title>
+    <style>
+        :root {
+            --bg: #0b0b0e;
+            --fg: #f2f2f3;
+            --brand: #27e1b9;
+            --accent: #f8da2f;
+            --card: #141419;
+            --border: #24242a;
+            --success: #27e1b9;
+            --error: #ff3b30;
+            --warning: #f8da2f;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: "Roboto Flex", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--brand);
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        
+        .platform-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 1rem;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 1rem;
+        }
+        
+        .btn {
+            background: var(--brand);
+            color: var(--bg);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #1fc89f;
+            transform: translateY(-2px);
+        }
+        
+        .admin-panel {
+            display: none;
+        }
+        
+        .admin-panel.active {
+            display: block;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--fg);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--brand);
+            color: var(--brand);
+            background: rgba(39, 225, 185, 0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            color: var(--brand);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid;
+        }
+        
+        .status.success {
+            background: rgba(39, 225, 185, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .status.error {
+            background: rgba(255, 59, 48, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+        
+        .status.warning {
+            background: rgba(248, 218, 47, 0.1);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+        
+        .file-upload {
+            border: 2px dashed var(--border);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--brand);
+            background: rgba(39, 225, 185, 0.1);
+        }
+        
+        .file-upload.dragover {
+            border-color: var(--brand);
+            background: rgba(39, 225, 185, 0.2);
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .image-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .image-item .actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-secondary {
+            background: var(--border);
+            color: var(--fg);
+        }
+        
+        .btn-secondary:hover {
+            background: #3a3a42;
+        }
+        
+        .logout {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+        }
+        
+        .user-info {
+            text-align: right;
+            margin-bottom: 2rem;
+            color: var(--muted);
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .language-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .lang-tab {
+            padding: 0.5rem 1rem;
+            background: var(--border);
+            border: none;
+            color: var(--fg);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .lang-tab.active {
+            background: var(--brand);
+            color: var(--bg);
+        }
+        
+        .deployment-info {
+            background: rgba(248, 218, 47, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .deployment-info h4 {
+            margin-top: 0;
+            color: var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Форма входа -->
+        <div id="loginForm" class="login-form">
+            <div class="header">
+                <div class="logo">ARTBAT Prague</div>
+                <div class="subtitle">Онлайн админка <span class="platform-badge">RENDER</span></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="username" placeholder="admin">
+            </div>
+            
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="password" placeholder="admin123">
+            </div>
+            
+            <button class="btn" onclick="login()">Войти</button>
+            
+            <div id="loginStatus"></div>
+        </div>
+
+        <!-- Панель админки -->
+        <div id="adminPanel" class="admin-panel">
+            <div class="logout">
+                <button class="btn btn-secondary" onclick="logout()">Выйти</button>
+            </div>
+            
+            <div class="user-info">
+                Пользователь: <span id="currentUser"></span>
+            </div>
+            
+            <div class="header">
+                <div class="logo">ARTBAT Prague</div>
+                <div class="subtitle">Панель управления <span class="platform-badge">RENDER</span></div>
+            </div>
+
+            <div class="deployment-info">
+                <h4>🚀 Развернуто на Render</h4>
+                <p>Эта админка работает на бесплатном тарифе Render. Файлы автоматически обновляются на вашем FTP хостинге.</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="translations">Переводы</button>
+                <button class="tab" data-tab="updates">Новости</button>
+                <button class="tab" data-tab="analytics">Аналитика</button>
+                <button class="tab" data-tab="media">Медиа</button>
+                <button class="tab" data-tab="settings">Настройки</button>
+            </div>
+
+            <!-- Вкладка Переводы -->
+            <div id="translations" class="tab-content active">
+                <div class="card">
+                    <h3>Управление переводами</h3>
+                    <p>Редактируйте переводы для всех языков сайта.</p>
+                    
+                    <div class="language-tabs">
+                        <button class="lang-tab active" data-lang="en">English</button>
+                        <button class="lang-tab" data-lang="cs">Čeština</button>
+                        <button class="lang-tab" data-lang="uk">Українська</button>
+                    </div>
+                    
+                    <div id="translationsEditor">
+                        <!-- Редактор переводов будет загружен динамически -->
+                    </div>
+                    
+                    <button class="btn" onclick="saveTranslations()">Сохранить переводы</button>
+                </div>
+            </div>
+
+            <!-- Вкладка Новости -->
+            <div id="updates" class="tab-content">
+                <div class="card">
+                    <h3>Управление новостями</h3>
+                    <p>Добавляйте и редактируйте новости сайта.</p>
+                    
+                    <div id="updatesEditor">
+                        <!-- Редактор новостей будет загружен динамически -->
+                    </div>
+                    
+                    <button class="btn" onclick="saveUpdates()">Сохранить новости</button>
+                </div>
+            </div>
+
+            <!-- Вкладка Аналитика -->
+            <div id="analytics" class="tab-content">
+                <div class="card">
+                    <h3>Настройки аналитики</h3>
+                    <p>Настройте Google Analytics и Facebook Pixel.</p>
+                    
+                    <div class="form-group">
+                        <label>Google Analytics ID</label>
+                        <input type="text" id="gaId" placeholder="G-XXXXXXXXXX">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Facebook Pixel ID</label>
+                        <input type="text" id="fbPixel" placeholder="XXXXXXXXXX">
+                    </div>
+                    
+                    <button class="btn" onclick="saveAnalytics()">Сохранить настройки</button>
+                </div>
+            </div>
+
+            <!-- Вкладка Медиа -->
+            <div id="media" class="tab-content">
+                <div class="card">
+                    <h3>Загрузка изображений</h3>
+                    <p>Загружайте изображения для разных разделов сайта.</p>
+                    
+                    <div class="form-group">
+                        <label>Категория</label>
+                        <select id="imageCategory">
+                            <option value="artists">Артисты</option>
+                            <option value="updates">Новости</option>
+                            <option value="media">Медиа</option>
+                            <option value="location">Локация</option>
+                        </select>
+                    </div>
+                    
+                    <div class="file-upload" id="fileUpload">
+                        <p>Перетащите файлы сюда или кликните для выбора</p>
+                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div id="uploadStatus"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Управление изображениями</h3>
+                    <div id="imagesList">
+                        <!-- Список изображений будет загружен динамически -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка Настройки -->
+            <div id="settings" class="tab-content">
+                <div class="card">
+                    <h3>Информация о системе</h3>
+                    <p>Статус админки и подключения.</p>
+                    
+                    <div id="systemStatus">
+                        <!-- Статус системы будет загружен динамически -->
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="checkSystemStatus()">Проверить статус</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authToken = null;
+        let currentLang = 'en';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Language switching
+        document.querySelectorAll('.lang-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentLang = tab.dataset.lang;
+                loadTranslations();
+            });
+        });
+
+        // File upload handling
+        const fileUpload = document.getElementById('fileUpload');
+        const fileInput = document.getElementById('fileInput');
+
+        fileUpload.addEventListener('click', () => fileInput.click());
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    uploadImage(file);
+                }
+            });
+        }
+
+        // Authentication
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    showAdminPanel();
+                    loadSiteData();
+                } else {
+                    showStatus(data.error, 'error', 'loginStatus');
+                }
+            } catch (error) {
+                showStatus('Ошибка подключения к серверу', 'error', 'loginStatus');
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            hideAdminPanel();
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('currentUser').textContent = currentUser.username;
+        }
+
+        function hideAdminPanel() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('active');
+        }
+
+        // API calls
+        async function loadSiteData() {
+            try {
+                const response = await fetch('/api/site/data', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    loadTranslations(data.translations);
+                    loadUpdates(data.updates);
+                    loadAnalytics(data.pixels);
+                }
+            } catch (error) {
+                console.error('Failed to load site data:', error);
+            }
+        }
+
+        function loadTranslations(translations = null) {
+            // Загружаем переводы для текущего языка
+            const editor = document.getElementById('translationsEditor');
+            if (!translations) {
+                editor.innerHTML = '<p>Загрузка переводов...</p>';
+                return;
+            }
+            
+            // Создаем форму для редактирования переводов
+            let html = '';
+            for (const [key, value] of Object.entries(translations)) {
+                if (typeof value === 'object' && value[currentLang] !== undefined) {
+                    html += `
+                        <div class="form-group">
+                            <label>${key}</label>
+                            <input type="text" data-key="${key}" value="${value[currentLang] || ''}" placeholder="Перевод для ${currentLang}">
+                        </div>
+                    `;
+                }
+            }
+            
+            editor.innerHTML = html;
+        }
+
+        function loadUpdates(updates = null) {
+            const editor = document.getElementById('updatesEditor');
+            if (!updates) {
+                editor.innerHTML = '<p>Загрузка новостей...</p>';
+                return;
+            }
+            
+            // Создаем форму для редактирования новостей
+            let html = '<div class="form-group">';
+            html += '<label>Новости (JSON)</label>';
+            html += '<textarea id="updatesText" placeholder="Введите JSON с новостями">';
+            html += JSON.stringify(updates, null, 2);
+            html += '</textarea>';
+            html += '</div>';
+            
+            editor.innerHTML = html;
+        }
+
+        function loadAnalytics(pixels = null) {
+            if (pixels) {
+                document.getElementById('gaId').value = pixels.ga_id || '';
+                document.getElementById('fbPixel').value = pixels.fb_pixel || '';
+            }
+        }
+
+        // Save functions
+        async function saveTranslations() {
+            try {
+                const inputs = document.querySelectorAll('#translationsEditor input');
+                const translations = {};
+                
+                inputs.forEach(input => {
+                    const key = input.dataset.key;
+                    if (key) {
+                        if (!translations[key]) translations[key] = {};
+                        translations[key][currentLang] = input.value;
+                    }
+                });
+                
+                const response = await fetch('/api/site/translations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ translations })
+                });
+                
+                if (response.ok) {
+                    showStatus('Переводы сохранены успешно!', 'success');
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Ошибка сохранения переводов', 'error');
+            }
+        }
+
+        async function saveUpdates() {
+            try {
+                const updatesText = document.getElementById('updatesText').value;
+                const updates = JSON.parse(updatesText);
+                
+                const response = await fetch('/api/site/updates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ updates })
+                });
+                
+                if (response.ok) {
+                    showStatus('Новости сохранены успешно!', 'success');
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Ошибка сохранения новостей', 'error');
+            }
+        }
+
+        async function saveAnalytics() {
+            try {
+                const pixels = {
+                    ga_id: document.getElementById('gaId').value,
+                    fb_pixel: document.getElementById('fbPixel').value
+                };
+                
+                const response = await fetch('/api/site/pixels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ pixels })
+                });
+                
+                if (response.ok) {
+                    showStatus('Настройки аналитики сохранены!', 'success');
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Ошибка сохранения настроек аналитики', 'error');
+            }
+        }
+
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('category', document.getElementById('imageCategory').value);
+            
+            try {
+                const response = await fetch('/api/site/upload-image', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(data.message, 'success', 'uploadStatus');
+                    loadImages();
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error, 'error', 'uploadStatus');
+                }
+            } catch (error) {
+                showStatus('Ошибка загрузки изображения', 'error', 'uploadStatus');
+            }
+        }
+
+        async function loadImages() {
+            try {
+                const category = document.getElementById('imageCategory').value;
+                const response = await fetch(`/api/site/images/${category}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayImages(data.images, category);
+                }
+            } catch (error) {
+                console.error('Failed to load images:', error);
+            }
+        }
+
+        function displayImages(images, category) {
+            const container = document.getElementById('imagesList');
+            
+            if (images.length === 0) {
+                container.innerHTML = '<p>Изображения не найдены</p>';
+                return;
+            }
+            
+            let html = '<div class="image-grid">';
+            images.forEach(image => {
+                html += `
+                    <div class="image-item">
+                        <img src="${image.url}" alt="${image.name}">
+                        <div class="actions">
+                            <button class="btn-small" onclick="deleteImage('${category}', '${image.name}')">Удалить</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        async function deleteImage(category, filename) {
+            if (!confirm('Удалить это изображение?')) return;
+            
+            try {
+                const response = await fetch(`/api/site/images/${category}/${filename}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    showStatus('Изображение удалено!', 'success');
+                    loadImages();
+                } else {
+                    const data = await response.json();
+                    showStatus(data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Ошибка удаления изображения', 'error');
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('systemStatus');
+                statusDiv.innerHTML = `
+                    <div class="status success">
+                        <strong>Статус:</strong> ${data.status}<br>
+                        <strong>Платформа:</strong> ${data.platform}<br>
+                        <strong>Версия:</strong> ${data.version}<br>
+                        <strong>Время:</strong> ${new Date(data.timestamp).toLocaleString()}
+                    </div>
+                `;
+            } catch (error) {
+                const statusDiv = document.getElementById('systemStatus');
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        <strong>Ошибка подключения к серверу</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function showStatus(message, type, elementId = null) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            
+            const container = elementId ? document.getElementById(elementId) : document.querySelector('.container');
+            container.insertBefore(statusDiv, container.firstChild);
+            
+            setTimeout(() => statusDiv.remove(), 5000);
+        }
+
+        // Auto-load images when category changes
+        document.getElementById('imageCategory').addEventListener('change', loadImages);
+        
+        // Check system status on load
+        if (document.getElementById('adminPanel').classList.contains('active')) {
+            checkSystemStatus();
+        }
+    </script>
+</body>
+</html>

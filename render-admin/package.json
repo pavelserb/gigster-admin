@@ -2,10 +2,10 @@
   "name": "artbat-prague-admin",
   "version": "1.0.0",
   "description": "Admin panel for ARTBAT Prague website",
-  "main": "server-render.js",
+  "main": "server-ftp.js",
   "scripts": {
-    "start": "node server-render.js",
-    "dev": "nodemon server-render.js"
+    "start": "node server-ftp.js",
+    "dev": "nodemon server-ftp.js"
   },
   "keywords": [
     "admin",
@@ -20,7 +20,8 @@
     "multer": "^1.4.5-lts.1",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "basic-ftp": "^5.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

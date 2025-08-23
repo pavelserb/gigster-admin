@@ -11,5 +11,15 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
+      - key: FTP_HOST
+        value: gigster.pro
+      - key: FTP_USER
+        value: somos
+      - key: FTP_PASSWORD
+        sync: false
+      - key: FTP_PORT
+        value: "21"
+      - key: FTP_REMOTE_PATH
+        value: /www/artbat-prague
     healthCheckPath: /admin/api/status
     autoDeploy: true

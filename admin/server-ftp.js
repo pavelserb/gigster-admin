@@ -462,13 +462,40 @@ app.get('/admin/api/media/tree', authenticateToken, async (req, res) => {
       const remotePath = `${FTP_CONFIG.remotePath}/assets`;
       const files = await ftp.listFiles(remotePath);
       
-      return files.filter(file => 
-        /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
-      ).map(file => ({
-        name: file.name,
-        type: 'file',
-        path: `assets/${file.name}`
-      }));
+      console.log('📁 Получены файлы из FTP:', files);
+      
+      // Разделяем на папки и файлы
+      const directories = [];
+      const mediaFiles = [];
+      
+      files.forEach(file => {
+        if (file.type === 'dir' && !file.name.startsWith('.')) {
+          // Это папка
+          directories.push({
+            name: file.name,
+            path: `assets/${file.name}`,
+            type: 'directory'
+          });
+        } else if (/\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)) {
+          // Это медиафайл
+          mediaFiles.push({
+            name: file.name,
+            path: `assets/${file.name}`,
+            type: 'file',
+            size: file.size,
+            modified: file.modified
+          });
+        }
+      });
+      
+      console.log('📁 Папки:', directories.map(d => d.name));
+      console.log('🖼️ Медиафайлы:', mediaFiles.map(f => f.name));
+      
+      return {
+        directories: directories,
+        files: mediaFiles,
+        total: directories.length + mediaFiles.length
+      };
     });
     
     res.json(result);

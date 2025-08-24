@@ -35,6 +35,15 @@ const FTP_CONFIG = {
   remotePath: process.env.FTP_REMOTE_PATH || '/artbat-prague'
 };
 
+// Log FTP configuration for debugging
+console.log('🔧 FTP Configuration:', {
+  host: FTP_CONFIG.host,
+  user: FTP_CONFIG.user,
+  port: FTP_CONFIG.port,
+  remotePath: FTP_CONFIG.remotePath,
+  hasPassword: !!FTP_CONFIG.password
+});
+
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -74,17 +83,24 @@ const authenticateToken = (req, res, next) => {
 
 // FTP helper functions
 async function withFTP(operation) {
+  console.log('🔌 Attempting FTP connection...');
   const ftpClient = new FTPClient();
   try {
     const connected = await ftpClient.connect();
     if (!connected) {
+      console.error('❌ FTP connection failed');
       throw new Error('FTP подключение не удалось');
     }
     
+    console.log('✅ FTP connected successfully');
     const result = await operation(ftpClient);
     return result;
+  } catch (error) {
+    console.error('❌ FTP operation error:', error);
+    throw error;
   } finally {
     await ftpClient.disconnect();
+    console.log('🔌 FTP disconnected');
   }
 }
 

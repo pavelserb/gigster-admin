@@ -10,5 +10,15 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
+      - key: FTP_HOST
+        value: somos.ftp.tools
+      - key: FTP_USER
+        value: somos_cursor
+      - key: FTP_PASSWORD
+        value: Pr6LUx9h45
+      - key: FTP_PORT
+        value: "21"
+      - key: FTP_REMOTE_PATH
+        value: /artbat-prague
     healthCheckPath: /admin/api/status
     autoDeploy: true

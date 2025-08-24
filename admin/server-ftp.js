@@ -660,13 +660,12 @@ app.get('/admin/api/media/directory/:folder', authenticateToken, async (req, res
       console.log(`📁 Загружаю содержимое папки: ${folder}`);
       console.log(`📁 Найдено файлов: ${files.length}`);
       
-      return files.filter(file => 
-        /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
-      ).map(file => ({
+      // Возвращаем все файлы, не только медиа
+      return files.map(file => ({
         name: file.name,
         path: `assets/${folder}/${file.name}`,
         size: file.size,
-        type: 'file'
+        type: file.type === 'dir' ? 'directory' : 'file'
       }));
     });
     
@@ -674,6 +673,39 @@ app.get('/admin/api/media/directory/:folder', authenticateToken, async (req, res
   } catch (error) {
     console.error('Media directory error:', error);
     res.status(500).json({ error: 'Ошибка чтения папки медиа' });
+  }
+});
+
+// Create media directory endpoint
+app.post('/admin/api/media/directory', authenticateToken, async (req, res) => {
+  try {
+    const { name, parentDir = '' } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Название папки обязательно' });
+    }
+    
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/assets/${parentDir}/${name}`.replace(/\/+/g, '/');
+      
+      console.log(`📁 Создаю папку: ${remotePath}`);
+      
+      const created = await ftp.createDirectory(remotePath);
+      if (!created) {
+        throw new Error('Failed to create directory on FTP');
+      }
+      
+      return { 
+        message: 'Папка создана успешно на FTP',
+        name: name,
+        path: `assets/${parentDir}/${name}`.replace(/\/+/g, '/')
+      };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Create directory error:', error);
+    res.status(500).json({ error: 'Ошибка создания папки' });
   }
 });
 

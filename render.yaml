@@ -3,8 +3,7 @@ services:
     name: gigster-admin
     env: node
     plan: free
-    rootDir: admin
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

@@ -1,0 +1,17 @@
+{
+  "name": "artbat-prague",
+  "version": "1.0.0",
+  "description": "ARTBAT Prague website with admin panel",
+  "main": "admin/server-ftp.js",
+  "scripts": {
+    "start": "cd admin && npm start",
+    "build": "cd admin && npm install",
+    "dev": "cd admin && npm run dev"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "workspaces": [
+    "admin"
+  ]
+}

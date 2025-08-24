@@ -81,8 +81,10 @@ echo "→ Копирую CSS..."
 cp -r css "$BUILD_DIR/"
 echo "→ Копирую JavaScript..."
 cp -r js "$BUILD_DIR/"
-echo "→ Копирую медиафайлы..."
-cp -r assets "$BUILD_DIR/"
+echo "⚠️  Папка assets НЕ копируется (управляется через админку):"
+echo "   - Все медиафайлы сохраняются на сервере"
+echo "   - Новые файлы загружаются через админку"
+echo "   - Существующие файлы не перезаписываются"
 echo "→ Копирую фавиконы..."
 cp -r favicon "$BUILD_DIR/"
 echo "→ Копирую мета файлы..."
@@ -201,7 +203,7 @@ open -u $FTP_USER,$FTP_PASS $FTP_HOST;
 cd $FTP_PATH;
 
 # Синхронизируем файлы сайта, исключая пользовательские данные
-mirror --reverse --delete --verbose --exclude-glob 'translations.json' --exclude-glob 'updates.json' --exclude-glob 'pixels.json' --exclude-glob 'config.json' --exclude-glob 'assets/updates/*' $BUILD_DIR .;
+mirror --reverse --delete --verbose --exclude-glob 'translations.json' --exclude-glob 'updates.json' --exclude-glob 'pixels.json' --exclude-glob 'config.json' --exclude-glob 'assets/*' $BUILD_DIR .;
 
 bye;
 "

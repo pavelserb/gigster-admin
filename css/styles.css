@@ -100,6 +100,7 @@ header.site .hdr {
   align-items: center;
   justify-content: space-between;
   height: var(--hdr-h);
+  padding: 0;
 }
 
 /* Когда выехали из hero (становится сплошной) */

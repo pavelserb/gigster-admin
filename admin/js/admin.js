@@ -3192,18 +3192,30 @@ class AdminPanel {
   }
 
   // Media file management
-  async deleteMediaFile(filename) {
+  async deleteMediaFile(filePath) {
     if (confirm('Вы уверены, что хотите удалить этот файл?')) {
       try {
         const token = localStorage.getItem('admin_token');
-        const response = await fetch(`/admin/api/media/${filename}`, {
+        
+        // Разделяем путь на папку и имя файла
+        const pathParts = filePath.split('/');
+        const filename = pathParts.pop(); // Последняя часть - имя файла
+        const dir = pathParts.length > 0 ? pathParts.join('/') : ''; // Остальное - папка
+        
+        // Формируем URL с query параметром для папки
+        const url = `/admin/api/media/${filename}${dir ? `?dir=${dir}` : ''}`;
+        
+        console.log(`🗑️ Удаляю файл: ${filename} из папки: ${dir || 'root'}`);
+        
+        const response = await fetch(url, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
           this.showSuccess('Файл удален');
-          this.renderMedia();
+          // Перезагружаем текущую папку
+          this.loadMediaDirectory(this.currentMediaDirectory || '');
         } else {
           this.showError('Ошибка удаления файла');
         }

@@ -48,8 +48,8 @@
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 
-  # CSP (как в nginx.conf): Google Fonts + OSM iframe + JSON files + inline scripts + Analytics scripts
-  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; media-src 'self' blob:; script-src 'self' 'unsafe-inline' https://connect.facebook.net https://www.googletagmanager.com https://analytics.tiktok.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' data: blob:; frame-ancestors 'self'; frame-src https://www.openstreetmap.org https://www.google.com https://maps.google.com;"
+  # CSP (как в nginx.conf): Google Fonts + OSM iframe + JSON files + inline scripts + Analytics scripts + Tracking images
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https://www.facebook.com https://www.googletagmanager.com https://www.google-analytics.com; media-src 'self' blob:; script-src 'self' 'unsafe-inline' https://connect.facebook.net https://www.googletagmanager.com https://analytics.tiktok.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' data: blob:; frame-ancestors 'self'; frame-src https://www.openstreetmap.org https://www.google.com https://maps.google.com;"
 </IfModule>
 
 # Запрет доступа к служебной папке (если вдруг под веб-корнем)

@@ -38,7 +38,7 @@ class PixelLoader {
       tt: [],
       custom: data.custom || [],
       settings: data.settings || {
-        respectConsent: true,
+        respectConsent: false,
         debugMode: false
       }
     };
@@ -121,7 +121,7 @@ class PixelLoader {
       tt: [{ id: '', enabled: false, name: 'TikTok Pixel' }],
       custom: [],
       settings: {
-        respectConsent: true,
+        respectConsent: false,
         debugMode: false
       }
     };

@@ -57,7 +57,7 @@ function getTranslation(field, fallback = '') {
 // Load CONFIG from JSON file
 async function loadConfig() {
   try {
-    const response = await fetch('js/config.json');
+    const response = await fetch('config.json');
     if (!response.ok) {
       throw new Error('Failed to load config.json');
     }

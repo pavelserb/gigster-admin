@@ -621,7 +621,7 @@ app.post('/admin/api/media/upload', authenticateToken, upload.single('file'), as
   }
 });
 
-// Media directory endpoint (query parameter)
+// Media directory endpoint (query parameter) - для корневой папки assets
 app.get('/admin/api/media/directory', authenticateToken, async (req, res) => {
   try {
     const { dir } = req.query;
@@ -632,14 +632,21 @@ app.get('/admin/api/media/directory', authenticateToken, async (req, res) => {
       console.log(`📁 Загружаю содержимое папки: ${dir || 'root'}`);
       console.log(`📁 Найдено файлов: ${files.length}`);
       
-      return files.filter(file => 
-        /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
-      ).map(file => ({
-        name: file.name,
-        path: `assets/${dir || ''}/${file.name}`,
-        size: file.size,
-        type: 'file'
-      }));
+      // Возвращаем структуру, которую ожидает клиент
+      return {
+        files: files.filter(file => 
+          /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
+        ).map(file => ({
+          name: file.name,
+          path: `${dir ? dir + '/' : ''}${file.name}`, // Убираем лишний assets/
+          size: file.size,
+          type: 'file'
+        })),
+        total: files.filter(file => 
+          /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
+        ).length,
+        folder: dir || 'root'
+      };
     });
     
     res.json(result);
@@ -664,7 +671,7 @@ app.get('/admin/api/media/directory/:folder', authenticateToken, async (req, res
       return {
         files: files.map(file => ({
           name: file.name,
-          path: `assets/${folder}/${file.name}`,
+          path: `${folder}/${file.name}`, // Убираем лишний assets/
           size: file.size,
           type: file.type === 'dir' ? 'directory' : 'file'
         })),

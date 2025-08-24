@@ -50,6 +50,10 @@ class FTPClient {
 
   async downloadFile(remotePath, localPath) {
     try {
+      // Создаем локальную папку если её нет
+      const localDir = path.dirname(localPath);
+      await fs.mkdir(localDir, { recursive: true });
+      
       await this.client.downloadTo(localPath, remotePath);
       console.log(`✅ Файл скачан: ${remotePath} -> ${localPath}`);
       return true;

@@ -873,6 +873,13 @@ nav.primary a.active {
   font-variation-settings: "wdth" 75;
 }
 
+@media (max-width: 900px) {
+  .hero-title {
+    font-size: clamp(60px, 18vw, 120px);
+    margin-top: 0.5rem;
+  }
+}
+
 /* низ: локация и venue */
 .hero-bottom {
   align-self: end;
@@ -899,8 +906,8 @@ nav.primary a.active {
 .loc-city {
   color: #e6e7eb;
   font-weight: 600;
-  font-size: clamp(12px, 1.2vw, 16px);
-  font-variation-settings: "wdth" 75;
+  font-size: clamp(14px, 1.2vw, 16px);
+  font-variation-settings: "wdth" 50;
 }
 .loc-venue strong {
   display: block;
@@ -910,7 +917,7 @@ nav.primary a.active {
 }
 .loc-address {
   color: #cfd1d8;
-  font-size: clamp(12px, 1.6vw, 14px);
+  font-size: clamp(14px, 1.6vw, 16px);
   font-weight: 100;
 }
 

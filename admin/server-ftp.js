@@ -660,13 +660,17 @@ app.get('/admin/api/media/directory/:folder', authenticateToken, async (req, res
       console.log(`📁 Загружаю содержимое папки: ${folder}`);
       console.log(`📁 Найдено файлов: ${files.length}`);
       
-      // Возвращаем все файлы, не только медиа
-      return files.map(file => ({
-        name: file.name,
-        path: `assets/${folder}/${file.name}`,
-        size: file.size,
-        type: file.type === 'dir' ? 'directory' : 'file'
-      }));
+      // Возвращаем структуру, которую ожидает клиент
+      return {
+        files: files.map(file => ({
+          name: file.name,
+          path: `assets/${folder}/${file.name}`,
+          size: file.size,
+          type: file.type === 'dir' ? 'directory' : 'file'
+        })),
+        total: files.length,
+        folder: folder
+      };
     });
     
     res.json(result);

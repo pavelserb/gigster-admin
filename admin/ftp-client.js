@@ -65,13 +65,25 @@ class FTPClient {
 
   async listFiles(remotePath = '/') {
     try {
-      const list = await this.client.list(remotePath);
-      return list.map(item => ({
+      console.log(`🔍 Получаю список файлов из: ${remotePath}`);
+      
+      // Сначала переходим в нужную папку
+      await this.client.cd(remotePath);
+      
+      // Получаем список файлов
+      const list = await this.client.list();
+      
+      console.log(`📁 Найдено файлов: ${list.length}`);
+      
+      const result = list.map(item => ({
         name: item.name,
         type: item.type,
         size: item.size,
         modified: item.modified
       }));
+      
+      console.log(`✅ Список файлов получен:`, result.map(f => f.name));
+      return result;
     } catch (error) {
       console.error(`❌ Ошибка получения списка файлов ${remotePath}:`, error.message);
       return [];

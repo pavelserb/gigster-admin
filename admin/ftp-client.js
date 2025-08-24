@@ -77,7 +77,7 @@ class FTPClient {
       
       const result = list.map(item => ({
         name: item.name,
-        type: item.type,
+        type: item.type === 2 ? 'dir' : 'file', // 2 = папка, 1 = файл
         size: item.size,
         modified: item.modified
       }));

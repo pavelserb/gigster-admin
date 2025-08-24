@@ -13,7 +13,7 @@ class PixelManager {
   
   async loadPixels() {
     try {
-      const response = await fetch('/api/pixels');
+      const response = await fetch('/admin/api/pixels');
       if (response.ok) {
         const data = await response.json();
         // Проверяем структуру данных и конвертируем старый формат в новый
@@ -305,7 +305,7 @@ class PixelManager {
       localStorage.setItem('site_pixels', JSON.stringify(this.pixels));
       
       // Пытаемся сохранить на сервер
-      const response = await fetch('/api/pixels', {
+      const response = await fetch('/admin/api/pixels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.pixels)

@@ -16,7 +16,7 @@ class PixelLoader {
   async loadPixelSettings() {
     try {
       // Пытаемся загрузить настройки с сервера
-      const response = await fetch('/api/pixels');
+      const response = await fetch('pixels.json');
       if (response.ok) {
         const data = await response.json();
         this.pixels = this.normalizePixelData(data);

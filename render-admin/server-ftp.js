@@ -10,6 +10,8 @@ const FTPClient = require('./ftp-client');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render deployment trigger - updated FTP integration
+
 // Middleware
 app.use(cors());
 app.use(express.json());

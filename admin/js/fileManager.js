@@ -236,7 +236,7 @@ class FileManager {
 
   async loadDirectory(path) {
     try {
-      const url = path ? `/admin/api/media/directory/${path}` : '/admin/api/media';
+      const url = path ? `/admin/api/media/directory/${path}` : '/admin/api/media/directory';
       const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
       });

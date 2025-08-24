@@ -100,7 +100,7 @@ header.site .hdr {
   align-items: center;
   justify-content: space-between;
   height: var(--hdr-h);
-  padding: 0;
+  /* padding: 0; */
 }
 
 /* Когда выехали из hero (становится сплошной) */
@@ -902,6 +902,7 @@ nav.primary a.active {
 .loc-text {
   display: flex;
   /* flex-direction: column; */
+  align-items: center;
   gap: 12px;
 }
 .loc-city {

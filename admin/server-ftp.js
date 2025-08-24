@@ -621,7 +621,7 @@ app.post('/admin/api/media/upload', authenticateToken, upload.single('file'), as
   }
 });
 
-// Media directory endpoint
+// Media directory endpoint (query parameter)
 app.get('/admin/api/media/directory', authenticateToken, async (req, res) => {
   try {
     const { dir } = req.query;
@@ -629,11 +629,42 @@ app.get('/admin/api/media/directory', authenticateToken, async (req, res) => {
       const remotePath = `${FTP_CONFIG.remotePath}/assets/${dir || ''}`;
       const files = await ftp.listFiles(remotePath);
       
+      console.log(`📁 Загружаю содержимое папки: ${dir || 'root'}`);
+      console.log(`📁 Найдено файлов: ${files.length}`);
+      
       return files.filter(file => 
         /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
       ).map(file => ({
         name: file.name,
         path: `assets/${dir || ''}/${file.name}`,
+        size: file.size,
+        type: 'file'
+      }));
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Media directory error:', error);
+    res.status(500).json({ error: 'Ошибка чтения папки медиа' });
+  }
+});
+
+// Media directory endpoint (path parameter) - для совместимости с клиентом
+app.get('/admin/api/media/directory/:folder', authenticateToken, async (req, res) => {
+  try {
+    const { folder } = req.params;
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/assets/${folder}`;
+      const files = await ftp.listFiles(remotePath);
+      
+      console.log(`📁 Загружаю содержимое папки: ${folder}`);
+      console.log(`📁 Найдено файлов: ${files.length}`);
+      
+      return files.filter(file => 
+        /\.(jpg|jpeg|png|gif|webp|mp4|webm)$/i.test(file.name)
+      ).map(file => ({
+        name: file.name,
+        path: `assets/${folder}/${file.name}`,
         size: file.size,
         type: 'file'
       }));

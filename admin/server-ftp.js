@@ -760,6 +760,56 @@ app.get('/admin/api/status', (req, res) => {
 // Create temp directory
 app.use('/admin/temp', express.static(path.join(__dirname, 'temp')));
 
+// Serve static assets from FTP (proxy to static hosting)
+app.use('/assets', async (req, res, next) => {
+  try {
+    // Получаем файл с FTP и отдаем его
+    const filePath = req.path;
+    const remotePath = `${FTP_CONFIG.remotePath}/assets${filePath}`;
+    
+    console.log(`📁 Запрос статического файла: ${filePath} -> ${remotePath}`);
+    
+    const ftpClient = new FTPClient();
+    await ftpClient.connect();
+    
+    // Создаем временный файл
+    const tempPath = path.join(__dirname, 'temp', 'static', filePath);
+    await fs.mkdir(path.dirname(tempPath), { recursive: true });
+    
+    // Скачиваем файл с FTP
+    const downloaded = await ftpClient.downloadFile(remotePath, tempPath);
+    await ftpClient.disconnect();
+    
+    if (downloaded) {
+      // Определяем MIME тип
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon'
+      };
+      
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Кэшируем на 1 час
+      
+      // Отдаем файл
+      res.sendFile(tempPath);
+    } else {
+      res.status(404).send('File not found');
+    }
+  } catch (error) {
+    console.error('Error serving static file:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 ARTBAT Prague Admin Server с FTP-интеграцией запущен на Render`);
   console.log(`📊 Статус: http://localhost:${PORT}/admin/api/status`);

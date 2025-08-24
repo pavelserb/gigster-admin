@@ -1,7 +1,7 @@
 {
   "hosting": {
     "type": "shared_hosting",
-    "path": "/home/somos/gigster.pro/www/artbat-prague/",
+    "path": "/artbat-prague/",
     "url": "ftp://somos_cursor@somos.ftp.tools:21/",
     "server": "apache", 
     "ftp": {

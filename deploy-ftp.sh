@@ -108,14 +108,14 @@ fi
 
 # Проверяем критические файлы перед деплоем
 echo "🔍 Проверяю критические файлы перед деплоем..."
+echo "⚠️  Пользовательские данные (translations.json, updates.json, pixels.json, config.json) НЕ проверяются"
+echo "   так как они обновляются через админку на Render, а не через деплой сайта"
 CRITICAL_FILES=(
     "index.html"
     "css/styles.css"
     "js/main.js"
     "js/i18n.js"
     "assets/icons/g.svg"
-    "translations.json"
-    "updates.json"
 )
 
 for file in "${CRITICAL_FILES[@]}"; do

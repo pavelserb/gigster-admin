@@ -12,9 +12,9 @@ class FTPClient {
     try {
       // FTP настройки из переменных окружения
       const config = {
-        host: process.env.FTP_HOST || 'gigster.pro',
-        user: process.env.FTP_USER || 'somos',
-        password: process.env.FTP_PASSWORD || 'your-ftp-password',
+        host: process.env.FTP_HOST || 'somos.ftp.tools',
+        user: process.env.FTP_USER || 'somos_cursor',
+        password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
         port: process.env.FTP_PORT || 21,
         secure: false
       };

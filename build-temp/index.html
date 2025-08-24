@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show</title>
+  <meta name="description" content="Join ARTBAT in Prague on Sep 5, 2025 for an unforgettable open-air electronic music experience at Areál7. Tickets available now from official partners." />
+  <meta name="theme-color" content="#0b0b0e">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://gigster.pro/artbat-prague/">
+
+  <!-- Fonts (plain stylesheet links; CSP-safe) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+
+  <!-- Styles (plain, no onload tricks) -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Icons / Manifest -->
+  <link rel="manifest" href="assets/icons/site.webmanifest">
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+
+  <!-- Analytics Pixels - Load early in head -->
+  <script src="js/pixels.js"></script>
+
+  <!-- Open Graph / Social preview -->
+  <meta property="og:title" content="ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show">
+  <meta property="og:description" content="Join ARTBAT in Prague on Sep 5, 2025 for an unforgettable open‑air electronic music experience at Areál7. Tickets available now.">
+  <meta property="og:image" content="https://gigster.pro/artbat-prague/assets/images/hero-poster.jpg">
+  <meta property="og:url" content="https://gigster.pro/artbat-prague/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ARTBAT Prague — Sep 5, 2025 | Areál7 Open-Air Show">
+  <meta name="twitter:description" content="Immersive open-air show in Prague. Tickets available now.">
+  <meta name="twitter:image" content="https://gigster.pro/artbat-prague/assets/images/hero-poster.jpg">
+</head>
+<body>
+  <a class="skip" href="#about" data-i18n="skip">Skip to content</a>
+
+  <header class="site">
+    <!-- mobile drawer -->
+    <div id="mnav" hidden>
+      <div class="mobile-overlay"></div>
+      <div class="mobile-menu">
+        <div class="container">
+          <nav aria-label="Mobile">
+            <a class="btn" href="#about" data-i18n="nav.about">About</a>
+            <a class="btn" href="#artists" data-i18n="nav.artists">Artists</a>
+            <a class="btn" href="#tickets" data-i18n="nav.tickets">Tickets</a>
+            <a class="btn" href="#location" data-i18n="nav.location">Location</a>
+            <a class="btn" href="#faqs" data-i18n="nav.faqs">FAQs</a>
+            <a class="btn" href="#connect" data-i18n="nav.connect">Connect</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="container hdr">
+      <div class="brand" aria-label="Site logo">
+        <a href="#"><img class="g" alt="g" src="assets/icons/g.svg"></a>
+        <!-- <dot></dot> -->
+        <!-- <span id="siteTitle">ARTBAT Prague</span> -->
+      </div>
+      <nav class="primary" aria-label="Primary">
+        <a href="#about" data-i18n="nav.about">About</a>
+        <a href="#artists" data-i18n="nav.artists">Artists</a>
+        <a href="#tickets" data-i18n="nav.tickets">Tickets</a>
+        <a href="#location" data-i18n="nav.location">Location</a>
+        <a href="#faqs" data-i18n="nav.faqs">FAQs</a>
+        <a href="#connect" data-i18n="nav.connect">Connect</a>
+      </nav>
+      <div class="spacer"></div>
+
+      <div class="hdr-actions">
+        <button id="hambBtn" class="hamb-btn" aria-expanded="false" aria-controls="mnav" aria-label="Open menu">
+          <span class="hamb-line"></span>
+          <span class="hamb-line"></span>
+          <span class="hamb-line"></span>
+        </button>
+        <!-- <div class="lang">
+          <button id="langBtn" class="btn lang-btn" aria-label="Change language"
+                  aria-haspopup="menu" aria-expanded="false" title="Language">EN</button>
+          <div id="langMenu" class="lang-menu" role="menu" hidden></div>
+        </div> -->
+      </div>
+    </div>
+
+  </header>
+
+  <!-- Floating Tickets island -->
+  <!-- <div class="floating-cta" role="region" aria-label="Quick tickets">
+    <a id="ticketsTop" class="btn primary large" href="#tickets" data-i18n="cta.tickets" aria-label="Buy tickets">Tickets</a>
+  </div> -->
+  
+  <!-- Floating Tickets island -->
+  <div class="floating-cta" role="region" aria-label="Quick tickets">
+    <div class="cta-bar" role="group" aria-label="Tickets actions">
+      <a id="ticketsPrimary" class="cta-main" href="#tickets" aria-label="Get tickets" data-i18n="cta.tickets">
+        Tickets
+      </a>
+      <button id="ticketsToggle" class="cta-toggle" aria-expanded="false" aria-controls="ticketsMenu" aria-label="More ticket vendors">
+        ▲
+      </button>
+    </div>
+    <div id="ticketsMenu" class="cta-menu" role="menu">
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="hero" aria-label="Hero">
+      <div class="hero-media" aria-hidden="true">
+        <!-- <video id="heroVideo" autoplay muted loop playsinline poster="assets/images/hero-poster.jpg" preload="metadata"> -->
+        <video id="heroVideo" autoplay muted loop playsinline preload="metadata">
+            <source src="assets/video/hero.webm" type="video/webm" />
+          <source src="assets/video/hero.mp4" type="video/mp4" />
+        </video>
+        <div class="hero-overlay" aria-hidden="true"></div>
+      </div>
+
+      <div class="hero-content">
+        <div class="container hero-layout">
+          <!-- top: date + time -->
+          <div class="hero-top">
+            <div class="eyebrow">
+              <span id="eventDate" class="eyebrow-date">5 September 2025</span>
+              <!-- <span class="dot">•</span> -->
+              <span id="eventTime" class="eyebrow-time">18:00 – 23:00</span>
+            </div>
+          </div>
+
+          <!-- center: big title -->
+          <div class="hero-center">
+            <h1 class="hero-title" id="eventName">ARTBAT</h1>
+          </div>
+
+          <!-- bottom: city/country + venue + address -->
+          <div class="hero-bottom">
+            <div class="hero-loc">
+              <div class="loc-text">
+               <img class="flag" id="eventFlag" alt="Czech Republic flag" src="assets/flags/cz.png">
+               <div class="loc-city">
+                  <span id="eventCity">Prague</span>, <span id="eventCountry">Czech Republic</span>
+                </div>
+              </div>
+              <div class="loc-venue">
+                <strong id="venueName">AREÁL7</strong>
+                <div id="venueAddressHero" class="loc-address">Za Elektrárnou, 170 00 Praha 7 – Holešovice</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /.hero-layout -->
+      </div><!-- /.hero-content -->
+    </section>
+
+
+    <!-- ABOUT -->
+    <section id="about" class="alt">
+      <div class="container grid two">
+        <h2 data-i18n="about.title">About the event</h2>
+        <div class="about-description">
+          <div id="eventAbout"></div>
+          <!-- <p data-i18n="about.body">Experience a large-scale open-air show featuring world-class production, curated sound, and a carefully designed audience journey from doors to closing.</p> -->
+        </div>
+        <!-- <div class="card" aria-live="polite">
+          <h3 style="margin-top:6px" data-i18n="about.updates">Latest updates</h3>
+          <ul id="newsList" class="muted" style="padding-left:18px;margin:8px 0 0"></ul>
+        </div> -->
+
+        <div class="about-gallery">
+          <div class="card">
+            <h3 data-i18n="about.media">Gallery</h3>
+            <div class="media-slider">
+              <div class="slider-container">
+                <div class="slider-track">
+                  <div class="slider-slide active">
+                    <img loading="lazy" decoding="async" src="assets/images/media/1.jpg" alt="Stage photo with lights"/>
+                  </div>
+                  <div class="slider-slide">
+                    <img loading="lazy" decoding="async" src="assets/images/media/2.jpg" alt="Crowd enjoying the show"/>
+                  </div>
+                  <div class="slider-slide">
+                    <img loading="lazy" decoding="async" src="assets/images/media/3.jpg" alt="Crowd enjoying the show"/>
+                  </div>
+                  <div class="slider-slide">
+                    <img loading="lazy" decoding="async" src="assets/images/media/4.jpg" alt="Crowd enjoying the show"/>
+                  </div>
+                  <div class="slider-slide">
+                    <video controls preload="metadata">
+                      <source src="assets/images/media/clip.mp4" type="video/mp4"/>
+                    </video>
+                  </div>
+                </div>
+                <!-- Autoplay button positioned in top-right corner -->
+                <button class="slider-autoplay-btn" aria-label="Toggle autoplay" title="Toggle autoplay">⏸</button>
+              </div>
+              <div class="slider-controls">
+                <button class="slider-btn prev" aria-label="Previous image">‹</button>
+                <div class="slider-dots"></div>
+                <button class="slider-btn next" aria-label="Next image">›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card about-updates" aria-live="polite">
+          <h3 style="margin-top:6px" data-i18n="about.updates">Latest updates</h3>
+
+          <div class="upd-toolbar">
+            <button class="chip sm is-active" data-filter="all">All</button>
+            <button class="chip sm" data-filter="tickets">Tickets</button>
+            <button class="chip sm" data-filter="lineup">Line-up</button>
+            <button class="chip sm" data-filter="logistics">Logistics</button>
+            <button class="chip sm" data-filter="announcement">News</button>
+          </div>
+
+          <div id="updatesList" class="updates timeline"></div>
+          <!-- Кнопка "Load more" можно оставить, если апдейтов реально много -->
+          <button id="updatesMoreBtn" class="btn" style="margin-top:10px;display:none">Load more</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARTISTS -->
+    <section id="artists">
+      <div class="container">
+        <h2 data-i18n="artists.title">Artists</h2>
+        <div id="artistsGrid"></div>
+      </div>
+    </section>
+
+    <!-- TICKETS -->
+    <section id="tickets" class="alt">
+      <div class="container">
+        <h2 data-i18n="tickets.title">Tickets</h2>
+        <p class="muted" data-i18n="tickets.note">Buy only from authorized ticket partners.</p>
+        <div id="ticketLinks" class="row" style="margin:12px 0 18px"></div>
+        <div class="card">
+          <h3 style="margin:6px 0 12px" data-i18n="tickets.categories">Ticket categories</h3>
+          <div id="tiers"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOCATION -->
+    <section id="location">
+      <div class="container">
+        <h2 data-i18n="location.title">Location</h2>
+        <div class="location-content grid two">
+          <div class="location-info">
+            <div class="venue-photos">
+              <div class="venue-slider" id="venuePhotosSlider">
+                <!-- Venue photos will be loaded dynamically from config -->
+              </div>
+            </div>
+            <div class="venue-details">
+              <div class="venue-info">
+                <div class="venue-name" id="locVenue">Areál7</div>
+                <div class="venue-address" id="locAddr">Jankovcova 1595/14, Praha 7</div>
+                <a class="btn primary" id="locSite" href="#" target="_blank" rel="noopener noreferrer" data-i18n="location.website">Venue website</a>
+              </div>
+              <div class="venue-actions">
+                <a class="btn route-btn" id="locRoute" href="#" target="_blank" rel="noopener noreferrer" data-i18n="location.route">
+                  <img src="assets/icons/route.svg" alt="Get route" class="route-icon">
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="location-map">
+            <iframe class="map" id="mapFrame" title="Map" loading="lazy" allowfullscreen src="https://www.openstreetmap.org/export/embed.html?bbox=14.430%2C50.100%2C14.460%2C50.120&amp;layer=mapnik" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faqs" class="alt">
+      <div class="container">
+        <h2 data-i18n="faq.title">FAQs</h2>
+        <div class="faq" id="faqList"></div>
+      </div>
+    </section>
+
+    <!-- CONNECT -->
+    <section id="connect">
+      <div class="container">
+        <h2 data-i18n="connect.title">Connect</h2>
+        <div class="connect-content grid two">
+          <div class="contact-form">
+            <div class="card">
+              <h3 data-i18n="connect.form">Contact us</h3>
+              <form id="contactForm">
+                <div class="form-row">
+                  <div class="form-field">
+                    <label class="sr-only" for="name">Name</label>
+                    <input id="name" required name="name" placeholder="Name" aria-label="Name"/>
+                  </div>
+                  <div class="form-field">
+                    <label class="sr-only" for="email">Email</label>
+                    <input id="email" required type="email" name="email" placeholder="Email" aria-label="Email"/>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="sr-only" for="message">Message</label>
+                  <textarea id="message" required name="message" rows="5" placeholder="Your message" aria-label="Message"></textarea>
+                </div>
+                <div class="form-footer">
+                  <label class="privacy-label">
+                    <input type="checkbox" required class="privacy-checkbox"/> 
+                    <span data-i18n="connect.privacy">I agree to the privacy policy.</span>
+                  </label>
+                  <button class="btn primary" type="submit" data-i18n="connect.send">Send</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="connect-links">
+            <div class="social-links">
+              <a class="btn social-btn" href="https://www.facebook.com/WeAreGigster" id="linkFacebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <img src="assets/icons/facebook-white.png" alt="Facebook" class="social-icon">
+              </a>
+              <a class="btn social-btn" href="https://www.instagram.com/WeAreGigster" id="linkInstagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <img src="assets/icons/instagram-outline-white.png" alt="Instagram" class="social-icon">
+              </a>
+              <a class="btn social-btn" href="https://www.tiktok.com/WeAreGigster" id="linkTikTok" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <img src="assets/icons/tiktok-white.png" alt="TikTok" class="social-icon">
+              </a>
+              <a class="btn social-btn" href="https://www.gigster.pro" id="linkWebsite" target="_blank" rel="noopener noreferrer" aria-label="Organizer website">
+                <img src="assets/icons/website-white.png" alt="Organizer website" class="social-icon">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container row" style="justify-content:space-between">
+      <small id="footOrg">© 2025 Gigster.pro</small>
+      <small class="muted" data-i18n="footer.rights">All rights reserved.</small>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox" hidden>
+    <div class="lightbox-overlay"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close" aria-label="Close lightbox">×</button>
+      <button class="lightbox-nav lightbox-prev" aria-label="Previous image">‹</button>
+      <button class="lightbox-nav lightbox-next" aria-label="Next image">›</button>
+      <div class="lightbox-media">
+        <!-- Media content will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/i18n.js" defer></script>
+  <script src="js/analytics.js" defer></script>
+  <script src="js/updates.js" defer></script>
+  <script src="js/main.js?v=26" defer></script>
+</body>
+</html>
+

@@ -117,7 +117,6 @@ CRITICAL_FILES=(
     "css/styles.css"
     "js/main.js"
     "js/i18n.js"
-    "assets/icons/g.svg"
 )
 
 for file in "${CRITICAL_FILES[@]}"; do

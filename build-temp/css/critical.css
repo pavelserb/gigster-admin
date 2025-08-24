@@ -1,0 +1,197 @@
+/* Critical CSS - загружается inline для улучшения производительности */
+
+/* === Base Critical Styles === */
+:root {
+  --bg: #0b0b0e;
+  --fg: #f2f2f3;
+  --brand: #27e1b9;
+  --accent: #f8da2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Roboto Flex", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === Critical Header Styles === */
+header.site {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 68px;
+  z-index: 1000;
+  background: rgba(10, 10, 14, 0.38);
+  backdrop-filter: saturate(1.1) blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.container {
+  max-width: clamp(620px, calc(100vw - 2 * clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem)), 1200px);
+  margin: 0 auto;
+  padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem);
+}
+
+.hdr {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.brand img {
+  height: 32px;
+  width: auto;
+}
+
+.primary {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .primary {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .hamb {
+    display: none;
+  }
+}
+
+/* === Critical Hero Styles === */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 68px;
+}
+
+.hero video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* === Critical Button Styles === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn.primary {
+  background: var(--brand);
+  color: var(--bg);
+}
+
+.btn.primary:hover {
+  background: #1fc89f;
+  transform: translateY(-2px);
+}
+
+/* === Critical Floating CTA === */
+.floating-cta {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+}
+
+.cta-main {
+  background: var(--brand);
+  color: var(--bg);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 32px rgba(39, 225, 185, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cta-main:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(39, 225, 185, 0.4);
+}
+
+/* === Critical Mobile Navigation === */
+#mnav {
+  position: fixed;
+  top: 68px;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  z-index: 999;
+}
+
+#mnav[hidden] {
+  display: none;
+}
+
+#mnav nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+/* === Critical Typography === */
+h1, h2, h3 {
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+/* === Critical Loading States === */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

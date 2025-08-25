@@ -701,9 +701,9 @@ nav.primary a.active {
     /* font-size: 15px; */
     border-radius: 0;
   }
-  .cta-bar {
+  /* .cta-bar { */
     /* border-radius: 0; */
-  }
+  /* } */
 }
 
 /* Вендоры в drop-up: текст +/или логотип */

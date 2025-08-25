@@ -68,9 +68,10 @@ const FTP_CONFIG = {
 
 // Helper function to get correct relative path for FTP
 function getFTPPath(path) {
-  // Для пользовательских данных файлов используем корень FTP
+  // Для пользовательских данных файлов используем папку artbat-prague
   if (path.includes('.json') || path.includes('index.html') || path.includes('users.json')) {
-    return path.replace(/^\//, ''); // Убираем начальный слеш для корня
+    const fullPath = `${FTP_CONFIG.remotePath}${path}`;
+    return fullPath.replace(/^\//, ''); // Убираем начальный слеш для относительного пути
   }
   
   // Для медиафайлов используем папку artbat-prague
@@ -443,7 +444,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
 app.get('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = `getFTPPath('/index.html')`;
+      const remotePath = getFTPPath('/index.html');
       const localPath = path.join(__dirname, 'temp', 'index.html');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -467,7 +468,7 @@ app.post('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = `getFTPPath('/index.html')`;
+      const remotePath = getFTPPath('/index.html');
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);
@@ -492,7 +493,7 @@ app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = `getFTPPath('/index.html')`;
+      const remotePath = getFTPPath('/index.html');
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);

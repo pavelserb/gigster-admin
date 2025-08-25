@@ -63,6 +63,10 @@ class FTPClient {
       const localDir = path.dirname(localPath);
       await fs.mkdir(localDir, { recursive: true });
       
+      // Переходим в корневую директорию FTP
+      await this.client.cd('/');
+      console.log(`📁 Перешел в корневую директорию FTP`);
+      
       // Проверяем, существует ли файл на FTP
       try {
         const fileInfo = await this.client.stat(remotePath);

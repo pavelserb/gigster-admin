@@ -63,7 +63,8 @@ const FTP_CONFIG = {
   user: process.env.FTP_USER || 'somos_cursor',
   password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
   port: process.env.FTP_PORT || 21,
-  remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
+  // remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
+  remotePath: '/artbat-prague' // Убираем начальный слеш
 };
 
 // Helper function to get correct relative path for FTP

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTBAT Prague - Админка</title>
+    <meta http-equiv="refresh" content="0; url=https://gigster-admin.onrender.com/admin/">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .loading {
+            margin: 1rem 0;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .link {
+            color: white;
+            text-decoration: underline;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+        .link:hover {
+            color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">ARTBAT Prague</div>
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Перенаправление на админку...</p>
+        </div>
+        <a href="https://gigster-admin.onrender.com/admin/" class="link">
+            Если перенаправление не работает, нажмите здесь
+        </a>
+    </div>
+    
+    <script>
+        // Дополнительный JavaScript для надежности
+        setTimeout(function() {
+            window.location.href = 'https://gigster-admin.onrender.com/admin/';
+        }, 1000);
+        
+        // Логирование для аналитики
+        console.log('ARTBAT Prague Admin redirect initiated');
+    </script>
+</body>
+</html>

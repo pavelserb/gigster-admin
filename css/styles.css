@@ -1415,6 +1415,19 @@ p {
   background: #ffb703;
 } /* pinned */
 
+@media (max-width: 480px) { 
+  .upd::before {
+    left: 14px;
+  }
+  .upd {
+    padding: 12px 12px 12px 32px;
+  }
+  .updates.timeline::before {
+    left: 18px;
+  }
+}
+
+
 /* Header: 2 строки + chevron справа */
 .upd .head {
   display: grid;

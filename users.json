@@ -9,6 +9,16 @@
       "isActive": true,
       "createdAt": "2024-08-24T00:00:00.000Z",
       "lastLogin": null
+    },
+    {
+      "id": "1756119675491",
+      "username": "Valeriia",
+      "email": "kusaikovaleriia@gmail.com",
+      "password": "$2b$10$4a9MaKVv4JURVwcdFO5gAOmN.7Zi08IjsXemhK99SmaV6dT82HFOu",
+      "role": "editor",
+      "isActive": true,
+      "createdAt": "2025-08-25T11:01:15.491Z",
+      "lastLogin": null
     }
   ],
   "settings": {

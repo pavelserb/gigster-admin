@@ -63,16 +63,14 @@ const FTP_CONFIG = {
   user: process.env.FTP_USER || 'somos_cursor',
   password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
   port: process.env.FTP_PORT || 21,
-  // remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
-  remotePath: '/artbat-prague' // Убираем начальный слеш
+  remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
 };
 
 // Helper function to get correct relative path for FTP
 function getFTPPath(path) {
-  // Для пользовательских данных файлов используем папку artbat-prague
+  // Для пользовательских данных файлов используем корень FTP
   if (path.includes('.json') || path.includes('index.html') || path.includes('users.json')) {
-    const fullPath = `${FTP_CONFIG.remotePath}${path}`;
-    return fullPath.replace(/^\//, ''); // Убираем начальный слеш для относительного пути
+    return path.replace(/^\//, ''); // Убираем начальный слеш для корня
   }
   
   // Для медиафайлов используем папку artbat-prague
@@ -234,7 +232,7 @@ app.post('/admin/api/config', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'config.json');
-      const remotePath = getFTPPath('/config.json');
+      const remotePath = `getFTPPath('/config.json')`;
       
       // Сохраняем локально
       await fs.mkdir(path.dirname(localPath), { recursive: true });
@@ -261,7 +259,7 @@ app.post('/admin/api/config/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'config.json');
-      const remotePath = getFTPPath('/config.json');
+      const remotePath = `getFTPPath('/config.json')`;
       
       // Сохраняем локально
       await fs.mkdir(path.dirname(localPath), { recursive: true });
@@ -287,7 +285,7 @@ app.post('/admin/api/config/save', authenticateToken, async (req, res) => {
 app.get('/admin/api/translations', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = getFTPPath('/translations.json');
+      const remotePath = `getFTPPath('/translations.json')`;
       const localPath = path.join(__dirname, 'temp', 'translations.json');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -311,7 +309,7 @@ app.post('/admin/api/translations', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'translations.json');
-      const remotePath = getFTPPath('/translations.json');
+      const remotePath = `getFTPPath('/translations.json')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -336,7 +334,7 @@ app.post('/admin/api/translations/save', authenticateToken, async (req, res) => 
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'translations.json');
-      const remotePath = getFTPPath('/translations.json');
+      const remotePath = `getFTPPath('/translations.json')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -362,7 +360,7 @@ app.get('/admin/api/updates', authenticateToken, async (req, res) => {
     console.log('📥 Запрос на получение апдейтов с FTP');
     
           const result = await withFTP(async (ftp) => {
-        const remotePath = getFTPPath('artbat-prague/updates.json');
+        const remotePath = getFTPPath('/updates.json');
         const localPath = path.join(__dirname, 'temp', 'updates.json');
         
         console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
@@ -396,7 +394,7 @@ app.post('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = getFTPPath('artbat-prague/updates.json');
+      const remotePath = `getFTPPath('/updates.json')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -421,7 +419,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = getFTPPath('artbat-prague/updates.json');
+      const remotePath = `getFTPPath('/updates.json')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -445,7 +443,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
 app.get('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = getFTPPath('/index.html');
+      const remotePath = `getFTPPath('/index.html')`;
       const localPath = path.join(__dirname, 'temp', 'index.html');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -469,7 +467,7 @@ app.post('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = getFTPPath('/index.html');
+      const remotePath = `getFTPPath('/index.html')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);
@@ -494,7 +492,7 @@ app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = getFTPPath('/index.html');
+      const remotePath = `getFTPPath('/index.html')`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);
@@ -592,7 +590,7 @@ app.get('/admin/api/media/tree', authenticateToken, async (req, res) => {
 app.get('/admin/api/pixels', async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = getFTPPath('/pixels.json');
+      const remotePath = `${FTP_CONFIG.remotePath}/pixels.json`;
       const localPath = path.join(__dirname, 'temp', 'pixels.json');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -616,7 +614,7 @@ app.post('/admin/api/pixels', async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'pixels.json');
-      const remotePath = getFTPPath('/pixels.json');
+      const remotePath = `${FTP_CONFIG.remotePath}/pixels.json`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));

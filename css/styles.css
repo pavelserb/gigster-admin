@@ -987,6 +987,13 @@ section .container {
 section.alt {
   background: linear-gradient(180deg, #0b0b0e, #0f0f14);
 }
+
+@media (max-width: 900px) {
+  section .container {
+    padding-bottom: 32px;
+  }
+}
+
 h2 {
   font-size: clamp(26px, 3vw, 36px);
   margin: 0 0 28px;

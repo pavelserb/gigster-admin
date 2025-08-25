@@ -2403,7 +2403,10 @@ class AdminPanel {
   async handleFormSubmit(e) {
     e.preventDefault();
     
-    console.log('📋 Form submitted:', e.target.id);
+    // Get the form ID correctly - e.target is the form element
+    const formId = e.target.id || e.target.getAttribute('id');
+    
+    console.log('📋 Form submitted:', formId);
     console.log('📋 Form element:', e.target);
     
     const formData = new FormData(e.target);
@@ -2411,7 +2414,7 @@ class AdminPanel {
     
     console.log('📋 Form data collected:', data);
     
-    await this._processFormSubmission(e.target.id, data);
+    await this._processFormSubmission(formId, data);
     this.closeModal();
   }
 
@@ -2455,7 +2458,38 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
-    await this.saveUpdate(data);
+    console.log('📝 Processing update form data:', data);
+    
+    // Process translation fields for updates
+    const processedData = { ...data };
+    
+    // Handle title translations
+    if (data.title_en || data.title_cs || data.title_uk) {
+      processedData.title = {
+        en: data.title_en || '',
+        cs: data.title_cs || '',
+        uk: data.title_uk || ''
+      };
+      delete processedData.title_en;
+      delete processedData.title_cs;
+      delete processedData.title_uk;
+    }
+    
+    // Handle body translations
+    if (data.body_en || data.body_cs || data.body_uk) {
+      processedData.body = {
+        en: data.body_en || '',
+        cs: data.body_cs || '',
+        uk: data.body_uk || ''
+      };
+      delete processedData.body_en;
+      delete processedData.body_cs;
+      delete processedData.body_uk;
+    }
+    
+    console.log('📝 Processed update data:', processedData);
+    
+    await this.saveUpdate(processedData);
   }
 
   async _handleUnknownForm(data) {

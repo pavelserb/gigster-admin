@@ -2407,7 +2407,10 @@ class AdminPanel {
     const formId = e.target.id || e.target.getAttribute('id');
     
     console.log('📋 Form submitted:', formId);
-    console.log('📋 Form element:', e.target);
+    console.log('📋 Form element tagName:', e.target.tagName);
+    console.log('📋 Form element id:', e.target.id);
+    console.log('📋 Form element getAttribute("id"):', e.target.getAttribute('id'));
+    console.log('📋 Form element outerHTML:', e.target.outerHTML.substring(0, 200) + '...');
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
@@ -2420,6 +2423,9 @@ class AdminPanel {
 
   async _processFormSubmission(formId, data) {
     console.log('🔍 Processing form submission:', { formId, data });
+    console.log('🔍 Form ID type:', typeof formId);
+    console.log('🔍 Form ID === "updateForm":', formId === 'updateForm');
+    console.log('🔍 Form ID === "dynamicForm":', formId === 'dynamicForm');
     
     if (formId === 'dynamicForm') {
       console.log('📝 Handling dynamic form');
@@ -2429,6 +2435,7 @@ class AdminPanel {
       await this._handleUpdateForm(data);
     } else {
       console.log('❓ Handling unknown form:', formId);
+      console.log('❓ Available form IDs:', ['dynamicForm', 'updateForm']);
       await this._handleUnknownForm(data);
     }
   }
@@ -2493,16 +2500,57 @@ class AdminPanel {
   }
 
   async _handleUnknownForm(data) {
+    console.log('❓ _handleUnknownForm called with data:', data);
+    console.log('❓ Checking conditions:');
+    console.log('❓ - data.title:', !!data.title);
+    console.log('❓ - data.type:', !!data.type);
+    console.log('❓ - data.body:', !!data.body);
+    console.log('❓ - data.title_en:', !!data.title_en);
+    console.log('❓ - data.body_en:', !!data.body_en);
+    
     if (data.title && data.type && data.body) {
+      console.log('✅ Detected as update form (title + type + body)');
       await this.saveUpdate(data);
+    } else if (data.title_en && data.type && data.body_en) {
+      console.log('✅ Detected as update form (title_en + type + body_en)');
+      // Process translation fields for updates
+      const processedData = { ...data };
+      
+      // Handle title translations
+      if (data.title_en || data.title_cs || data.title_uk) {
+        processedData.title = {
+          en: data.title_en || '',
+          cs: data.title_cs || '',
+          uk: data.title_uk || ''
+        };
+        delete processedData.title_en;
+        delete processedData.title_cs;
+        delete processedData.title_uk;
+      }
+      
+      // Handle body translations
+      if (data.body_en || data.body_cs || data.body_uk) {
+        processedData.body = {
+          en: data.body_en || '',
+          cs: data.body_cs || '',
+          uk: data.body_uk || ''
+        };
+        delete processedData.body_en;
+        delete processedData.body_cs;
+        delete processedData.body_uk;
+      }
+      
+      console.log('📝 Processed update data in unknown form:', processedData);
+      await this.saveUpdate(processedData);
     } else if (data.name || data.q || data.type) {
+      console.log('✅ Detected as dynamic form');
       if (this.editingItem) {
         await this.updateDynamicItem(data);
       } else {
         await this.addDynamicItem(data);
       }
     } else {
-      console.warn('Cannot determine form type for data:', data);
+      console.warn('❌ Cannot determine form type for data:', data);
     }
   }
 

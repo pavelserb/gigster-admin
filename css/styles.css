@@ -999,6 +999,7 @@ p {
   background: none;
   padding: 0;
   border: none;
+  margin-bottom: 2rem;
 }
 
 .card {
@@ -1465,12 +1466,15 @@ p {
 } /* дата = цвет точки */
 .upd .title {
   font-weight: 800;
-  font-size: 28px;
+  /* font-size: 28px; */
+  font-size: 1.5rem;
+  font-variation-settings: "wdth" 75;
 }
 .upd .chev {
   align-self: center;
   font-size: 14px;
   opacity: 0.9;
+  display: none;
 }
 .upd[aria-expanded="true"] .chev {
   transform: rotate(180deg);

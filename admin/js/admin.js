@@ -396,6 +396,23 @@ class AdminPanel {
 
   // Config Management
   renderConfig() {
+    console.log('🔧 renderConfig вызван с данными:', this.config);
+    
+    // Проверяем, есть ли данные конфигурации
+    if (!this.config || Object.keys(this.config).length === 0) {
+      console.warn('⚠️ Конфигурация пустая, используем значения по умолчанию');
+      this.config = {
+        event: {},
+        authorizedSellers: [],
+        tiers: [],
+        artists: [],
+        faqs: [],
+        contacts: [],
+        updateCategories: {},
+        updateBadges: {}
+      };
+    }
+    
     // Event info - handle new translation structure
     this.renderTranslationField('eventName', this.config.event?.name);
     this.renderTranslationField('eventDate', this.config.event?.date);
@@ -1058,8 +1075,22 @@ class AdminPanel {
 
   // Translations Management
   renderTranslations() {
+    console.log('🌐 renderTranslations вызван с данными:', this.translations);
+    
     const container = document.getElementById('translationsEditor');
     container.innerHTML = '';
+
+    // Проверяем, есть ли данные переводов
+    if (!this.translations || Object.keys(this.translations).length === 0) {
+      console.warn('⚠️ Переводы пустые, используем значения по умолчанию');
+      this.translations = {
+        sections: {
+          en: {},
+          cs: {},
+          uk: {}
+        }
+      };
+    }
 
     // Get the current language data from translations.json
     const currentLang = this.currentLanguage || 'en';

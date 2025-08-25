@@ -345,22 +345,34 @@ app.post('/admin/api/translations/save', authenticateToken, async (req, res) => 
 // Get updates from FTP
 app.get('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
+    console.log('📥 Запрос на получение апдейтов с FTP');
+    
     const result = await withFTP(async (ftp) => {
       const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
       const localPath = path.join(__dirname, 'temp', 'updates.json');
       
+      console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
+      
       const downloaded = await ftp.downloadFile(remotePath, localPath);
       if (!downloaded) {
+        console.error('❌ Файл updates.json не найден на FTP');
         return { message: 'Updates file not found on FTP' };
       }
       
+      console.log('✅ Файл updates.json скачан успешно');
+      
       const content = await fs.readFile(localPath, 'utf8');
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      
+      console.log(`📊 Загружено ${Array.isArray(parsed) ? parsed.length : 'неизвестно'} апдейтов`);
+      
+      return parsed;
     });
     
+    console.log('📤 Отправляю апдейты клиенту:', typeof result);
     res.json(result);
   } catch (error) {
-    console.error('Updates error:', error);
+    console.error('❌ Ошибка чтения обновлений:', error);
     res.status(500).json({ error: 'Ошибка чтения обновлений' });
   }
 });

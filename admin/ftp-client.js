@@ -19,6 +19,13 @@ class FTPClient {
         secure: false
       };
 
+      console.log('🔌 Попытка подключения к FTP:', {
+        host: config.host,
+        user: config.user,
+        port: config.port,
+        hasPassword: !!config.password
+      });
+
       await this.client.access(config);
       console.log('✅ FTP подключение установлено');
       return true;

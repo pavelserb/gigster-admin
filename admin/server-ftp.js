@@ -361,7 +361,7 @@ app.get('/admin/api/updates', authenticateToken, async (req, res) => {
     console.log('📥 Запрос на получение апдейтов с FTP');
     
           const result = await withFTP(async (ftp) => {
-        const remotePath = getFTPPath('/updates.json');
+        const remotePath = getFTPPath('artbat-prague/updates.json');
         const localPath = path.join(__dirname, 'temp', 'updates.json');
         
         console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
@@ -395,7 +395,7 @@ app.post('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = getFTPPath('/updates.json');
+      const remotePath = getFTPPath('artbat-prague/updates.json');
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -420,7 +420,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = getFTPPath('/updates.json');
+      const remotePath = getFTPPath('artbat-prague/updates.json');
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));

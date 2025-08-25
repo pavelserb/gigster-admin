@@ -1555,7 +1555,7 @@ class AdminPanel {
           <div class="input-row">
             <input type="text" id="updateMedia" name="media" value="${update?.media || ''}">
             <div class="file-input-actions">
-              <button type="button" class="btn btn-secondary" onclick="fileManager.show(document.getElementById('updateMedia'), (path) => { document.getElementById('updateMedia').value = path; })">Выбрать</button>
+              <button type="button" class="btn btn-secondary" onclick="admin.selectUpdateMedia()">Выбрать</button>
             </div>
           </div>
         </div>
@@ -2783,9 +2783,26 @@ class AdminPanel {
     }
   }
 
+  // Special method for selecting media files for updates
+  selectUpdateMedia() {
+    // Show file manager with custom callback
+    fileManager.show(document.getElementById('updateMedia'), (path) => {
+      document.getElementById('updateMedia').value = path;
+      
+      // If a new file was selected (not empty), ensure it's uploaded
+      if (path && path.trim() !== '') {
+        console.log('✅ Media file selected for update:', path);
+        // The file should already be on FTP since it was selected from fileManager
+        // Just update the field value
+      }
+    });
+  }
+
   async saveUpdate(data) {
     
     try {
+      console.log('💾 Saving update with data:', data);
+      
       // Generate ID if not provided
       const id = data.id || `update_${Date.now()}`;
       
@@ -2802,21 +2819,34 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
-      if (data.thumb) update.thumb = data.thumb;
-      if (data.media) update.media = data.media;
+      if (data.thumb) {
+        update.thumb = data.thumb;
+        console.log('📸 Thumbnail path:', data.thumb);
+      }
+      if (data.media) {
+        update.media = data.media;
+        console.log('🎬 Media path:', data.media);
+      }
+
+      console.log('📝 Final update object:', update);
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
         // Update existing
+        console.log(`✏️ Updating existing update at index ${this.editingUpdateIndex}`);
         this.updates[this.editingUpdateIndex] = update;
         this.editingUpdateIndex = undefined; // Reset editing index
       } else {
         // Add new
+        console.log('➕ Adding new update');
         this.updates.unshift(update);
       }
+      
+      console.log('📊 Total updates after save:', this.updates.length);
       this.renderUpdates();
       
       // Auto-save updates
+      console.log('💾 Saving updates to server...');
       await this.saveUpdates();
       this.showSuccess('Обновление сохранено');
       
@@ -3089,6 +3119,8 @@ class AdminPanel {
   }
 
   async saveUpdates() {
+    console.log('💾 Sending updates to server:', this.updates);
+    
     const response = await fetch('/admin/api/updates/save', {
       method: 'POST',
       headers: {
@@ -3098,9 +3130,16 @@ class AdminPanel {
       body: JSON.stringify(this.updates)
     });
 
+    console.log('📡 Server response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Server error:', errorText);
       throw new Error('Updates save failed');
     }
+    
+    const result = await response.json();
+    console.log('✅ Updates saved successfully:', result);
   }
 
   previewSite() {

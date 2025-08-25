@@ -309,28 +309,13 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
-        console.log('📋 Raw updates data:', updatesData);
-        
         // Handle new structure with languages field
-        let updatesArray;
-        if (updatesData.updates && Array.isArray(updatesData.updates)) {
-          updatesArray = updatesData.updates;
-        } else if (Array.isArray(updatesData)) {
-          updatesArray = updatesData;
-        } else {
-          console.warn('⚠️ Updates data is not an array:', updatesData);
-          updatesArray = [];
-        }
-        
-        this.updates = updatesArray;
-        console.log('✅ Final updates array:', this.updates);
-        
+        this.updates = updatesData.updates || updatesData || [];
         // Store languages if present
         if (updatesData.languages) {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
-        console.warn('⚠️ Updates response not ok:', updatesResponse.status);
         this.updates = [];
       }
 
@@ -1204,12 +1189,6 @@ class AdminPanel {
     }
     
     container.innerHTML = '';
-
-    // Ensure updates is an array
-    if (!Array.isArray(this.updates)) {
-      console.error('❌ this.updates is not an array:', this.updates);
-      this.updates = [];
-    }
 
     if (this.updates.length === 0) {
       container.innerHTML = '<div class="no-updates">Нет обновлений для отображения</div>';
@@ -2445,11 +2424,6 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
-    console.log('📝 Update form data:', data);
-    console.log('📁 Media fields:', {
-      thumb: data.thumb,
-      media: data.media
-    });
     await this.saveUpdate(data);
   }
 
@@ -2791,8 +2765,6 @@ class AdminPanel {
   async saveUpdate(data) {
     
     try {
-      console.log('💾 Saving update with data:', data);
-      
       // Generate ID if not provided
       const id = data.id || `update_${Date.now()}`;
       
@@ -2809,15 +2781,8 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
-      console.log('📁 Media fields in data:', {
-        thumb: data.thumb,
-        media: data.media
-      });
-
       if (data.thumb) update.thumb = data.thumb;
       if (data.media) update.media = data.media;
-      
-      console.log('💾 Final update object:', update);
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {

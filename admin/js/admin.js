@@ -2907,9 +2907,12 @@ class AdminPanel {
         // If body is a string, split by newlines
         processedBody = data.body.split('\n').filter(line => line.trim());
       } else if (data.body && typeof data.body === 'object') {
-        // If body is an object with translations, use the English version and split
-        const bodyText = data.body.en || data.body.cs || data.body.uk || '';
-        processedBody = bodyText.split('\n').filter(line => line.trim());
+        // If body is an object with translations, preserve all translations
+        processedBody = {
+          en: data.body.en ? data.body.en.split('\n').filter(line => line.trim()) : [],
+          cs: data.body.cs ? data.body.cs.split('\n').filter(line => line.trim()) : [],
+          uk: data.body.uk ? data.body.uk.split('\n').filter(line => line.trim()) : []
+        };
       } else {
         processedBody = [];
       }

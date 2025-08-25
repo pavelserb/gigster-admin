@@ -2901,15 +2901,35 @@ class AdminPanel {
       // Use custom date if provided, otherwise use current date
       const ts = data.customDate ? new Date(data.customDate).toISOString() : new Date().toISOString();
       
-      const update = {
-        id: id,
-        ts: ts,
-        type: data.type,
-        title: data.title,
-        body: data.body.split('\n').filter(line => line.trim()),
-        important: data.important === 'on' || data.important === true,
-        pinned: data.pinned === 'on' || data.pinned === true
-      };
+              // Handle body processing - support both string and object formats
+        console.log('📝 Processing body:', { type: typeof data.body, value: data.body });
+        
+        let processedBody;
+        if (typeof data.body === 'string') {
+          // If body is a string, split by newlines
+          console.log('📝 Body is string, splitting by newlines');
+          processedBody = data.body.split('\n').filter(line => line.trim());
+        } else if (data.body && typeof data.body === 'object') {
+          // If body is an object with translations, use English version for compatibility
+          console.log('📝 Body is object with translations, using English version');
+          const bodyText = data.body.en || data.body.cs || data.body.uk || '';
+          processedBody = bodyText.split('\n').filter(line => line.trim());
+        } else {
+          console.log('📝 Body is empty or invalid, using empty array');
+          processedBody = [];
+        }
+        
+        console.log('📝 Processed body result:', processedBody);
+        
+        const update = {
+          id: id,
+          ts: ts,
+          type: data.type,
+          title: data.title,
+          body: processedBody,
+          important: data.important === 'on' || data.important === true,
+          pinned: data.pinned === 'on' || data.pinned === true
+        };
 
       if (data.thumb) {
         update.thumb = data.thumb;

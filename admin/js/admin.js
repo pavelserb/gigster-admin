@@ -2403,19 +2403,29 @@ class AdminPanel {
   async handleFormSubmit(e) {
     e.preventDefault();
     
+    console.log('📋 Form submitted:', e.target.id);
+    console.log('📋 Form element:', e.target);
+    
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    
+    console.log('📋 Form data collected:', data);
     
     await this._processFormSubmission(e.target.id, data);
     this.closeModal();
   }
 
   async _processFormSubmission(formId, data) {
+    console.log('🔍 Processing form submission:', { formId, data });
+    
     if (formId === 'dynamicForm') {
+      console.log('📝 Handling dynamic form');
       await this._handleDynamicForm(data);
     } else if (formId === 'updateForm') {
+      console.log('📝 Handling update form');
       await this._handleUpdateForm(data);
     } else {
+      console.log('❓ Handling unknown form:', formId);
       await this._handleUnknownForm(data);
     }
   }

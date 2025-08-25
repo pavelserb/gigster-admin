@@ -2901,12 +2901,25 @@ class AdminPanel {
       // Use custom date if provided, otherwise use current date
       const ts = data.customDate ? new Date(data.customDate).toISOString() : new Date().toISOString();
       
+      // Handle body processing - it can be either a string or an object with translations
+      let processedBody;
+      if (typeof data.body === 'string') {
+        // If body is a string, split by newlines
+        processedBody = data.body.split('\n').filter(line => line.trim());
+      } else if (data.body && typeof data.body === 'object') {
+        // If body is an object with translations, use the English version and split
+        const bodyText = data.body.en || data.body.cs || data.body.uk || '';
+        processedBody = bodyText.split('\n').filter(line => line.trim());
+      } else {
+        processedBody = [];
+      }
+      
       const update = {
         id: id,
         ts: ts,
         type: data.type,
         title: data.title,
-        body: data.body.split('\n').filter(line => line.trim()),
+        body: processedBody,
         important: data.important === 'on' || data.important === true,
         pinned: data.pinned === 'on' || data.pinned === true
       };

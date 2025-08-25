@@ -20,11 +20,42 @@ app.use('/admin', express.static(__dirname));
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Admin credentials - пароль: admin123
-const ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: '$2a$10$Aa8CTrqmz.IDPDCCdqwEt.gSsWIMe0cknWJGe4MmlHVtFfbBzncGu'
+// Admin credentials - загружаются из users.json на FTP
+let ADMIN_USERS = {
+  users: [
+    {
+      username: 'admin',
+      password: '$2a$10$Aa8CTrqmz.IDPDCCdqwEt.gSsWIMe0cknWJGe4MmlHVtFfbBzncGu',
+      role: 'admin',
+      isActive: true
+    }
+  ]
 };
+
+// Функция для загрузки пользователей с FTP
+async function loadUsersFromFTP() {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/users.json`;
+      const localPath = path.join(__dirname, 'temp', 'users.json');
+      
+      const downloaded = await ftp.downloadFile(remotePath, localPath);
+      if (!downloaded) {
+        console.log('⚠️  users.json не найден на FTP, используем встроенных пользователей');
+        return ADMIN_USERS;
+      }
+      
+      const content = await fs.readFile(localPath, 'utf8');
+      return JSON.parse(content);
+    });
+    
+    ADMIN_USERS = result;
+    console.log(`✅ Загружено ${result.users.length} пользователей с FTP`);
+  } catch (error) {
+    console.error('❌ Ошибка загрузки пользователей:', error);
+    console.log('⚠️  Используем встроенных пользователей');
+  }
+}
 
 // FTP configuration
 const FTP_CONFIG = {
@@ -110,18 +141,44 @@ async function withFTP(operation) {
 app.post('/admin/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    if (username !== ADMIN_CREDENTIALS.username) {
-      return res.status(401).json({ error: 'Неверные учетные данные' });
+    
+    // Ищем пользователя
+    const user = ADMIN_USERS.users.find(u => 
+      u.username === username && u.isActive
+    );
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Пользователь не найден или неактивен' });
     }
-
-    const isValidPassword = await bcrypt.compare(password, ADMIN_CREDENTIALS.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Неверные учетные данные' });
+    
+    // Проверяем пароль
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    
+    if (isValidPassword) {
+      const token = jwt.sign(
+        { 
+          username: user.username, 
+          role: user.role,
+          userId: user.id 
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      // Обновляем время последнего входа
+      user.lastLogin = new Date().toISOString();
+      
+      res.json({ 
+        token,
+        user: {
+          username: user.username,
+          role: user.role,
+          email: user.email
+        }
+      });
+    } else {
+      res.status(401).json({ error: 'Неверный пароль' });
     }
-
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
@@ -810,9 +867,12 @@ app.use('/assets', async (req, res, next) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 ARTBAT Prague Admin Server с FTP-интеграцией запущен на Render`);
   console.log(`📊 Статус: http://localhost:${PORT}/admin/api/status`);
   console.log(`🔐 Админка: http://localhost:${PORT}/admin`);
   console.log(`🌐 FTP: ${FTP_CONFIG.host}:${FTP_CONFIG.port}${FTP_CONFIG.remotePath}`);
+  
+  // Загружаем пользователей с FTP при запуске
+  await loadUsersFromFTP();
 });

@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "$2a$10$Aa8CTrqmz.IDPDCCdqwEt.gSsWIMe0cknWJGe4MmlHVtFfbBzncGu",
+      "email": "admin@artbat-prague.com",
+      "role": "admin",
+      "isActive": true,
+      "createdAt": "2024-08-24T00:00:00.000Z",
+      "lastLogin": null
+    }
+  ],
+  "settings": {
+    "maxLoginAttempts": 5,
+    "sessionTimeout": 3600,
+    "passwordMinLength": 8
+  }
+}

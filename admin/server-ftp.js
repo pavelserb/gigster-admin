@@ -827,17 +827,30 @@ app.use('/assets', async (req, res, next) => {
     console.log(`📁 Запрос статического файла: ${filePath} -> ${remotePath}`);
     
     const ftpClient = new FTPClient();
-    await ftpClient.connect();
+    const connected = await ftpClient.connect();
+    
+    if (!connected) {
+      console.error('❌ FTP подключение не удалось для статического файла');
+      return res.status(500).send('FTP connection failed');
+    }
     
     // Создаем временный файл
     const tempPath = path.join(__dirname, 'temp', 'static', filePath);
     await fs.mkdir(path.dirname(tempPath), { recursive: true });
+    
+    console.log(`📥 Скачиваю файл: ${remotePath} -> ${tempPath}`);
     
     // Скачиваем файл с FTP
     const downloaded = await ftpClient.downloadFile(remotePath, tempPath);
     await ftpClient.disconnect();
     
     if (downloaded) {
+      console.log(`✅ Файл скачан успешно: ${filePath}`);
+      
+      // Проверяем размер файла
+      const stats = await fs.stat(tempPath);
+      console.log(`📊 Размер файла: ${stats.size} байт`);
+      
       // Определяем MIME тип
       const ext = path.extname(filePath).toLowerCase();
       const mimeTypes = {
@@ -859,10 +872,11 @@ app.use('/assets', async (req, res, next) => {
       // Отдаем файл
       res.sendFile(tempPath);
     } else {
-      res.status(404).send('File not found');
+      console.error(`❌ Файл не найден на FTP: ${remotePath}`);
+      res.status(404).send('File not found on FTP');
     }
   } catch (error) {
-    console.error('Error serving static file:', error);
+    console.error('❌ Ошибка обслуживания статического файла:', error);
     res.status(500).send('Internal server error');
   }
 });

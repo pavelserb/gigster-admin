@@ -50,9 +50,20 @@ class FTPClient {
 
   async downloadFile(remotePath, localPath) {
     try {
+      console.log(`🔍 Попытка скачивания: ${remotePath} -> ${localPath}`);
+      
       // Создаем локальную папку если её нет
       const localDir = path.dirname(localPath);
       await fs.mkdir(localDir, { recursive: true });
+      
+      // Проверяем, существует ли файл на FTP
+      try {
+        const fileInfo = await this.client.stat(remotePath);
+        console.log(`📁 Файл найден на FTP: ${remotePath}, размер: ${fileInfo.size} байт`);
+      } catch (statError) {
+        console.error(`❌ Файл не найден на FTP: ${remotePath}`);
+        return false;
+      }
       
       await this.client.downloadTo(localPath, remotePath);
       console.log(`✅ Файл скачан: ${remotePath} -> ${localPath}`);

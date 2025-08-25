@@ -821,10 +821,10 @@ app.use('/admin/temp', express.static(path.join(__dirname, 'temp')));
 app.use('/assets', async (req, res, next) => {
   try {
     // Получаем файл с FTP и отдаем его
-    const filePath = req.path;
+    const filePath = decodeURIComponent(req.path); // Декодируем URL (пробелы, кириллица и т.д.)
     const remotePath = `${FTP_CONFIG.remotePath}/assets${filePath}`;
     
-    console.log(`📁 Запрос статического файла: ${filePath} -> ${remotePath}`);
+    console.log(`📁 Запрос статического файла: ${req.path} -> ${filePath} -> ${remotePath}`);
     
     const ftpClient = new FTPClient();
     const connected = await ftpClient.connect();

@@ -899,6 +899,15 @@ app.listen(PORT, async () => {
   console.log(`🔐 Админка: http://localhost:${PORT}/admin`);
   console.log(`🌐 FTP: ${FTP_CONFIG.host}:${FTP_CONFIG.port}${FTP_CONFIG.remotePath}`);
   
+  // Создаем временные папки
+  try {
+    await fs.mkdir(path.join(__dirname, 'temp'), { recursive: true });
+    await fs.mkdir(path.join(__dirname, 'temp', 'static'), { recursive: true });
+    console.log('✅ Временные папки созданы');
+  } catch (error) {
+    console.error('❌ Ошибка создания временных папок:', error);
+  }
+  
   // Загружаем пользователей с FTP при запуске
   await loadUsersFromFTP();
 });

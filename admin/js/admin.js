@@ -309,13 +309,28 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
-        // Handle new structure with languages field
-        this.updates = updatesData.updates || updatesData || [];
+        console.log('📊 Updates data received:', updatesData);
+        console.log('📊 Updates data type:', typeof updatesData);
+        console.log('📊 Updates data is array:', Array.isArray(updatesData));
+        
+        // Handle new structure with languages field and ensure it's always an array
+        if (updatesData.updates && Array.isArray(updatesData.updates)) {
+          console.log('✅ Using updatesData.updates array');
+          this.updates = updatesData.updates;
+        } else if (Array.isArray(updatesData)) {
+          console.log('✅ Using updatesData as array');
+          this.updates = updatesData;
+        } else {
+          console.warn('⚠️ Updates data is not an array, using empty array');
+          console.warn('⚠️ Data structure:', updatesData);
+          this.updates = [];
+        }
         // Store languages if present
         if (updatesData.languages) {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
+        console.warn('⚠️ Updates response not ok:', updatesResponse.status);
         this.updates = [];
       }
 
@@ -1190,6 +1205,12 @@ class AdminPanel {
     
     container.innerHTML = '';
 
+    // Ensure this.updates is always an array
+    if (!Array.isArray(this.updates)) {
+      console.warn('this.updates is not an array, resetting to empty array');
+      this.updates = [];
+    }
+
     if (this.updates.length === 0) {
       container.innerHTML = '<div class="no-updates">Нет обновлений для отображения</div>';
       return;
@@ -1534,7 +1555,7 @@ class AdminPanel {
           <div class="input-row">
             <input type="text" id="updateMedia" name="media" value="${update?.media || ''}">
             <div class="file-input-actions">
-              <button type="button" class="btn btn-secondary" onclick="fileManager.show(document.getElementById('updateMedia'), (path) => { document.getElementById('updateMedia').value = path; })">Выбрать</button>
+              <button type="button" class="btn btn-secondary" onclick="admin.selectUpdateMedia()">Выбрать</button>
             </div>
           </div>
         </div>
@@ -2382,19 +2403,39 @@ class AdminPanel {
   async handleFormSubmit(e) {
     e.preventDefault();
     
+    // Get the form ID correctly - e.target is the form element
+    const formId = e.target.id || e.target.getAttribute('id');
+    
+    console.log('📋 Form submitted:', formId);
+    console.log('📋 Form element tagName:', e.target.tagName);
+    console.log('📋 Form element id:', e.target.id);
+    console.log('📋 Form element getAttribute("id"):', e.target.getAttribute('id'));
+    console.log('📋 Form element outerHTML:', e.target.outerHTML.substring(0, 200) + '...');
+    
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     
-    await this._processFormSubmission(e.target.id, data);
+    console.log('📋 Form data collected:', data);
+    
+    await this._processFormSubmission(formId, data);
     this.closeModal();
   }
 
   async _processFormSubmission(formId, data) {
+    console.log('🔍 Processing form submission:', { formId, data });
+    console.log('🔍 Form ID type:', typeof formId);
+    console.log('🔍 Form ID === "updateForm":', formId === 'updateForm');
+    console.log('🔍 Form ID === "dynamicForm":', formId === 'dynamicForm');
+    
     if (formId === 'dynamicForm') {
+      console.log('📝 Handling dynamic form');
       await this._handleDynamicForm(data);
     } else if (formId === 'updateForm') {
+      console.log('📝 Handling update form');
       await this._handleUpdateForm(data);
     } else {
+      console.log('❓ Handling unknown form:', formId);
+      console.log('❓ Available form IDs:', ['dynamicForm', 'updateForm']);
       await this._handleUnknownForm(data);
     }
   }
@@ -2424,20 +2465,92 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
-    await this.saveUpdate(data);
+    console.log('📝 Processing update form data:', data);
+    
+    // Process translation fields for updates
+    const processedData = { ...data };
+    
+    // Handle title translations
+    if (data.title_en || data.title_cs || data.title_uk) {
+      processedData.title = {
+        en: data.title_en || '',
+        cs: data.title_cs || '',
+        uk: data.title_uk || ''
+      };
+      delete processedData.title_en;
+      delete processedData.title_cs;
+      delete processedData.title_uk;
+    }
+    
+    // Handle body translations
+    if (data.body_en || data.body_cs || data.body_uk) {
+      processedData.body = {
+        en: data.body_en || '',
+        cs: data.body_cs || '',
+        uk: data.body_uk || ''
+      };
+      delete processedData.body_en;
+      delete processedData.body_cs;
+      delete processedData.body_uk;
+    }
+    
+    console.log('📝 Processed update data:', processedData);
+    
+    await this.saveUpdate(processedData);
   }
 
   async _handleUnknownForm(data) {
+    console.log('❓ _handleUnknownForm called with data:', data);
+    console.log('❓ Checking conditions:');
+    console.log('❓ - data.title:', !!data.title);
+    console.log('❓ - data.type:', !!data.type);
+    console.log('❓ - data.body:', !!data.body);
+    console.log('❓ - data.title_en:', !!data.title_en);
+    console.log('❓ - data.body_en:', !!data.body_en);
+    
     if (data.title && data.type && data.body) {
+      console.log('✅ Detected as update form (title + type + body)');
       await this.saveUpdate(data);
+    } else if (data.title_en && data.type && data.body_en) {
+      console.log('✅ Detected as update form (title_en + type + body_en)');
+      // Process translation fields for updates
+      const processedData = { ...data };
+      
+      // Handle title translations
+      if (data.title_en || data.title_cs || data.title_uk) {
+        processedData.title = {
+          en: data.title_en || '',
+          cs: data.title_cs || '',
+          uk: data.title_uk || ''
+        };
+        delete processedData.title_en;
+        delete processedData.title_cs;
+        delete processedData.title_uk;
+      }
+      
+      // Handle body translations
+      if (data.body_en || data.body_cs || data.body_uk) {
+        processedData.body = {
+          en: data.body_en || '',
+          cs: data.body_cs || '',
+          uk: data.body_uk || ''
+        };
+        delete processedData.body_en;
+        delete processedData.body_cs;
+        delete processedData.body_uk;
+      }
+      
+      console.log('📝 Processed update data in unknown form:', processedData);
+      await this.saveUpdate(processedData);
     } else if (data.name || data.q || data.type) {
+      console.log('✅ Detected as dynamic form');
       if (this.editingItem) {
         await this.updateDynamicItem(data);
       } else {
         await this.addDynamicItem(data);
       }
     } else {
-      console.warn('Cannot determine form type for data:', data);
+      console.warn('❌ Cannot determine form type for data:', data);
     }
   }
 
@@ -2762,9 +2875,26 @@ class AdminPanel {
     }
   }
 
+  // Special method for selecting media files for updates
+  selectUpdateMedia() {
+    // Show file manager with custom callback
+    fileManager.show(document.getElementById('updateMedia'), (path) => {
+      document.getElementById('updateMedia').value = path;
+      
+      // If a new file was selected (not empty), ensure it's uploaded
+      if (path && path.trim() !== '') {
+        console.log('✅ Media file selected for update:', path);
+        // The file should already be on FTP since it was selected from fileManager
+        // Just update the field value
+      }
+    });
+  }
+
   async saveUpdate(data) {
     
     try {
+      console.log('💾 Saving update with data:', data);
+      
       // Generate ID if not provided
       const id = data.id || `update_${Date.now()}`;
       
@@ -2781,21 +2911,34 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
-      if (data.thumb) update.thumb = data.thumb;
-      if (data.media) update.media = data.media;
+      if (data.thumb) {
+        update.thumb = data.thumb;
+        console.log('📸 Thumbnail path:', data.thumb);
+      }
+      if (data.media) {
+        update.media = data.media;
+        console.log('🎬 Media path:', data.media);
+      }
+
+      console.log('📝 Final update object:', update);
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
         // Update existing
+        console.log(`✏️ Updating existing update at index ${this.editingUpdateIndex}`);
         this.updates[this.editingUpdateIndex] = update;
         this.editingUpdateIndex = undefined; // Reset editing index
       } else {
         // Add new
+        console.log('➕ Adding new update');
         this.updates.unshift(update);
       }
+      
+      console.log('📊 Total updates after save:', this.updates.length);
       this.renderUpdates();
       
       // Auto-save updates
+      console.log('💾 Saving updates to server...');
       await this.saveUpdates();
       this.showSuccess('Обновление сохранено');
       
@@ -3068,6 +3211,8 @@ class AdminPanel {
   }
 
   async saveUpdates() {
+    console.log('💾 Sending updates to server:', this.updates);
+    
     const response = await fetch('/admin/api/updates/save', {
       method: 'POST',
       headers: {
@@ -3077,9 +3222,16 @@ class AdminPanel {
       body: JSON.stringify(this.updates)
     });
 
+    console.log('📡 Server response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Server error:', errorText);
       throw new Error('Updates save failed');
     }
+    
+    const result = await response.json();
+    console.log('✅ Updates saved successfully:', result);
   }
 
   previewSite() {
@@ -3878,7 +4030,7 @@ class AdminPanel {
     const newHeight = Math.max(textarea.scrollHeight, textarea.offsetHeight);
     textarea.style.height = newHeight + 'px';
     
-    console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
+    // console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
   }
 
   // Initialize auto-resize for all textareas

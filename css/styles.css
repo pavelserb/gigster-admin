@@ -477,8 +477,12 @@ nav.primary a.active {
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(
+  /* height: calc(
     clamp(36px, calc(var(--cta-bar-h, 56px) * 0.5), 120px) +
+      env(safe-area-inset-bottom, 0px)
+  ); */
+  height: calc(
+    clamp(70px, calc(var(--cta-bar-h, 110px) * 0.5), 140px) +
       env(safe-area-inset-bottom, 0px)
   );
   background: linear-gradient(
@@ -600,7 +604,8 @@ nav.primary a.active {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  /* background: rgba(0, 0, 0, 0.3); */
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(2px);
   z-index: 1001;
   opacity: 0;
@@ -618,7 +623,8 @@ nav.primary a.active {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(100% + 8px);
+  /* bottom: calc(100% + 8px); */
+  bottom: 100%;
   background: rgba(10, 10, 14, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
@@ -2057,6 +2063,7 @@ p {
   gap: 32px;
   padding-right: 40px;
   justify-content: space-between;
+  width: 100%;
 }
 
 .venue-details {
@@ -2069,7 +2076,8 @@ p {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  flex: 1;
+  /* flex: 1; */
+  flex: 2;
 }
 
 .venue-name {
@@ -2087,7 +2095,8 @@ p {
 
 .venue-info .btn {
   align-self: flex-start;
-  min-width: 160px;
+  justify-content: center;
+  /* min-width: 160px; */
 }
 
 .venue-actions {
@@ -2096,6 +2105,7 @@ p {
   align-items: center;
   justify-content: center;
   gap: 16px;
+  flex: 1;
 }
 
 .route-btn {
@@ -2286,7 +2296,7 @@ p {
   }
   
   .venue-info .btn {
-    min-width: 140px;
+    /* min-width: 140px; */
     font-size: 0.9rem;
   }
   
@@ -2319,13 +2329,14 @@ p {
   }
   
   .venue-details {
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: 20px;
     align-items: center;
+    margin-bottom: 1.5rem;
   }
   
   .venue-info .btn {
-    min-width: 100%;
+    /* min-width: 100%; */
     justify-content: center;
   }
   

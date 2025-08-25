@@ -63,25 +63,20 @@ class FTPClient {
       const localDir = path.dirname(localPath);
       await fs.mkdir(localDir, { recursive: true });
       
-      // Убираем начальный слеш для относительного пути
-      const relativePath = remotePath.startsWith('/') ? remotePath.slice(1) : remotePath;
-      console.log(`📁 Использую относительный путь: ${relativePath}`);
-      
-      // Переходим в корневую директорию FTP
-      await this.client.cd('/');
-      console.log(`📁 Перешел в корневую директорию FTP`);
+      // Используем абсолютный путь (начинается с /)
+      console.log(`📁 Использую абсолютный путь: ${remotePath}`);
       
       // Проверяем, существует ли файл на FTP
       try {
-        const fileInfo = await this.client.stat(relativePath);
-        console.log(`📁 Файл найден на FTP: ${relativePath}, размер: ${fileInfo.size} байт`);
+        const fileInfo = await this.client.stat(remotePath);
+        console.log(`📁 Файл найден на FTP: ${remotePath}, размер: ${fileInfo.size} байт`);
       } catch (statError) {
-        console.error(`❌ Файл не найден на FTP: ${relativePath}`);
+        console.error(`❌ Файл не найден на FTP: ${remotePath}`);
         return false;
       }
       
-      await this.client.downloadTo(localPath, relativePath);
-      console.log(`✅ Файл скачан: ${relativePath} -> ${localPath}`);
+      await this.client.downloadTo(localPath, remotePath);
+      console.log(`✅ Файл скачан: ${remotePath} -> ${localPath}`);
       return true;
     } catch (error) {
       console.error(`❌ Ошибка скачивания файла ${remotePath}:`, error.message);

@@ -877,7 +877,7 @@ nav.primary a.active {
   min-height: 100dvh;
   /* ключевая строка: отступ сверху = высота хедера + безопасный зазор */
   /* padding: calc(var(--hdr-h) + var(--hero-top-pad)) var(--container-padding) 80px; */
-  padding: var(--hdr-h) calc(var(--container-padding) + 8px) 32px calc(var(--container-padding) + 8px);
+  /* padding: var(--hdr-h) calc(var(--container-padding) + 8px) 32px calc(var(--container-padding) + 8px); */
   padding-inline: calc(var(--container-padding) + 8px);
   align-items: start;
 }

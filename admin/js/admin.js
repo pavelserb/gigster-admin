@@ -309,13 +309,20 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
+        console.log('📊 Updates data received:', updatesData);
+        console.log('📊 Updates data type:', typeof updatesData);
+        console.log('📊 Updates data is array:', Array.isArray(updatesData));
+        
         // Handle new structure with languages field and ensure it's always an array
         if (updatesData.updates && Array.isArray(updatesData.updates)) {
+          console.log('✅ Using updatesData.updates array');
           this.updates = updatesData.updates;
         } else if (Array.isArray(updatesData)) {
+          console.log('✅ Using updatesData as array');
           this.updates = updatesData;
         } else {
-          console.warn('Updates data is not an array, using empty array');
+          console.warn('⚠️ Updates data is not an array, using empty array');
+          console.warn('⚠️ Data structure:', updatesData);
           this.updates = [];
         }
         // Store languages if present
@@ -323,6 +330,7 @@ class AdminPanel {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
+        console.warn('⚠️ Updates response not ok:', updatesResponse.status);
         this.updates = [];
       }
 

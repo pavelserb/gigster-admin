@@ -3946,7 +3946,7 @@ class AdminPanel {
     const newHeight = Math.max(textarea.scrollHeight, textarea.offsetHeight);
     textarea.style.height = newHeight + 'px';
     
-    console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
+    // console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
   }
 
   // Initialize auto-resize for all textareas

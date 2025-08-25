@@ -309,8 +309,15 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
-        // Handle new structure with languages field
-        this.updates = updatesData.updates || updatesData || [];
+        // Handle new structure with languages field and ensure it's always an array
+        if (updatesData.updates && Array.isArray(updatesData.updates)) {
+          this.updates = updatesData.updates;
+        } else if (Array.isArray(updatesData)) {
+          this.updates = updatesData;
+        } else {
+          console.warn('Updates data is not an array, using empty array');
+          this.updates = [];
+        }
         // Store languages if present
         if (updatesData.languages) {
           this.updatesLanguages = updatesData.languages;
@@ -1189,6 +1196,12 @@ class AdminPanel {
     }
     
     container.innerHTML = '';
+
+    // Ensure this.updates is always an array
+    if (!Array.isArray(this.updates)) {
+      console.warn('this.updates is not an array, resetting to empty array');
+      this.updates = [];
+    }
 
     if (this.updates.length === 0) {
       container.innerHTML = '<div class="no-updates">Нет обновлений для отображения</div>';

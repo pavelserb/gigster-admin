@@ -36,7 +36,7 @@ let ADMIN_USERS = {
 async function loadUsersFromFTP() {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = `${FTP_CONFIG.remotePath}/users.json`;
+      const remotePath = getFTPPath('/users.json');
       const localPath = path.join(__dirname, 'temp', 'users.json');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -63,8 +63,14 @@ const FTP_CONFIG = {
   user: process.env.FTP_USER || 'somos_cursor',
   password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
   port: process.env.FTP_PORT || 21,
-  remotePath: process.env.FTP_REMOTE_PATH || '/artbat-prague'
+  remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
 };
+
+// Helper function to get correct relative path for FTP
+function getFTPPath(path) {
+  const fullPath = `${FTP_CONFIG.remotePath}${path}`;
+  return fullPath.replace(/^\//, ''); // Убираем начальный слеш для относительного пути
+}
 
 // Log FTP configuration for debugging
 console.log('🔧 FTP Configuration:', {
@@ -194,7 +200,7 @@ app.get('/admin/api/auth/verify', authenticateToken, (req, res) => {
 app.get('/admin/api/config', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = `${FTP_CONFIG.remotePath}/config.json`;
+      const remotePath = getFTPPath('/config.json');
       const localPath = path.join(__dirname, 'temp', 'config.json');
       
       // Скачиваем файл с FTP
@@ -347,27 +353,27 @@ app.get('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
     console.log('📥 Запрос на получение апдейтов с FTP');
     
-    const result = await withFTP(async (ftp) => {
-      const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
-      const localPath = path.join(__dirname, 'temp', 'updates.json');
-      
-      console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
-      
-      const downloaded = await ftp.downloadFile(remotePath, localPath);
-      if (!downloaded) {
-        console.error('❌ Файл updates.json не найден на FTP');
-        return { message: 'Updates file not found on FTP' };
-      }
-      
-      console.log('✅ Файл updates.json скачан успешно');
-      
-      const content = await fs.readFile(localPath, 'utf8');
-      const parsed = JSON.parse(content);
-      
-      console.log(`📊 Загружено ${Array.isArray(parsed) ? parsed.length : 'неизвестно'} апдейтов`);
-      
-      return parsed;
-    });
+          const result = await withFTP(async (ftp) => {
+        const remotePath = getFTPPath('/updates.json');
+        const localPath = path.join(__dirname, 'temp', 'updates.json');
+        
+        console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
+        
+        const downloaded = await ftp.downloadFile(remotePath, localPath);
+        if (!downloaded) {
+          console.error('❌ Файл updates.json не найден на FTP');
+          return { message: 'Updates file not found on FTP' };
+        }
+        
+        console.log('✅ Файл updates.json скачан успешно');
+        
+        const content = await fs.readFile(localPath, 'utf8');
+        const parsed = JSON.parse(content);
+        
+        console.log(`📊 Загружено ${Array.isArray(parsed) ? parsed.length : 'неизвестно'} апдейтов`);
+        
+        return parsed;
+      });
     
     console.log('📤 Отправляю апдейты клиенту:', typeof result);
     res.json(result);

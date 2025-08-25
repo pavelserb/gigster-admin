@@ -2923,11 +2923,34 @@ class AdminPanel {
         
         console.log('📝 Processed body result:', processedBody);
         
+        // Handle title processing - keep title as object for translations
+        console.log('📝 Processing title:', { type: typeof data.title, value: data.title });
+        
+        let processedTitle;
+        if (typeof data.title === 'string') {
+          // If title is a string, convert to translation object
+          console.log('📝 Title is string, converting to translation object');
+          processedTitle = {
+            en: data.title,
+            cs: data.title,
+            uk: data.title
+          };
+        } else if (data.title && typeof data.title === 'object') {
+          // If title is already an object with translations, use as is
+          console.log('📝 Title is object with translations, using as is');
+          processedTitle = data.title;
+        } else {
+          console.log('📝 Title is empty or invalid, using empty translation object');
+          processedTitle = { en: '', cs: '', uk: '' };
+        }
+        
+        console.log('📝 Processed title result:', processedTitle);
+        
         const update = {
           id: id,
           ts: ts,
           type: data.type,
-          title: data.title,
+          title: processedTitle,
           body: processedBody,
           important: data.important === 'on' || data.important === true,
           pinned: data.pinned === 'on' || data.pinned === true

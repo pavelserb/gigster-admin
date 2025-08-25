@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2a$10$Aa8CTrqmz.IDPDCCdqwEt.gSsWIMe0cknWJGe4MmlHVtFfbBzncGu",
+      "role": "admin",
+      "name": "Главный администратор",
+      "email": "admin@artbat-prague.com",
+      "created": "2024-08-24T00:00:00.000Z",
+      "active": true
+    }
+  ],
+  "roles": {
+    "admin": {
+      "name": "Администратор",
+      "permissions": ["read", "write", "delete", "upload", "manage_users"]
+    },
+    "editor": {
+      "name": "Редактор",
+      "permissions": ["read", "write", "upload"]
+    },
+    "viewer": {
+      "name": "Просмотр",
+      "permissions": ["read"]
+    }
+  }
+}

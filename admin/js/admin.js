@@ -309,13 +309,26 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
+        console.log('📥 Получены данные апдейтов:', updatesData);
+        
         // Handle new structure with languages field
-        this.updates = updatesData.updates || updatesData || [];
+        if (Array.isArray(updatesData)) {
+          this.updates = updatesData;
+        } else if (updatesData && Array.isArray(updatesData.updates)) {
+          this.updates = updatesData.updates;
+        } else {
+          console.warn('⚠️ Неожиданный формат данных апдейтов:', updatesData);
+          this.updates = [];
+        }
+        
+        console.log('✅ Апдейты загружены:', this.updates);
+        
         // Store languages if present
         if (updatesData.languages) {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
+        console.error('❌ Ошибка загрузки апдейтов:', updatesResponse.status);
         this.updates = [];
       }
 
@@ -1189,6 +1202,12 @@ class AdminPanel {
     }
     
     container.innerHTML = '';
+
+    // Защита от не-массива
+    if (!Array.isArray(this.updates)) {
+      console.error('❌ this.updates не является массивом:', this.updates);
+      this.updates = [];
+    }
 
     if (this.updates.length === 0) {
       container.innerHTML = '<div class="no-updates">Нет обновлений для отображения</div>';

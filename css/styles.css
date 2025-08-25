@@ -448,7 +448,7 @@ nav.primary a.active {
 /* Контейнер островка: без transform! центрируем через left/right + margin */
 .floating-cta {
   position: fixed;
-  z-index: 1002;
+  z-index: 1004;
   left: 0;
   right: 0;
   bottom: 20px; /* ближе к нижнему краю на desktop */
@@ -508,7 +508,7 @@ nav.primary a.active {
   /* Убеждаемся, что floating-cta видна поверх мобильного меню */
   #mnav:not([hidden]) ~ .floating-cta,
   #mnav:not([hidden]) + .floating-cta {
-    z-index: 1002;
+    z-index: 1004;
   }
 }
 
@@ -593,6 +593,26 @@ nav.primary a.active {
   }
 }
 
+/* Tickets Menu Overlay */
+.tickets-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 1001;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.tickets-overlay:not([hidden]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Drop-up меню */
 .cta-menu {
   position: absolute;
@@ -604,7 +624,7 @@ nav.primary a.active {
   border-radius: 12px;
   padding: 0;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  z-index: 2;
+  z-index: 1003;
   pointer-events: none;
   opacity: 0;
   transform: translateY(6px) scale(0.98);
@@ -632,6 +652,22 @@ nav.primary a.active {
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
+}
+
+/* Анимация для tickets menu при открытии */
+.cta-menu.open {
+  animation: slideUpMenu 0.3s ease-out;
+}
+
+@keyframes slideUpMenu {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 /* .cta-menu button {
   display: block;
@@ -1417,13 +1453,16 @@ p {
 
 @media (max-width: 480px) { 
   .upd::before {
-    left: 14px;
+    left: 12px;
   }
   .upd {
     padding: 12px 12px 12px 32px;
   }
   .updates.timeline::before {
-    left: 18px;
+    left: 17px;
+  }
+  .about-updates.card {
+    padding: 18px 12px;
   }
 }
 
@@ -1819,11 +1858,13 @@ p {
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
+  line-clamp: 4;
   transition: color 0.2s ease;
 }
 
 .artist .bio-content.expanded {
   -webkit-line-clamp: unset;
+  line-clamp: unset;
   overflow: visible;
 }
 
@@ -1951,10 +1992,17 @@ p {
   .artist .bio-content {
     font-size: 1rem;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 
 @media (max-width: 480px) {
+  #artistsGrid {
+    gap: 16px;
+  }
+  .artist.card {
+    padding: 12px 12px;
+  }
   .artist .content {
     padding: 16px 0;
     gap: 12px;

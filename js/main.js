@@ -289,24 +289,29 @@ function setupHeaderOverlay() {
 function openTicketsMenu(){
   const menu = document.getElementById('ticketsMenu');
   const toggle = document.getElementById('ticketsToggle');
+  const overlay = document.getElementById('ticketsOverlay');
   if (!menu || !toggle) return;
   menu.classList.add('open');
   toggle.setAttribute('aria-expanded','true');
   toggle.textContent = '▼';
+  overlay?.removeAttribute('hidden');
 }
 
 function closeTicketsMenu(){
   const menu = document.getElementById('ticketsMenu');
   const toggle = document.getElementById('ticketsToggle');
+  const overlay = document.getElementById('ticketsOverlay');
   if (!menu || !toggle) return;
   menu.classList.remove('open');
   toggle.setAttribute('aria-expanded','false');
   toggle.textContent = '▲';
+  overlay?.setAttribute('hidden', '');
 }
 
 function setupTicketsIslandInteractions(){
   const toggle = document.getElementById('ticketsToggle');
   const menu   = document.getElementById('ticketsMenu');
+  const overlay = document.getElementById('ticketsOverlay');
   if (!toggle || !menu) return;
 
   // Remove hidden attribute on start if it remained in HTML
@@ -325,9 +330,16 @@ function setupTicketsIslandInteractions(){
     }
   });
 
+  // Click on overlay — close
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closeTicketsMenu();
+    }
+  });
+
   // Click outside — close
   document.addEventListener('click', (e) => {
-    if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle) {
+    if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle && e.target !== overlay) {
       closeTicketsMenu();
     }
   });

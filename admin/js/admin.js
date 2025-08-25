@@ -2781,8 +2781,26 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
-      if (data.thumb) update.thumb = data.thumb;
-      if (data.media) update.media = data.media;
+      // Process translation fields for thumb and media
+      if (data.thumb_en || data.thumb_cs || data.thumb_uk) {
+        update.thumb = {
+          en: data.thumb_en || '',
+          cs: data.thumb_cs || '',
+          uk: data.thumb_uk || ''
+        };
+      } else if (data.thumb) {
+        update.thumb = data.thumb;
+      }
+      
+      if (data.media_en || data.media_cs || data.media_uk) {
+        update.media = {
+          en: data.media_en || '',
+          cs: data.media_cs || '',
+          uk: data.media_uk || ''
+        };
+      } else if (data.media) {
+        update.media = data.media;
+      }
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {

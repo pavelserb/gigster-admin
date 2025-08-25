@@ -4108,7 +4108,7 @@ class AdminPanel {
               setTimeout(() => this.autoResizeTextarea(textarea), 0);
             });
             
-            console.log(`Initialized auto-resize for textarea: ${textarea.id || 'unnamed'}`);
+            // console.log(`Initialized auto-resize for textarea: ${textarea.id || 'unnamed'}`);
           });
           return;
         }

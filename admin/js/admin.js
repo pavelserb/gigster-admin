@@ -309,26 +309,13 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
-        console.log('📥 Получены данные апдейтов:', updatesData);
-        
         // Handle new structure with languages field
-        if (Array.isArray(updatesData)) {
-          this.updates = updatesData;
-        } else if (updatesData && Array.isArray(updatesData.updates)) {
-          this.updates = updatesData.updates;
-        } else {
-          console.warn('⚠️ Неожиданный формат данных апдейтов:', updatesData);
-          this.updates = [];
-        }
-        
-        console.log('✅ Апдейты загружены:', this.updates);
-        
+        this.updates = updatesData.updates || updatesData || [];
         // Store languages if present
         if (updatesData.languages) {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
-        console.error('❌ Ошибка загрузки апдейтов:', updatesResponse.status);
         this.updates = [];
       }
 
@@ -396,23 +383,6 @@ class AdminPanel {
 
   // Config Management
   renderConfig() {
-    console.log('🔧 renderConfig вызван с данными:', this.config);
-    
-    // Проверяем, есть ли данные конфигурации
-    if (!this.config || Object.keys(this.config).length === 0) {
-      console.warn('⚠️ Конфигурация пустая, используем значения по умолчанию');
-      this.config = {
-        event: {},
-        authorizedSellers: [],
-        tiers: [],
-        artists: [],
-        faqs: [],
-        contacts: [],
-        updateCategories: {},
-        updateBadges: {}
-      };
-    }
-    
     // Event info - handle new translation structure
     this.renderTranslationField('eventName', this.config.event?.name);
     this.renderTranslationField('eventDate', this.config.event?.date);
@@ -1075,22 +1045,8 @@ class AdminPanel {
 
   // Translations Management
   renderTranslations() {
-    console.log('🌐 renderTranslations вызван с данными:', this.translations);
-    
     const container = document.getElementById('translationsEditor');
     container.innerHTML = '';
-
-    // Проверяем, есть ли данные переводов
-    if (!this.translations || Object.keys(this.translations).length === 0) {
-      console.warn('⚠️ Переводы пустые, используем значения по умолчанию');
-      this.translations = {
-        sections: {
-          en: {},
-          cs: {},
-          uk: {}
-        }
-      };
-    }
 
     // Get the current language data from translations.json
     const currentLang = this.currentLanguage || 'en';
@@ -1233,12 +1189,6 @@ class AdminPanel {
     }
     
     container.innerHTML = '';
-
-    // Защита от не-массива
-    if (!Array.isArray(this.updates)) {
-      console.error('❌ this.updates не является массивом:', this.updates);
-      this.updates = [];
-    }
 
     if (this.updates.length === 0) {
       container.innerHTML = '<div class="no-updates">Нет обновлений для отображения</div>';
@@ -2831,26 +2781,8 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
-      // Process translation fields for thumb and media
-      if (data.thumb_en || data.thumb_cs || data.thumb_uk) {
-        update.thumb = {
-          en: data.thumb_en || '',
-          cs: data.thumb_cs || '',
-          uk: data.thumb_uk || ''
-        };
-      } else if (data.thumb) {
-        update.thumb = data.thumb;
-      }
-      
-      if (data.media_en || data.media_cs || data.media_uk) {
-        update.media = {
-          en: data.media_en || '',
-          cs: data.media_cs || '',
-          uk: data.media_uk || ''
-        };
-      } else if (data.media) {
-        update.media = data.media;
-      }
+      if (data.thumb) update.thumb = data.thumb;
+      if (data.media) update.media = data.media;
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
@@ -3946,7 +3878,7 @@ class AdminPanel {
     const newHeight = Math.max(textarea.scrollHeight, textarea.offsetHeight);
     textarea.style.height = newHeight + 'px';
     
-    // console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
+    console.log(`Auto-resized textarea ${textarea.id || 'unnamed'}: ${newHeight}px`);
   }
 
   // Initialize auto-resize for all textareas

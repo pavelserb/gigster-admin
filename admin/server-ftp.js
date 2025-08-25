@@ -36,7 +36,7 @@ let ADMIN_USERS = {
 async function loadUsersFromFTP() {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = "/users.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/users.json`;
       const localPath = path.join(__dirname, 'temp', 'users.json');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -63,10 +63,8 @@ const FTP_CONFIG = {
   user: process.env.FTP_USER || 'somos_cursor',
   password: process.env.FTP_PASSWORD || 'Pr6LUx9h45',
   port: process.env.FTP_PORT || 21,
-  remotePath: (process.env.FTP_REMOTE_PATH || '/artbat-prague').replace(/^\//, '') // Убираем начальный слеш
+  remotePath: process.env.FTP_REMOTE_PATH || '/artbat-prague'
 };
-
-// Убираем сложную логику путей - используем прямые пути
 
 // Log FTP configuration for debugging
 console.log('🔧 FTP Configuration:', {
@@ -196,7 +194,7 @@ app.get('/admin/api/auth/verify', authenticateToken, (req, res) => {
 app.get('/admin/api/config', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = "/config.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/config.json`;
       const localPath = path.join(__dirname, 'temp', 'config.json');
       
       // Скачиваем файл с FTP
@@ -222,7 +220,7 @@ app.post('/admin/api/config', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'config.json');
-      const remotePath = "/config.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/config.json`;
       
       // Сохраняем локально
       await fs.mkdir(path.dirname(localPath), { recursive: true });
@@ -249,7 +247,7 @@ app.post('/admin/api/config/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'config.json');
-      const remotePath = "/config.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/config.json`;
       
       // Сохраняем локально
       await fs.mkdir(path.dirname(localPath), { recursive: true });
@@ -275,7 +273,7 @@ app.post('/admin/api/config/save', authenticateToken, async (req, res) => {
 app.get('/admin/api/translations', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = "/translations.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/translations.json`;
       const localPath = path.join(__dirname, 'temp', 'translations.json');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -299,7 +297,7 @@ app.post('/admin/api/translations', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'translations.json');
-      const remotePath = "/translations.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/translations.json`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -324,7 +322,7 @@ app.post('/admin/api/translations/save', authenticateToken, async (req, res) => 
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'translations.json');
-      const remotePath = "/translations.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/translations.json`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -347,34 +345,22 @@ app.post('/admin/api/translations/save', authenticateToken, async (req, res) => 
 // Get updates from FTP
 app.get('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
-    console.log('📥 Запрос на получение апдейтов с FTP');
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
+      const localPath = path.join(__dirname, 'temp', 'updates.json');
+      
+      const downloaded = await ftp.downloadFile(remotePath, localPath);
+      if (!downloaded) {
+        return { message: 'Updates file not found on FTP' };
+      }
+      
+      const content = await fs.readFile(localPath, 'utf8');
+      return JSON.parse(content);
+    });
     
-          const result = await withFTP(async (ftp) => {
-        const remotePath = "/updates.json";
-        const localPath = path.join(__dirname, 'temp', 'updates.json');
-        
-        console.log(`🔍 Скачиваю файл: ${remotePath} -> ${localPath}`);
-        
-        const downloaded = await ftp.downloadFile(remotePath, localPath);
-        if (!downloaded) {
-          console.error('❌ Файл updates.json не найден на FTP');
-          return { message: 'Updates file not found on FTP' };
-        }
-        
-        console.log('✅ Файл updates.json скачан успешно');
-        
-        const content = await fs.readFile(localPath, 'utf8');
-        const parsed = JSON.parse(content);
-        
-        console.log(`📊 Загружено ${Array.isArray(parsed) ? parsed.length : 'неизвестно'} апдейтов`);
-        
-        return parsed;
-      });
-    
-    console.log('📤 Отправляю апдейты клиенту:', typeof result);
     res.json(result);
   } catch (error) {
-    console.error('❌ Ошибка чтения обновлений:', error);
+    console.error('Updates error:', error);
     res.status(500).json({ error: 'Ошибка чтения обновлений' });
   }
 });
@@ -384,7 +370,7 @@ app.post('/admin/api/updates', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = "/updates.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -409,7 +395,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'updates.json');
-      const remotePath = "/updates.json";
+      const remotePath = `${FTP_CONFIG.remotePath}/updates.json`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, JSON.stringify(req.body, null, 2));
@@ -433,7 +419,7 @@ app.post('/admin/api/updates/save', authenticateToken, async (req, res) => {
 app.get('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
-      const remotePath = "/index.html";
+      const remotePath = `${FTP_CONFIG.remotePath}/index.html`;
       const localPath = path.join(__dirname, 'temp', 'index.html');
       
       const downloaded = await ftp.downloadFile(remotePath, localPath);
@@ -457,7 +443,7 @@ app.post('/admin/api/html', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = "/index.html";
+      const remotePath = `${FTP_CONFIG.remotePath}/index.html`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);
@@ -482,7 +468,7 @@ app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   try {
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', 'index.html');
-      const remotePath = "/index.html";
+      const remotePath = `${FTP_CONFIG.remotePath}/index.html`;
       
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, req.body.content);
@@ -835,36 +821,23 @@ app.use('/admin/temp', express.static(path.join(__dirname, 'temp')));
 app.use('/assets', async (req, res, next) => {
   try {
     // Получаем файл с FTP и отдаем его
-    const filePath = decodeURIComponent(req.path); // Декодируем URL (пробелы, кириллица и т.д.)
+    const filePath = req.path;
     const remotePath = `${FTP_CONFIG.remotePath}/assets${filePath}`;
     
-    console.log(`📁 Запрос статического файла: ${req.path} -> ${filePath} -> ${remotePath}`);
+    console.log(`📁 Запрос статического файла: ${filePath} -> ${remotePath}`);
     
     const ftpClient = new FTPClient();
-    const connected = await ftpClient.connect();
-    
-    if (!connected) {
-      console.error('❌ FTP подключение не удалось для статического файла');
-      return res.status(500).send('FTP connection failed');
-    }
+    await ftpClient.connect();
     
     // Создаем временный файл
     const tempPath = path.join(__dirname, 'temp', 'static', filePath);
     await fs.mkdir(path.dirname(tempPath), { recursive: true });
-    
-    console.log(`📥 Скачиваю файл: ${remotePath} -> ${tempPath}`);
     
     // Скачиваем файл с FTP
     const downloaded = await ftpClient.downloadFile(remotePath, tempPath);
     await ftpClient.disconnect();
     
     if (downloaded) {
-      console.log(`✅ Файл скачан успешно: ${filePath}`);
-      
-      // Проверяем размер файла
-      const stats = await fs.stat(tempPath);
-      console.log(`📊 Размер файла: ${stats.size} байт`);
-      
       // Определяем MIME тип
       const ext = path.extname(filePath).toLowerCase();
       const mimeTypes = {
@@ -886,11 +859,10 @@ app.use('/assets', async (req, res, next) => {
       // Отдаем файл
       res.sendFile(tempPath);
     } else {
-      console.error(`❌ Файл не найден на FTP: ${remotePath}`);
-      res.status(404).send('File not found on FTP');
+      res.status(404).send('File not found');
     }
   } catch (error) {
-    console.error('❌ Ошибка обслуживания статического файла:', error);
+    console.error('Error serving static file:', error);
     res.status(500).send('Internal server error');
   }
 });
@@ -900,15 +872,6 @@ app.listen(PORT, async () => {
   console.log(`📊 Статус: http://localhost:${PORT}/admin/api/status`);
   console.log(`🔐 Админка: http://localhost:${PORT}/admin`);
   console.log(`🌐 FTP: ${FTP_CONFIG.host}:${FTP_CONFIG.port}${FTP_CONFIG.remotePath}`);
-  
-  // Создаем временные папки
-  try {
-    await fs.mkdir(path.join(__dirname, 'temp'), { recursive: true });
-    await fs.mkdir(path.join(__dirname, 'temp', 'static'), { recursive: true });
-    console.log('✅ Временные папки созданы');
-  } catch (error) {
-    console.error('❌ Ошибка создания временных папок:', error);
-  }
   
   // Загружаем пользователей с FTP при запуске
   await loadUsersFromFTP();

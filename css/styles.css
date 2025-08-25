@@ -519,7 +519,7 @@ nav.primary a.active {
   display: grid;
   grid-template-columns: 1fr auto; /* основная кнопка + стрелка */
   gap: 0;
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
   pointer-events: auto;
   background: transparent;
@@ -687,13 +687,16 @@ nav.primary a.active {
 
 /* Узкие экраны — фулл-ширина */
 @media (max-width: 480px) {
+  .floating-cta {
+    padding: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem);
+  }
   .cta-main {
     /* padding: 14px 16px; */
     /* font-size: 15px; */
     border-radius: 0;
   }
   .cta-bar {
-    border-radius: 0;
+    /* border-radius: 0; */
   }
 }
 

@@ -2528,19 +2528,28 @@ class AdminPanel {
         delete processedData.title_uk;
       }
       
-      // Handle body translations
+      // Handle body translations - keep body as array for site compatibility
       if (data.body_en || data.body_cs || data.body_uk) {
-        processedData.body = {
-          en: data.body_en || '',
-          cs: data.body_cs || '',
-          uk: data.body_uk || ''
+        // Use English version for body (site compatibility)
+        const bodyText = data.body_en || data.body_cs || data.body_uk || '';
+        processedData.body = bodyText.split('\n').filter(line => line.trim());
+        
+        // Store translations separately for admin panel
+        processedData.bodyTranslations = {
+          en: data.body_en ? data.body_en.split('\n').filter(line => line.trim()) : [],
+          cs: data.body_cs ? data.body_cs.split('\n').filter(line => line.trim()) : [],
+          uk: data.body_uk ? data.body_uk.split('\n').filter(line => line.trim()) : []
         };
+        
         delete processedData.body_en;
         delete processedData.body_cs;
         delete processedData.body_uk;
       }
       
       console.log('📝 Processed update data in unknown form:', processedData);
+      console.log('📝 Body type:', typeof processedData.body);
+      console.log('📝 Body is array:', Array.isArray(processedData.body));
+      console.log('📝 Body content:', processedData.body);
       console.log('📝 Current editingUpdateIndex:', this.editingUpdateIndex);
       console.log('📝 Current updates array length:', this.updates.length);
       

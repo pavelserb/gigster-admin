@@ -2424,6 +2424,11 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
+    console.log('📝 Update form data:', data);
+    console.log('📁 Media fields:', {
+      thumb: data.thumb,
+      media: data.media
+    });
     await this.saveUpdate(data);
   }
 
@@ -2765,6 +2770,8 @@ class AdminPanel {
   async saveUpdate(data) {
     
     try {
+      console.log('💾 Saving update with data:', data);
+      
       // Generate ID if not provided
       const id = data.id || `update_${Date.now()}`;
       
@@ -2781,8 +2788,15 @@ class AdminPanel {
         pinned: data.pinned === 'on' || data.pinned === true
       };
 
+      console.log('📁 Media fields in data:', {
+        thumb: data.thumb,
+        media: data.media
+      });
+
       if (data.thumb) update.thumb = data.thumb;
       if (data.media) update.media = data.media;
+      
+      console.log('💾 Final update object:', update);
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {

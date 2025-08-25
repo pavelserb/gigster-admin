@@ -876,7 +876,8 @@ nav.primary a.active {
   gap: 16px;
   min-height: 100dvh;
   /* ключевая строка: отступ сверху = высота хедера + безопасный зазор */
-  padding: calc(var(--hdr-h) + var(--hero-top-pad)) var(--container-padding) 80px;
+  /* padding: calc(var(--hdr-h) + var(--hero-top-pad)) var(--container-padding) 80px; */
+  padding: var(--hdr-h) calc(var(--container-padding) + 8px);
   align-items: start;
 }
 

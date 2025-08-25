@@ -37,6 +37,27 @@ class UpdatesManager {
     this.updateMoreButtonText();
   }
 
+  // Detect current language from DOM or URL
+  detectCurrentLanguage() {
+    // Check if language is set in DOM
+    const htmlLang = document.documentElement.lang;
+    if (htmlLang && ['en', 'cs', 'uk'].includes(htmlLang)) {
+      this.setLanguage(htmlLang);
+      return;
+    }
+
+    // Check URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLang = urlParams.get('lang');
+    if (urlLang && ['en', 'cs', 'uk'].includes(urlLang)) {
+      this.setLanguage(urlLang);
+      return;
+    }
+
+    // Default to English
+    this.setLanguage('en');
+  }
+
   // Initialize the updates manager
   async init() {
     await this.loadUpdatesData();
@@ -113,6 +134,17 @@ class UpdatesManager {
       this.render();
       this.showThumbnails();
     });
+
+    // Language change listener
+    document.addEventListener('languageChanged', (e) => {
+      const newLang = e.detail?.language || 'en';
+      console.log('🌐 Language changed in updates.js:', newLang);
+      this.setLanguage(newLang);
+      this.render(); // Re-render with new language
+    });
+
+    // Initial language detection
+    this.detectCurrentLanguage();
   }
 
   // Process deep link from URL

@@ -2538,9 +2538,9 @@ class AdminPanel {
       // Handle body translations
       if (data.body_en || data.body_cs || data.body_uk) {
         processedData.body = {
-          en: (data.body_en || '').split('\n').filter(line => line.trim()),
-          cs: (data.body_cs || '').split('\n').filter(line => line.trim()),
-          uk: (data.body_uk || '').split('\n').filter(line => line.trim())
+          en: this.processBodyText(data.body_en || ''),
+          cs: this.processBodyText(data.body_cs || ''),
+          uk: this.processBodyText(data.body_uk || '')
         };
         delete processedData.body_en;
         delete processedData.body_cs;
@@ -2915,7 +2915,7 @@ class AdminPanel {
         if (typeof data.body === 'string') {
           // If body is a string, convert to translation object
           console.log('📝 Body is string, converting to translation object');
-          const bodyText = data.body.split('\n').filter(line => line.trim());
+          const bodyText = this.processBodyText(data.body);
           processedBody = {
             en: bodyText,
             cs: bodyText,
@@ -2934,9 +2934,9 @@ class AdminPanel {
           } else {
             // Need to split strings into arrays
             processedBody = {
-              en: (data.body.en || '').split('\n').filter(line => line.trim()),
-              cs: (data.body.cs || '').split('\n').filter(line => line.trim()),
-              uk: (data.body.uk || '').split('\n').filter(line => line.trim())
+              en: this.processBodyText(data.body.en || ''),
+              cs: this.processBodyText(data.body.cs || ''),
+              uk: this.processBodyText(data.body.uk || '')
             };
           }
         } else {
@@ -3016,9 +3016,9 @@ class AdminPanel {
               originalUpdate.body.uk = update.body.uk;
             } else {
               // If update.body is not in array format, convert it
-              originalUpdate.body.en = (update.body.en || '').split('\n').filter(line => line.trim());
-              originalUpdate.body.cs = (update.body.cs || '').split('\n').filter(line => line.trim());
-              originalUpdate.body.uk = (update.body.uk || '').split('\n').filter(line => line.trim());
+              originalUpdate.body.en = this.processBodyText(update.body.en || '');
+              originalUpdate.body.cs = this.processBodyText(update.body.cs || '');
+              originalUpdate.body.uk = this.processBodyText(update.body.uk || '');
             }
             update.body = originalUpdate.body;
           } else {
@@ -3122,11 +3122,47 @@ class AdminPanel {
     if (!fieldData) return '';
     
     if (typeof fieldData === 'object') {
-      return fieldData[lang] || '';
+      const value = fieldData[lang] || '';
+      
+      // Special handling for body field to restore line breaks
+      if (Array.isArray(value)) {
+        return value.join('\n');
+      }
+      
+      return value;
     }
     
     // If it's a string, return it only for English
     return lang === 'en' ? fieldData : '';
+  }
+
+  // Process body text to preserve paragraph structure
+  processBodyText(text) {
+    if (!text || typeof text !== 'string') return [];
+    
+    // Split by newlines and preserve empty lines for paragraphs
+    const lines = text.split('\n');
+    const processedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // If line is empty and next line is also empty, it's a paragraph break
+      if (line === '' && (i + 1 < lines.length && lines[i + 1].trim() === '')) {
+        processedLines.push(''); // Keep paragraph break
+        i++; // Skip next empty line
+      } else if (line !== '') {
+        // Non-empty line
+        processedLines.push(line);
+      }
+    }
+    
+    // Filter out consecutive empty lines at the end
+    while (processedLines.length > 0 && processedLines[processedLines.length - 1] === '') {
+      processedLines.pop();
+    }
+    
+    return processedLines;
   }
 
   getTranslationDisplay(fieldData, fallback = 'Не указано') {

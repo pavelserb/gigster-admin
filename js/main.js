@@ -161,6 +161,11 @@ function applyNewTranslations(lang) {
   if (window.updatesManager) {
     window.updatesManager.setLanguage(lang);
   }
+
+  // Dispatch language change event for other components
+  document.dispatchEvent(new CustomEvent('languageChanged', {
+    detail: { language: lang }
+  }));
   
   // Update language switcher UI
   const langSwitcher = document.querySelector('.lang-switcher');

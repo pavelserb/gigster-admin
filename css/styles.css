@@ -482,7 +482,7 @@ nav.primary a.active {
       env(safe-area-inset-bottom, 0px)
   ); */
   height: calc(
-    clamp(70px, calc(var(--cta-bar-h, 110px) * 0.5), 140px) +
+    clamp(100px, calc(var(--cta-bar-h, 120px) * 0.5), 140px) +
       env(safe-area-inset-bottom, 0px)
   );
   background: linear-gradient(
@@ -494,12 +494,12 @@ nav.primary a.active {
   pointer-events: none;
   z-index: 0;
 }
-@supports (backdrop-filter: blur(1px)) {
+/* @supports (backdrop-filter: blur(1px)) {
   .floating-cta::before {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }
-}
+} */
 
 /* МОБАЙЛ: ширина 100vw, у самого низа */
 @media (max-width: 900px) {

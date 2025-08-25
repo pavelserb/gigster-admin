@@ -2901,7 +2901,8 @@ class AdminPanel {
       // Use custom date if provided, otherwise use current date
       const ts = data.customDate ? new Date(data.customDate).toISOString() : new Date().toISOString();
       
-              // Handle body processing - support both string and object formats
+              // Handle body processing - keep body as array for site compatibility
+        // CRITICAL: updates.js expects body as array of strings for read more functionality
         console.log('📝 Processing body:', { type: typeof data.body, value: data.body });
         
         let processedBody;
@@ -2911,6 +2912,7 @@ class AdminPanel {
           processedBody = data.body.split('\n').filter(line => line.trim());
         } else if (data.body && typeof data.body === 'object') {
           // If body is an object with translations, use English version for compatibility
+          // This ensures updates.js can properly render read more buttons
           console.log('📝 Body is object with translations, using English version');
           const bodyText = data.body.en || data.body.cs || data.body.uk || '';
           processedBody = bodyText.split('\n').filter(line => line.trim());

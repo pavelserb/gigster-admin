@@ -63,20 +63,31 @@ class FTPClient {
       const localDir = path.dirname(localPath);
       await fs.mkdir(localDir, { recursive: true });
       
-      // Используем абсолютный путь (начинается с /)
-      console.log(`📁 Использую абсолютный путь: ${remotePath}`);
+      // Разделяем путь на директорию и имя файла
+      const pathParts = remotePath.split('/');
+      const filename = pathParts.pop(); // Последняя часть - имя файла
+      const directory = pathParts.join('/'); // Остальное - директория
       
-      // Проверяем, существует ли файл на FTP
+      console.log(`📁 Директория: ${directory || 'root'}, файл: ${filename}`);
+      
+      // Переходим в нужную директорию (как в listFiles)
+      if (directory) {
+        await this.client.cd(directory);
+        console.log(`📁 Перешел в директорию: ${directory}`);
+      }
+      
+      // Проверяем, существует ли файл
       try {
-        const fileInfo = await this.client.stat(remotePath);
-        console.log(`📁 Файл найден на FTP: ${remotePath}, размер: ${fileInfo.size} байт`);
+        const fileInfo = await this.client.stat(filename);
+        console.log(`📁 Файл найден на FTP: ${filename}, размер: ${fileInfo.size} байт`);
       } catch (statError) {
-        console.error(`❌ Файл не найден на FTP: ${remotePath}`);
+        console.error(`❌ Файл не найден на FTP: ${filename}`);
         return false;
       }
       
-      await this.client.downloadTo(localPath, remotePath);
-      console.log(`✅ Файл скачан: ${remotePath} -> ${localPath}`);
+      // Скачиваем файл
+      await this.client.downloadTo(localPath, filename);
+      console.log(`✅ Файл скачан: ${filename} -> ${localPath}`);
       return true;
     } catch (error) {
       console.error(`❌ Ошибка скачивания файла ${remotePath}:`, error.message);

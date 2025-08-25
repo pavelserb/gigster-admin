@@ -211,7 +211,7 @@ nav.primary a.active {
   display: none;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  /* align-items: center; */
   width: 44px;
   height: 44px;
   background: transparent;
@@ -2924,7 +2924,7 @@ footer .container {
   }
   
   .lang-current {
-    padding: 6px 10px;
+    padding: 6px 8px;
   }
   
   .lang-name {

@@ -2538,9 +2538,9 @@ class AdminPanel {
       // Handle body translations
       if (data.body_en || data.body_cs || data.body_uk) {
         processedData.body = {
-          en: data.body_en || '',
-          cs: data.body_cs || '',
-          uk: data.body_uk || ''
+          en: (data.body_en || '').split('\n').filter(line => line.trim()),
+          cs: (data.body_cs || '').split('\n').filter(line => line.trim()),
+          uk: (data.body_uk || '').split('\n').filter(line => line.trim())
         };
         delete processedData.body_en;
         delete processedData.body_cs;
@@ -2908,24 +2908,40 @@ class AdminPanel {
       // Use custom date if provided, otherwise use current date
       const ts = data.customDate ? new Date(data.customDate).toISOString() : new Date().toISOString();
       
-              // Handle body processing - keep body as array for site compatibility
-        // CRITICAL: updates.js expects body as array of strings for read more functionality
+              // Handle body processing - preserve translation structure while ensuring site compatibility
         console.log('📝 Processing body:', { type: typeof data.body, value: data.body });
         
         let processedBody;
         if (typeof data.body === 'string') {
-          // If body is a string, split by newlines
-          console.log('📝 Body is string, splitting by newlines');
-          processedBody = data.body.split('\n').filter(line => line.trim());
+          // If body is a string, convert to translation object
+          console.log('📝 Body is string, converting to translation object');
+          const bodyText = data.body.split('\n').filter(line => line.trim());
+          processedBody = {
+            en: bodyText,
+            cs: bodyText,
+            uk: bodyText
+          };
         } else if (data.body && typeof data.body === 'object') {
-          // If body is an object with translations, use English version for compatibility
-          // This ensures updates.js can properly render read more buttons
-          console.log('📝 Body is object with translations, using English version');
-          const bodyText = data.body.en || data.body.cs || data.body.uk || '';
-          processedBody = bodyText.split('\n').filter(line => line.trim());
+          // If body is an object with translations, preserve structure
+          console.log('📝 Body is object with translations, preserving structure');
+          if (Array.isArray(data.body.en)) {
+            // Already processed as arrays
+            processedBody = {
+              en: data.body.en,
+              cs: data.body.cs || [],
+              uk: data.body.uk || []
+            };
+          } else {
+            // Need to split strings into arrays
+            processedBody = {
+              en: (data.body.en || '').split('\n').filter(line => line.trim()),
+              cs: (data.body.cs || '').split('\n').filter(line => line.trim()),
+              uk: (data.body.uk || '').split('\n').filter(line => line.trim())
+            };
+          }
         } else {
-          console.log('📝 Body is empty or invalid, using empty array');
-          processedBody = [];
+          console.log('📝 Body is empty or invalid, using empty translation object');
+          processedBody = { en: [], cs: [], uk: [] };
         }
         
         console.log('📝 Processed body result:', processedBody);
@@ -2958,7 +2974,7 @@ class AdminPanel {
           ts: ts,
           type: data.type,
           title: processedTitle,
-          body: processedBody,
+          body: processedBody, // Translation object for admin panel and site
           important: data.important === 'on' || data.important === true,
           pinned: data.pinned === 'on' || data.pinned === true
         };
@@ -2972,7 +2988,11 @@ class AdminPanel {
         console.log('🎬 Media path:', data.media);
       }
 
-      console.log('📝 Final update object:', update);
+              console.log('📝 Final update object:', update);
+        console.log('📝 Body structure check:', {
+          body: typeof update.body,
+          bodyKeys: update.body ? Object.keys(update.body) : 'N/A'
+        });
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
@@ -2985,7 +3005,26 @@ class AdminPanel {
         const originalUpdate = this.updates[this.editingUpdateIndex];
         if (originalUpdate && originalUpdate.body && typeof originalUpdate.body === 'object' && !Array.isArray(originalUpdate.body)) {
           console.log('🔄 Preserving original body structure with translations');
-          update.body = originalUpdate.body;
+          
+          // Update the content while preserving the translation structure
+          if (update.body && typeof update.body === 'object' && update.body.en) {
+            console.log('📝 Updating body content while preserving structure');
+            // Update each language with new content
+            if (Array.isArray(update.body.en)) {
+              originalUpdate.body.en = update.body.en;
+              originalUpdate.body.cs = update.body.cs;
+              originalUpdate.body.uk = update.body.uk;
+            } else {
+              // If update.body is not in array format, convert it
+              originalUpdate.body.en = (update.body.en || '').split('\n').filter(line => line.trim());
+              originalUpdate.body.cs = (update.body.cs || '').split('\n').filter(line => line.trim());
+              originalUpdate.body.uk = (update.body.uk || '').split('\n').filter(line => line.trim());
+            }
+            update.body = originalUpdate.body;
+          } else {
+            // If new body is not in translation format, preserve original
+            update.body = originalUpdate.body;
+          }
         }
         
         this.updates[this.editingUpdateIndex] = update;

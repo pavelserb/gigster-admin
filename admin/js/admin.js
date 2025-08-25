@@ -2903,16 +2903,27 @@ class AdminPanel {
       
       // Handle body processing - it can be either a string or an object with translations
       let processedBody;
+      let translations = null;
+      
       if (typeof data.body === 'string') {
         // If body is a string, split by newlines
         processedBody = data.body.split('\n').filter(line => line.trim());
       } else if (data.body && typeof data.body === 'object') {
-        // If body is an object with translations, preserve all translations
-        processedBody = {
-          en: data.body.en ? data.body.en.split('\n').filter(line => line.trim()) : [],
-          cs: data.body.cs ? data.body.cs.split('\n').filter(line => line.trim()) : [],
-          uk: data.body.uk ? data.body.uk.split('\n').filter(line => line.trim()) : []
-        };
+        // If body is an object with translations, use English version for compatibility
+        // but preserve translations in a separate field
+        const bodyText = data.body.en || data.body.cs || data.body.uk || '';
+        processedBody = bodyText.split('\n').filter(line => line.trim());
+        
+        // Store translations separately for admin panel
+        if (data.body.en || data.body.cs || data.body.uk) {
+          translations = {
+            body: {
+              en: data.body.en ? data.body.en.split('\n').filter(line => line.trim()) : [],
+              cs: data.body.cs ? data.body.cs.split('\n').filter(line => line.trim()) : [],
+              uk: data.body.uk ? data.body.uk.split('\n').filter(line => line.trim()) : []
+            }
+          };
+        }
       } else {
         processedBody = [];
       }
@@ -2926,6 +2937,11 @@ class AdminPanel {
         important: data.important === 'on' || data.important === true,
         pinned: data.pinned === 'on' || data.pinned === true
       };
+      
+      // Add translations if available
+      if (translations) {
+        update.translations = translations;
+      }
 
       if (data.thumb) {
         update.thumb = data.thumb;
@@ -2940,9 +2956,19 @@ class AdminPanel {
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
-        // Update existing
+        // Update existing - find by ID to avoid index issues
         console.log(`✏️ Updating existing update at index ${this.editingUpdateIndex}`);
-        this.updates[this.editingUpdateIndex] = update;
+        console.log(`✏️ Looking for update with ID: ${id}`);
+        
+        // Find the update by ID instead of using index
+        const existingIndex = this.updates.findIndex(u => u.id === id);
+        if (existingIndex !== -1) {
+          console.log(`✏️ Found existing update at index ${existingIndex}`);
+          this.updates[existingIndex] = update;
+        } else {
+          console.log(`⚠️ Update with ID ${id} not found, adding as new`);
+          this.updates.unshift(update);
+        }
         this.editingUpdateIndex = undefined; // Reset editing index
       } else {
         // Add new

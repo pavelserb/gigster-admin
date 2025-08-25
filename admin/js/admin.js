@@ -314,6 +314,13 @@ class AdminPanel {
         console.log('📊 Updates data is array:', Array.isArray(updatesData));
         
         // Handle new structure with languages field and ensure it's always an array
+        console.log('📊 Updates data structure:', {
+          hasUpdates: !!updatesData.updates,
+          updatesIsArray: Array.isArray(updatesData.updates),
+          dataIsArray: Array.isArray(updatesData),
+          dataKeys: Object.keys(updatesData)
+        });
+        
         if (updatesData.updates && Array.isArray(updatesData.updates)) {
           console.log('✅ Using updatesData.updates array');
           this.updates = updatesData.updates;
@@ -2971,6 +2978,16 @@ class AdminPanel {
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
         // Update existing
         console.log(`✏️ Updating existing update at index ${this.editingUpdateIndex}`);
+        console.log('📝 Original update body structure:', this.updates[this.editingUpdateIndex]?.body);
+        console.log('📝 New update body structure:', update.body);
+        
+        // Preserve original body structure if it was an object with translations
+        const originalUpdate = this.updates[this.editingUpdateIndex];
+        if (originalUpdate && originalUpdate.body && typeof originalUpdate.body === 'object' && !Array.isArray(originalUpdate.body)) {
+          console.log('🔄 Preserving original body structure with translations');
+          update.body = originalUpdate.body;
+        }
+        
         this.updates[this.editingUpdateIndex] = update;
         this.editingUpdateIndex = undefined; // Reset editing index
       } else {

@@ -23,25 +23,34 @@ class UpdatesManager {
   // Initialize translations for current language
   getTranslations() {
     const lang = this.currentLang || 'en';
-    return {
+    console.log('🌐 Updates.js: getTranslations() called with language:', lang);
+    const result = {
       en: { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT' },
       uk: { moreBtn: 'Показати щё', readMore: 'Читати далі', readLess: 'Приховати', NEW: 'NEW', IMPORTANT: 'IMPORTANT' },
       cs: { moreBtn: 'Načíst další', readMore: 'Více', readLess: 'Méně', NEW: 'NEW', IMPORTANT: 'IMPORTANT' }
     }[lang] || { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT' };
+    console.log('🌐 Updates.js: getTranslations() result:', result);
+    return result;
   }
 
   // Set current language and update translations
   setLanguage(lang) {
+    console.log('🌐 Updates.js: Setting language to:', lang);
     this.currentLang = lang;
     this.L = this.getTranslations();
     this.updateMoreButtonText();
+    console.log('🌐 Updates.js: Current language set to:', this.currentLang);
   }
 
   // Detect current language from DOM or URL
   detectCurrentLanguage() {
+    console.log('🌐 Updates.js: detectCurrentLanguage() called');
+    
     // Check if language is set in DOM
     const htmlLang = document.documentElement.lang;
+    console.log('🌐 Updates.js: HTML lang attribute:', htmlLang);
     if (htmlLang && ['en', 'cs', 'uk'].includes(htmlLang)) {
+      console.log('🌐 Updates.js: Using HTML lang:', htmlLang);
       this.setLanguage(htmlLang);
       return;
     }
@@ -49,33 +58,54 @@ class UpdatesManager {
     // Check URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
+    console.log('🌐 Updates.js: URL lang parameter:', urlLang);
     if (urlLang && ['en', 'cs', 'uk'].includes(urlLang)) {
+      console.log('🌐 Updates.js: Using URL lang:', urlLang);
       this.setLanguage(urlLang);
       return;
     }
 
     // Default to English
+    console.log('🌐 Updates.js: Defaulting to English');
     this.setLanguage('en');
   }
 
   // Initialize the updates manager
   async init() {
+    console.log('🌐 Updates.js: init() called');
     await this.loadUpdatesData();
     this.setupDOM();
     this.setupEventListeners();
     this.processDeepLink();
     this.render();
     this.setupSocialMeta();
+    console.log('🌐 Updates.js: init() completed with language:', this.currentLang);
   }
 
   // Load updates data from JSON
   async loadUpdatesData() {
     try {
+      console.log('🌐 Updates.js: Loading updates data...');
       const response = await fetch('updates.json', { cache: 'no-store' });
       const updatesRaw = await response.json();
       this.items = [...updatesRaw].sort((a, b) => 
         (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.ts) - new Date(a.ts)
       );
+      console.log('🌐 Updates.js: Loaded', this.items.length, 'updates');
+      console.log('🌐 Updates.js: Sample update structure:', this.items[0]);
+      
+      // Log the structure of the first few updates for debugging
+      this.items.slice(0, 3).forEach((update, index) => {
+        console.log(`🌐 Updates.js: Update ${index} structure:`, {
+          id: update.id,
+          title: update.title,
+          body: update.body,
+          titleType: typeof update.title,
+          bodyType: typeof update.body,
+          titleKeys: update.title ? Object.keys(update.title) : 'N/A',
+          bodyKeys: update.body ? Object.keys(update.body) : 'N/A'
+        });
+      });
     } catch (error) {
       console.error('Error loading updates:', error);
       this.items = [];
@@ -84,11 +114,15 @@ class UpdatesManager {
 
   // Setup DOM references
   setupDOM() {
+    console.log('🌐 Updates.js: setupDOM() called');
     this.list = document.getElementById('updatesList');
     this.toolbar = document.querySelector('.upd-toolbar');
     this.moreBtn = document.getElementById('updatesMoreBtn');
     
-    if (!this.list) return;
+    if (!this.list) {
+      console.warn('🌐 Updates.js: No updates list found');
+      return;
+    }
     
     // Ensure "Load more" button exists
     if (!this.moreBtn) {
@@ -104,18 +138,26 @@ class UpdatesManager {
 
   // Update more button text
   updateMoreButtonText() {
+    console.log('🌐 Updates.js: updateMoreButtonText() called');
     if (this.moreBtn) {
       this.moreBtn.textContent = this.L.moreBtn;
       this.moreBtn.setAttribute('aria-label', this.L.moreBtn);
+      console.log('🌐 Updates.js: More button text updated to:', this.L.moreBtn);
+    } else {
+      console.warn('🌐 Updates.js: No more button found');
     }
   }
 
   // Setup event listeners
   setupEventListeners() {
+    console.log('🌐 Updates.js: setupEventListeners() called');
+    
     // Filter buttons
     this.toolbar?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-filter]');
       if (!btn) return;
+      
+      console.log('🌐 Updates.js: Filter button clicked:', btn.dataset.filter);
       
       this.toolbar.querySelectorAll('.chip.sm').forEach(b => 
         b.classList.toggle('is-active', b === btn)
@@ -130,6 +172,7 @@ class UpdatesManager {
 
     // Load more button
     this.moreBtn?.addEventListener('click', () => {
+      console.log('🌐 Updates.js: Load more button clicked');
       this.page++;
       this.render();
       this.showThumbnails();
@@ -139,35 +182,45 @@ class UpdatesManager {
     document.addEventListener('languageChanged', (e) => {
       const newLang = e.detail?.language || 'en';
       console.log('🌐 Language changed in updates.js:', newLang);
+      console.log('🌐 Event details:', e.detail);
       this.setLanguage(newLang);
+      console.log('🌐 About to re-render updates with language:', this.currentLang);
       this.render(); // Re-render with new language
     });
 
     // Initial language detection
+    console.log('🌐 Updates.js: Calling detectCurrentLanguage()');
     this.detectCurrentLanguage();
+    console.log('🌐 Updates.js: Event listeners setup completed');
   }
 
   // Process deep link from URL
   processDeepLink() {
-    const qs = new URL(location.href).searchParams;
-    const deepId = qs.get('u');
+    console.log('🌐 Updates.js: processDeepLink() called');
+    const urlParams = new URLSearchParams(window.location.search);
+    const updateId = urlParams.get('u');
     
-    if (deepId) {
-      const idx = this.items.findIndex(i => (i.id || '') === deepId);
-      if (idx >= 0) {
-        this.page = Math.floor(idx / this.pageSize);
-        this.pendingDeepOpen = deepId;
-        // Force filter to All to not hide the needed card
-        this.toolbar?.querySelectorAll('.chip.sm').forEach(b => 
-          b.classList.toggle('is-active', b.dataset.filter === 'all')
-        );
-        this.currentFilter = 'all';
+    if (updateId) {
+      console.log('🌐 Updates.js: Deep link found for update:', updateId);
+      this.pendingDeepOpen = updateId;
+      // Find the update in our data
+      const targetUpdate = this.items.find(item => item.id === updateId);
+      if (targetUpdate) {
+        console.log('🌐 Updates.js: Target update found:', targetUpdate);
+        // Set the page to show this update expanded
+        this.page = Math.ceil(this.items.indexOf(targetUpdate) / this.pageSize) - 1;
+        this.page = Math.max(0, this.page);
+      } else {
+        console.warn('🌐 Updates.js: Target update not found:', updateId);
       }
+    } else {
+      console.log('🌐 Updates.js: No deep link found');
     }
   }
 
   // Render updates
   render() {
+    console.log('🌐 Updates.js: render() called with language:', this.currentLang);
     if (!this.list) return;
     
     this.list.innerHTML = '';
@@ -175,6 +228,7 @@ class UpdatesManager {
       this.currentFilter === 'all' ? true : i.type === this.currentFilter
     );
     const slice = filtered.slice(0, (this.page + 1) * this.pageSize);
+    console.log('🌐 Updates.js: Rendering', slice.length, 'updates');
 
     slice.forEach((u) => {
       const shouldExpand = this.pendingDeepOpen && u.id === this.pendingDeepOpen;
@@ -196,7 +250,11 @@ class UpdatesManager {
 
   // Handle deep link after rendering
   handleDeepLink() {
-    if (!this.pendingDeepOpen || !this.list) return;
+    console.log('🌐 Updates.js: handleDeepLink() called');
+    if (!this.pendingDeepOpen || !this.list) {
+      console.log('🌐 Updates.js: No pending deep link or list not ready');
+      return;
+    }
     
     const target = Array.from(this.list.querySelectorAll('.upd'))
       .find(x => x.dataset.id === this.pendingDeepOpen);
@@ -223,6 +281,7 @@ class UpdatesManager {
 
   // Hide thumb preview for open card
   hideThumbPreview(card) {
+    console.log('🌐 Updates.js: hideThumbPreview() called');
     const thumb = card.querySelector('.preview .thumb');
     if (thumb && !card.classList.contains('thumb-is-media')) {
       thumb.style.display = 'none';
@@ -231,6 +290,7 @@ class UpdatesManager {
 
   // Scroll to specific card
   scrollToCard(card) {
+    console.log('🌐 Updates.js: scrollToCard() called');
     const hdr = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
     const y = card.getBoundingClientRect().top + window.scrollY - (hdr + 12);
     window.scrollTo({ top: y, behavior: 'smooth' });
@@ -238,6 +298,7 @@ class UpdatesManager {
 
   // Clear URL parameter
   clearUrlParameter() {
+    console.log('🌐 Updates.js: clearUrlParameter() called');
     const u = new URL(location.href);
     u.searchParams.delete('u');
     history.replaceState(null, '', u);
@@ -246,7 +307,11 @@ class UpdatesManager {
   // Show thumbnails for cards with has-thumb class
   // But don't show thumb for cards that are already expanded
   showThumbnails() {
-    if (!this.list) return;
+    console.log('🌐 Updates.js: showThumbnails() called');
+    if (!this.list) {
+      console.warn('🌐 Updates.js: No list found for showThumbnails');
+      return;
+    }
     
     this.list.querySelectorAll('.upd.has-thumb .preview .thumb').forEach(thumb => {
       const card = thumb.closest('.upd');
@@ -267,8 +332,22 @@ class UpdatesManager {
   renderUpdateCard(u, expandFirst = false) {
     const isNew = this.daysAgo(u.ts) <= 7;
     
+    console.log('🌐 Updates.js: Rendering card for update:', u.id, 'with language:', this.currentLang);
+    console.log('🌐 Updates.js: Update data:', {
+      id: u.id,
+      title: u.title,
+      body: u.body,
+      titleType: typeof u.title,
+      bodyType: typeof u.body,
+      currentLang: this.currentLang
+    });
+    
     // Parse body text
-    const bodyText = this.getTranslation(u.body, '') || '';
+    const bodyText = (() => {
+      const translation = this.getTranslation(u.body, '') || '';
+      console.log('🌐 Updates.js: Body translation for update', u.id, ':', translation);
+      return translation;
+    })();
     let paras = [];
     
     if (Array.isArray(bodyText)) {
@@ -294,7 +373,11 @@ class UpdatesManager {
       const external = /^https?:\/\//i.test(url);
       const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
       const cls = (c.primary ? 'btn primary' : 'btn') + (extra ? ' extra' : '');
-      const label = this.getTranslation(c.label, 'Learn more') || 'Learn more';
+      const label = (() => {
+        const translation = this.getTranslation(c.label, 'Learn more') || 'Learn more';
+        console.log('🌐 Updates.js: CTA label translation:', translation);
+        return translation;
+      })();
       return `<a class="${cls}" href="${url}"${attrs}>${this.escapeHTML(label)}</a>`;
     };
 
@@ -341,7 +424,11 @@ class UpdatesManager {
               ${u.important ? `<span class="badge imp">${this.getUpdateBadgeTranslation('important')}</span>` : ''}
             </div>
           </div>
-          <div class="hrow2"><span class="title">${this.escapeHTML(this.getTranslation(u.title, '') || '')}</span></div>
+          <div class="hrow2"><span class="title">${(() => {
+          const titleTranslation = this.getTranslation(u.title, '') || '';
+          console.log('🌐 Updates.js: Title translation for update', u.id, ':', titleTranslation);
+          return this.escapeHTML(titleTranslation);
+        })()}</span></div>
         </button>
         <span class="chev" aria-hidden="true">▾</span>
       </div>
@@ -383,8 +470,16 @@ class UpdatesManager {
       try {
         if (navigator.share) {
           await navigator.share({ 
-            title: this.getTranslation(u.title, '') || document.title, 
-            text: this.getTranslation(u.title, '') || '', 
+            title: (() => {
+              const translation = this.getTranslation(u.title, '') || document.title;
+              console.log('🌐 Updates.js: Title translation for social meta:', translation);
+              return translation;
+            })(),
+            text: (() => {
+              const translation = this.getTranslation(u.title, '') || '';
+              console.log('🌐 Updates.js: Text translation for social meta:', translation);
+              return translation;
+            })(),
             url: uurl.toString() 
           });
         } else {
@@ -497,6 +592,11 @@ class UpdatesManager {
 
   // Social meta management
   setupSocialMeta() {
+    console.log('🌐 Updates.js: setupSocialMeta() called');
+    if (!this.initialSocialMeta) {
+      console.warn('🌐 Updates.js: No initial social meta data');
+      return;
+    }
     const DEFAULT_SHARE_IMAGE = 'assets/updates/social-default.jpg';
     const metaSel = (attr, key) => document.querySelector(`meta[${attr}="${key}"]`);
     const ensureMeta = (attr, key) => {
@@ -530,7 +630,11 @@ class UpdatesManager {
 
   // Update social meta for specific update
   updateSocialMeta(u) {
-    const bodyText = this.getTranslation(u.body, '') || '';
+    const bodyText = (() => {
+      const translation = this.getTranslation(u.body, '') || '';
+      console.log('🌐 Updates.js: Body translation for updateSocialMeta:', translation);
+      return translation;
+    })();
     let firstPara = this.initialSocialMeta.desc;
     
     if (Array.isArray(bodyText) && bodyText.length > 0) {
@@ -540,8 +644,16 @@ class UpdatesManager {
     }
     
     const image = u.media || (Array.isArray(u.gallery) && u.gallery[0]) || u.thumb || this.initialSocialMeta.ogImage;
-    const title = this.getTranslation(u.title, '') ? 
-      `${this.getTranslation(u.title, '')} • ${this.initialSocialMeta.title}` : this.initialSocialMeta.title;
+    const title = (() => {
+      const translation = this.getTranslation(u.title, '');
+      console.log('🌐 Updates.js: Title translation for updateSocialMeta:', translation);
+      return translation;
+    })() ?
+      `${(() => {
+        const translation = this.getTranslation(u.title, '');
+        console.log('🌐 Updates.js: Title translation for updateSocialMeta (concatenated):', translation);
+        return translation;
+      })()} • ${this.initialSocialMeta.title}` : this.initialSocialMeta.title;
     
     document.title = title;
     
@@ -568,18 +680,41 @@ class UpdatesManager {
     if (this.initialSocialMeta.desc) {
       ensureMeta('name', 'description').setAttribute('content', firstPara);
     }
-    setOg('og:title', this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title);
-    setOg('og:description', firstPara);
+    setOg('og:title', (() => {
+      const translation = this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title;
+      console.log('🌐 Updates.js: Title translation for og:title:', translation);
+      return translation;
+    })());
+    setOg('og:description', (() => {
+      const translation = this.getTranslation(u.body, '') || this.initialSocialMeta.ogDesc || '';
+      console.log('🌐 Updates.js: Body translation for og:description:', translation);
+      return translation;
+    })());
     setOg('og:image', image);
     setOg('og:url', new URL(location.href).toString());
+    
+    // Twitter Card
     setTw('twitter:card', 'summary_large_image');
-    setTw('twitter:title', this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title);
-    setTw('twitter:description', firstPara);
+    setTw('twitter:title', (() => {
+      const translation = this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title;
+      console.log('🌐 Updates.js: Title translation for twitter:title:', translation);
+      return translation;
+    })());
+    setTw('twitter:description', (() => {
+      const translation = this.getTranslation(u.body, '') || '';
+      console.log('🌐 Updates.js: Body translation for twitter:description:', translation);
+      return translation;
+    })());
     setTw('twitter:image', image);
   }
 
   // Reset social meta to initial state
   resetSocialMeta() {
+    console.log('🌐 Updates.js: resetSocialMeta() called');
+    if (!this.initialSocialMeta) {
+      console.warn('🌐 Updates.js: No initial social meta data to reset to');
+      return;
+    }
     document.title = this.initialSocialMeta.title;
     
     const metaSel = (attr, key) => document.querySelector(`meta[${attr}="${key}"]`);
@@ -617,6 +752,7 @@ class UpdatesManager {
 
   // Set URL parameter
   setUrlParameter(value) {
+    console.log('🌐 Updates.js: setUrlParameter() called with value:', value);
     const u = new URL(location.href);
     if (value) u.searchParams.set('u', value);
     else u.searchParams.delete('u');
@@ -625,39 +761,55 @@ class UpdatesManager {
 
   // Utility functions
   daysAgo(ts) {
+    console.log('🌐 Updates.js: daysAgo() called with timestamp:', ts);
     const d = (Date.now() - new Date(ts).getTime()) / 86400000;
+    console.log('🌐 Updates.js: daysAgo result:', d);
     return d;
   }
 
   fmtDate(ts) {
+    console.log('🌐 Updates.js: fmtDate() called with timestamp:', ts);
     try {
-      return new Date(ts).toLocaleDateString(document.documentElement.lang || 'en', { 
+      const result = new Date(ts).toLocaleDateString(document.documentElement.lang || 'en', { 
         day: '2-digit', 
         month: 'short' 
       });
-    } catch {
+      console.log('🌐 Updates.js: fmtDate result:', result);
+      return result;
+    } catch (error) {
+      console.error('🌐 Updates.js: fmtDate error:', error);
       return ts;
     }
   }
 
   escapeHTML(s) {
-    return String(s).replace(/[&<>"']/g, c =>
+    console.log('🌐 Updates.js: escapeHTML() called with string:', s);
+    const result = String(s).replace(/[&<>"']/g, c =>
       c === '&' ? '&amp;' :
       c === '<' ? '&lt;'  :
       c === '>' ? '&gt;'  :
       c === '"' ? '&quot;': '&#39;'
     );
+    console.log('🌐 Updates.js: escapeHTML result:', result);
+    return result;
   }
 
   withUTM(url, medium = 'updates', campaign = 'artbat2025') {
+    console.log('🌐 Updates.js: withUTM() called with url:', url, 'medium:', medium, 'campaign:', campaign);
     try {
       const u = new URL(url, location.href);
-      if (!/^https?:/i.test(u.protocol)) return url;
+      if (!/^https?:/i.test(u.protocol)) {
+        console.log('🌐 Updates.js: withUTM returning original url (not http/https):', url);
+        return url;
+      }
       u.searchParams.set('utm_source', 'site');
       u.searchParams.set('utm_medium', medium);
       u.searchParams.set('utm_campaign', campaign);
-      return u.toString();
-    } catch {
+      const result = u.toString();
+      console.log('🌐 Updates.js: withUTM result:', result);
+      return result;
+    } catch (error) {
+      console.error('🌐 Updates.js: withUTM error:', error);
       return url;
     }
   }
@@ -666,19 +818,29 @@ class UpdatesManager {
     if (!field) return fallback;
     
     if (typeof field === 'object') {
-      return field[this.currentLang] || field.en || fallback;
+      const result = field[this.currentLang] || field.en || fallback;
+      console.log('🌐 Updates.js: getTranslation called:', {
+        field: field,
+        currentLang: this.currentLang,
+        result: result
+      });
+      return result;
     }
     
     return field;
   }
 
   getUpdateTypeTranslation(type) {
+    console.log('🌐 Updates.js: getUpdateTypeTranslation() called with type:', type);
     // This would need to be implemented based on your CONFIG structure
+    console.log('🌐 Updates.js: getUpdateTypeTranslation returning:', type);
     return type;
   }
 
   getUpdateBadgeTranslation(badgeType) {
+    console.log('🌐 Updates.js: getUpdateBadgeTranslation() called with badgeType:', badgeType);
     // This would need to be implemented based on your CONFIG structure
+    console.log('🌐 Updates.js: getUpdateBadgeTranslation returning:', badgeType);
     return badgeType;
   }
 }

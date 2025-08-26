@@ -1942,7 +1942,7 @@ p {
 
 
 .artist .links.row {
-  margin-top: auto;
+  margin-top: 1rem;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
@@ -2033,6 +2033,7 @@ p {
 }
 
 /* Tickets */
+
 .ticket-tier {
   display: flex;
   align-items: center;
@@ -2043,6 +2044,12 @@ p {
 }
 .ticket-tier + .ticket-tier {
   margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+  #tickets .card {
+    padding: 14px 12px;
+  }
 }
 
 /* Location section */
@@ -2663,7 +2670,8 @@ footer .container {
 
 @media (max-width: 480px) {
   .contact-form .card {
-    padding: 20px;
+    /* padding: 20px; */
+    padding: 14px 12px;
   }
   
   .form-field input,
@@ -2689,7 +2697,7 @@ footer .container {
 .bio-content {
   color: var(--muted);
   line-height: 1.6;
-  margin-bottom: 16px;
+  /* margin-bottom: 16px; */
 }
 
 .bio-content p {

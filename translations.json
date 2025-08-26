@@ -65,6 +65,10 @@
       "connect": {
         "title": "Connect",
         "form": "Contact us",
+        "name": "Name",
+        "email": "Email",
+        "subject": "Subject",
+        "message": "Your message",
         "privacy": "I agree to the privacy policy.",
         "send": "Send",
         "website": "Organizer website"
@@ -115,6 +119,10 @@
       "connect": {
         "title": "Kontakt",
         "form": "Kontaktujte nás",
+        "name": "Jméno",
+        "email": "Email",
+        "subject": "Předmět",
+        "message": "Vaše zpráva",
         "privacy": "Souhlasím se zásadami ochrany osobních údajů.",
         "send": "Odeslat",
         "website": "Webové stránky pořadatele"
@@ -165,6 +173,10 @@
       "connect": {
         "title": "Контакти",
         "form": "Зв'яжіться з нами",
+        "name": "Ім'я",
+        "email": "Email",
+        "subject": "Тема",
+        "message": "Ваше повідомлення",
         "privacy": "Я погоджуюся з політикою конфіденційності.",
         "send": "Надіслати",
         "website": "Веб-сайт організатора"

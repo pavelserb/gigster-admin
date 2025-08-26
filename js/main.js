@@ -474,8 +474,14 @@ function mountBasics() {
   // Setup smart map touch handling
   setupMapTouchHandling();
   
+  // Setup contact form
+  setupContactForm();
+  
   // Update static translations
   updateStaticTranslations();
+  
+  // Update form placeholders
+  updateFormPlaceholders();
 }
 
 // Adjust --cta-bar-h to actual bar height
@@ -1659,6 +1665,105 @@ function getSocialIcon(linkType) {
   }
   
   return null;
+}
+
+// Update form placeholders with translations
+function updateFormPlaceholders() {
+  const elements = document.querySelectorAll('[data-i18n-placeholder]');
+  elements.forEach(element => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    const translation = getTranslationFromFile(key);
+    if (translation) {
+      element.placeholder = translation;
+      element.setAttribute('aria-label', translation);
+    }
+  });
+}
+
+// Setup contact form submission
+function setupContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      subject: formData.get('subject'),
+      message: formData.get('message')
+    };
+    
+    // Basic validation
+    if (!data.name || !data.email || !data.subject || !data.message) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    try {
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+      
+      // Send email using a simple service (you can replace with your preferred method)
+      const response = await sendContactEmail(data);
+      
+      if (response.success) {
+        alert('Thank you! Your message has been sent successfully.');
+        form.reset();
+      } else {
+        alert('Sorry, there was an error sending your message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      alert('Sorry, there was an error sending your message. Please try again.');
+    } finally {
+      // Reset button state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+// Send contact email (placeholder function - replace with your email service)
+async function sendContactEmail(data) {
+  // This is a placeholder implementation
+  // You can replace this with your preferred email service:
+  // - EmailJS
+  // - Formspree
+  // - Netlify Forms
+  // - Custom backend endpoint
+  
+  // For now, we'll simulate a successful response
+  // In production, replace this with actual email sending logic
+  
+  console.log('Contact form data:', data);
+  
+  // Example using EmailJS (you would need to add EmailJS script and configure it)
+  // if (window.emailjs) {
+  //   return await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+  //     to_email: 'connect@gigster.pro',
+  //     from_name: data.name,
+  //     from_email: data.email,
+  //     subject: data.subject,
+  //     message: data.message
+  //   });
+  // }
+  
+  // For now, return success (replace with actual implementation)
+  return { success: true };
 }
 
 // Open full map in new tab

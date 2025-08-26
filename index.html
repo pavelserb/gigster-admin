@@ -304,17 +304,21 @@
               <form id="contactForm">
                 <div class="form-row">
                   <div class="form-field">
-                    <label class="sr-only" for="name">Name</label>
-                    <input id="name" required name="name" placeholder="Name" aria-label="Name"/>
+                    <label class="sr-only" for="name" data-i18n="connect.name">Name</label>
+                    <input id="name" required name="name" placeholder="" aria-label="" data-i18n-placeholder="connect.name"/>
                   </div>
                   <div class="form-field">
-                    <label class="sr-only" for="email">Email</label>
-                    <input id="email" required type="email" name="email" placeholder="Email" aria-label="Email"/>
+                    <label class="sr-only" for="email" data-i18n="connect.email">Email</label>
+                    <input id="email" required type="email" name="email" placeholder="" aria-label="" data-i18n-placeholder="connect.email"/>
                   </div>
                 </div>
                 <div class="form-field">
-                  <label class="sr-only" for="message">Message</label>
-                  <textarea id="message" required name="message" rows="5" placeholder="Your message" aria-label="Message"></textarea>
+                  <label class="sr-only" for="subject" data-i18n="connect.subject">Subject</label>
+                  <input id="subject" required name="subject" placeholder="" aria-label="" data-i18n-placeholder="connect.subject"/>
+                </div>
+                <div class="form-field">
+                  <label class="sr-only" for="message" data-i18n="connect.message">Message</label>
+                  <textarea id="message" required name="message" rows="5" placeholder="" aria-label="" data-i18n-placeholder="connect.message"></textarea>
                 </div>
                 <div class="form-footer">
                   <label class="privacy-label">
@@ -371,7 +375,8 @@
   <script src="js/i18n.js" defer></script>
   <script src="js/analytics.js" defer></script>
   <script src="js/updates.js" defer></script>
-      <script src="js/main.js?v=35" defer></script>
+      <script src="js/main.js?v=36" defer></script>
 </body>
 </html>
+
 

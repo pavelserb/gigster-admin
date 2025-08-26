@@ -1,4 +1,4 @@
-// Admin Panel JavaScript
+// Admin Panel JavaScript - Optimized Version
 class AdminPanel {
   constructor() {
     this.config = {};
@@ -7,9 +7,9 @@ class AdminPanel {
     this.currentLanguage = 'en';
     this.isAuthenticated = false;
     this.editingItem = null;
-    this.editingUpdateIndex = undefined; // Track which update is being edited
+    this.editingUpdateIndex = undefined;
     this.currentMediaDirectory = '';
-    this.expandedFolders = new Set(); // Track expanded folders in tree view
+    this.expandedFolders = new Set();
     
     // Media filter state
     this.currentMediaFilter = 'all';
@@ -18,14 +18,16 @@ class AdminPanel {
     // Translation save timeout
     this.saveTranslationsTimeout = null;
     
-    // Initialization flag
+    // Performance optimizations
     this.isInitialized = false;
+    this.debounceTimers = new Map();
+    this.intersectionObserver = null;
     
     // Cache frequently used DOM elements
     this._cacheDOMElements();
     
-    // Use setTimeout to avoid calling async function in constructor
-    setTimeout(() => this.init(), 0);
+    // Initialize with requestAnimationFrame for better performance
+    requestAnimationFrame(() => this.init());
   }
 
   _cacheDOMElements() {
@@ -35,11 +37,21 @@ class AdminPanel {
       adminInterface: document.getElementById('adminInterface'),
       modalOverlay: document.getElementById('modalOverlay'),
       modalBody: document.getElementById('modalBody'),
-      modalClose: document.getElementById('modalClose')
+      modalClose: document.getElementById('modalClose'),
+      navTabs: document.querySelectorAll('.nav-tab'),
+      tabContents: document.querySelectorAll('.tab-content')
     };
   }
 
-  // Compact Translation Interface Management
+  // Debounce function for performance optimization
+  debounce(func, wait) {
+    return (...args) => {
+      clearTimeout(this.debounceTimers.get(func));
+      this.debounceTimers.set(func, setTimeout(() => func.apply(this, args), wait));
+    };
+  }
+
+  // Compact Translation Interface Management - Optimized
   toggleTranslationField(fieldName) {
     const fieldElement = document.querySelector(`[data-field="${fieldName}"]`);
     if (!fieldElement) return;
@@ -50,7 +62,7 @@ class AdminPanel {
     // Close all other translation fields
     this._closeAllTranslationFields(fieldName);
     
-    // Toggle current field
+    // Toggle current field with smooth animation
     const isExpanded = content.classList.contains('expanded');
     
     if (isExpanded) {
@@ -58,6 +70,9 @@ class AdminPanel {
     } else {
       this._openTranslationField(fieldElement);
     }
+
+    // Update counter after toggle
+    this.updateTranslationCounter(fieldName);
   }
 
   _openTranslationField(fieldElement) {
@@ -240,60 +255,30 @@ class AdminPanel {
       this.setupInterface();
       this.setupLanguageManagement();
       this.initTranslationCounters();
+      
+      // Initialize performance optimizations
+      if (window.PerformanceOptimizer) {
+        this.performanceOptimizer = new PerformanceOptimizer();
+      }
+      
       this.isInitialized = true;
     }
   }
 
   bindEvents() {
-    // Login
+    // Use event delegation for better performance
+    document.addEventListener('click', this.handleGlobalClick.bind(this));
+    document.addEventListener('change', this.handleGlobalChange.bind(this));
+    document.addEventListener('submit', this.handleGlobalSubmit.bind(this));
+
+    // Login specific events
     document.getElementById('loginForm')?.addEventListener('submit', (e) => this.handleLogin(e));
     document.getElementById('logoutBtn')?.addEventListener('click', () => this.logout());
 
-    // Navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => {
+    // Navigation - use cached elements
+    this._elements.navTabs.forEach(tab => {
       tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
     });
-
-    // Config buttons
-    document.getElementById('addSellerBtn')?.addEventListener('click', () => this.addSeller());
-    document.getElementById('addTierBtn')?.addEventListener('click', () => this.addTier());
-    document.getElementById('addArtistBtn')?.addEventListener('click', () => this.addArtist());
-    document.getElementById('addFaqBtn')?.addEventListener('click', () => this.addFaq());
-    document.getElementById('addContactBtn')?.addEventListener('click', () => this.addContact());
-    document.getElementById('addVenuePhotoBtn')?.addEventListener('click', () => this.addVenuePhoto());
-
-    // Config form fields - auto-save on change
-    const configFields = [
-      'eventName', 'eventDate', 'eventTime', 'eventTimeEnd', 'eventCity', 'eventCountry', 'eventFlag',
-      'heroBackground', 'showCountdown', 'eventAbout',
-      'venueName', 'venueAddress', 'venueWebsite', 'venueRoute',
-      'ticketsURL'
-    ];
-    
-    configFields.forEach(fieldId => {
-      const field = document.getElementById(fieldId);
-      if (field) {
-        field.addEventListener('change', () => {
-          this.updateConfigFromForm();
-        });
-      }
-    });
-
-    // Language selector
-    document.getElementById('languageSelect')?.addEventListener('change', (e) => {
-      this.currentLanguage = e.target.value;
-      this.renderTranslations();
-    });
-
-    // Updates
-    document.getElementById('addUpdateBtn')?.addEventListener('click', () => this.addUpdate());
-
-    
-
-    // HTML Editor
-    document.getElementById('formatHtmlBtn')?.addEventListener('click', () => this.formatHtml());
-    document.getElementById('previewHtmlBtn')?.addEventListener('click', () => this.previewHtml());
-    document.getElementById('saveHtmlBtn')?.addEventListener('click', () => this.saveHtml());
 
     // Global actions
     document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAll());
@@ -304,19 +289,76 @@ class AdminPanel {
     document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
       if (e.target.id === 'modalOverlay') this.closeModal();
     });
-
-    // Form submissions are handled in setupInterface() to avoid duplication
-
-    // Add event listener for tier individual link checkbox
-    document.addEventListener('change', (e) => {
-      if (e.target.id === 'tierUseIndividualLink') {
-        const individualLinkGroup = document.getElementById('tierIndividualLinkGroup');
-        if (individualLinkGroup) {
-          individualLinkGroup.style.display = e.target.checked ? 'block' : 'none';
-        }
-      }
-    });
   }
+
+  // Event delegation for better performance
+  handleGlobalClick(e) {
+    const target = e.target;
+    
+    // Config buttons
+    if (target.id === 'addSellerBtn') this.addSeller();
+    else if (target.id === 'addTierBtn') this.addTier();
+    else if (target.id === 'addArtistBtn') this.addArtist();
+    else if (target.id === 'addFaqBtn') this.addFaq();
+    else if (target.id === 'addContactBtn') this.addContact();
+    else if (target.id === 'addVenuePhotoBtn') this.addVenuePhoto();
+    else if (target.id === 'addUpdateBtn') this.addUpdate();
+    else if (target.id === 'formatHtmlBtn') this.formatHtml();
+    else if (target.id === 'previewHtmlBtn') this.previewHtml();
+    else if (target.id === 'saveHtmlBtn') this.saveHtml();
+    
+    // Translation controls
+    else if (target.classList.contains('copy-main')) {
+      const fieldName = target.closest('.compact-translation-field')?.dataset.field;
+      if (fieldName) this.copyMainLanguage(fieldName);
+    }
+    else if (target.classList.contains('clear-all')) {
+      const fieldName = target.closest('.compact-translation-field')?.dataset.field;
+      if (fieldName) this.clearAllLanguages(fieldName);
+    }
+  }
+
+  handleGlobalChange(e) {
+    const target = e.target;
+    
+    // Config form fields - auto-save on change with debouncing
+    const configFields = [
+      'eventName', 'eventDate', 'eventTime', 'eventTimeEnd', 'eventCity', 'eventCountry', 'eventFlag',
+      'heroBackground', 'showCountdown', 'eventAbout',
+      'venueName', 'venueAddress', 'venueWebsite', 'venueRoute',
+      'ticketsURL'
+    ];
+    
+    if (configFields.includes(target.id)) {
+      this.debouncedUpdateConfig();
+    }
+    
+    // Language selector
+    else if (target.id === 'languageSelect') {
+      this.currentLanguage = target.value;
+      this.renderTranslations();
+    }
+    
+    // Tier individual link checkbox
+    else if (target.id === 'tierUseIndividualLink') {
+      const individualLinkGroup = document.getElementById('tierIndividualLinkGroup');
+      if (individualLinkGroup) {
+        individualLinkGroup.style.display = target.checked ? 'block' : 'none';
+      }
+    }
+  }
+
+  handleGlobalSubmit(e) {
+    // Handle form submissions
+    if (e.target.id === 'loginForm') {
+      this.handleLogin(e);
+    }
+  }
+
+  // Debounced config update for better performance
+  debouncedUpdateConfig = this.debounce(() => {
+    this.updateConfigFromForm();
+  }, 500);
 
   async checkAuth() {
     const token = localStorage.getItem('admin_token');
@@ -462,17 +504,70 @@ class AdminPanel {
   }
 
   switchTab(tabName) {
-    // Update navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => {
+    // Update navigation with optimized DOM queries
+    this._elements.navTabs.forEach(tab => {
       tab.classList.remove('active');
     });
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeTab) activeTab.classList.add('active');
 
-    // Update content
-    document.querySelectorAll('.tab-content').forEach(content => {
+    // Update content with optimized DOM queries
+    this._elements.tabContents.forEach(content => {
       content.classList.remove('active');
     });
-    document.getElementById(`${tabName}Tab`).classList.add('active');
+    const activeContent = document.getElementById(`${tabName}Tab`);
+    if (activeContent) {
+      activeContent.classList.add('active');
+      // Lazy load content if needed
+      this.lazyLoadTabContent(tabName);
+    }
+  }
+
+  // Lazy load tab content for better performance
+  lazyLoadTabContent(tabName) {
+    const contentElement = document.getElementById(`${tabName}Tab`);
+    if (!contentElement || contentElement.dataset.loaded === 'true') return;
+
+    // Mark as loaded to prevent duplicate loading
+    contentElement.dataset.loaded = 'true';
+
+    // Load specific content based on tab
+    switch (tabName) {
+      case 'media':
+        this.loadMediaContent();
+        break;
+      case 'updates':
+        this.loadUpdatesContent();
+        break;
+      case 'marketing':
+        this.loadMarketingContent();
+        break;
+    }
+  }
+
+  // Optimized content loading functions
+  loadMediaContent() {
+    // Load media content only when needed
+    if (!this.mediaLoaded) {
+      this.loadMediaFiles();
+      this.mediaLoaded = true;
+    }
+  }
+
+  loadUpdatesContent() {
+    // Load updates content only when needed
+    if (!this.updatesLoaded) {
+      this.renderUpdates();
+      this.updatesLoaded = true;
+    }
+  }
+
+  loadMarketingContent() {
+    // Load marketing content only when needed
+    if (!this.marketingLoaded) {
+      this.renderMarketing();
+      this.marketingLoaded = true;
+    }
   }
 
   // Config Management

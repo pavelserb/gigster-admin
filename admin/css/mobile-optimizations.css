@@ -1,0 +1,407 @@
+/* Mobile Optimizations for Admin Panel */
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+  /* Increase touch targets */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 20px;
+  }
+  
+  .nav-tab {
+    min-height: 48px;
+    padding: 14px 20px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Improve scrolling */
+  .admin-main {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Better spacing for mobile */
+  .config-sections {
+    gap: 16px;
+  }
+  
+  .config-section {
+    margin-bottom: 16px;
+  }
+  
+  .section-header {
+    padding: 16px 20px;
+  }
+  
+  .section-content {
+    padding: 20px;
+  }
+  
+  /* Optimize form layouts */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  /* Improve translation interface */
+  .translation-inputs {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .translation-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .translation-controls .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Better media grid */
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  
+  /* Improve updates list */
+  .update-item {
+    padding: 16px 20px;
+  }
+  
+  .update-item-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .update-item-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  /* Better modal handling */
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal-body {
+    max-height: calc(100vh - 20px);
+    margin: 0;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .header-content {
+    padding: 12px;
+  }
+  
+  .nav-container {
+    padding: 0 12px;
+  }
+  
+  .nav-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-width: 80px;
+  }
+  
+  .admin-main {
+    padding: 12px;
+  }
+  
+  .content-header {
+    padding: 16px;
+  }
+  
+  .content-header h2 {
+    font-size: 18px;
+  }
+  
+  .content-header p {
+    font-size: 13px;
+  }
+  
+  .section-header,
+  .section-content {
+    padding: 16px;
+  }
+  
+  .updates-toolbar,
+  .media-toolbar,
+  .marketing-toolbar,
+  .editor-toolbar {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .update-item,
+  .pixel-item {
+    padding: 12px 16px;
+  }
+  
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  /* Improve form inputs */
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+  
+  /* Better translation interface */
+  .main-lang-container {
+    padding: 12px;
+  }
+  
+  .translation-inputs {
+    padding: 12px;
+  }
+  
+  .translation-input label {
+    font-size: 11px;
+  }
+  
+  .translation-input input,
+  .translation-input textarea {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .admin-header {
+    position: relative;
+  }
+  
+  .admin-nav {
+    position: relative;
+    top: auto;
+  }
+  
+  .admin-main {
+    height: auto;
+    min-height: calc(100vh - 120px);
+  }
+  
+  .media-container {
+    height: auto;
+    min-height: 400px;
+  }
+  
+  .editor-container {
+    height: auto;
+    min-height: 400px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn {
+    border-width: 0.5px;
+  }
+  
+  .nav-tab {
+    border-bottom-width: 1px;
+  }
+  
+  .config-section {
+    border-width: 0.5px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .tab-content {
+    animation: none;
+  }
+  
+  .compact-translation-content {
+    transition: none;
+  }
+}
+
+/* Dark mode optimizations for mobile */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .admin-interface {
+    background: #1a1a1a;
+  }
+  
+  .admin-header,
+  .admin-nav {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+  
+  .config-section,
+  .updates-container,
+  .media-sidebar,
+  .media-main,
+  .marketing-container,
+  .editor-container {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+  
+  .section-header,
+  .updates-toolbar,
+  .media-toolbar,
+  .marketing-toolbar,
+  .editor-toolbar {
+    background: #333333;
+    border-color: #404040;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: #333333;
+    border-color: #404040;
+    color: #e1e1e1;
+  }
+  
+  .nav-tab {
+    color: #b0b0b0;
+  }
+  
+  .nav-tab:hover {
+    background: #333333;
+    color: #e1e1e1;
+  }
+  
+  .nav-tab.active {
+    color: #667eea;
+    background: #333333;
+  }
+  
+  .btn-secondary {
+    background: #333333;
+    color: #e1e1e1;
+    border-color: #404040;
+  }
+  
+  .btn-secondary:hover {
+    background: #404040;
+    border-color: #667eea;
+    color: #667eea;
+  }
+}
+
+/* Performance optimizations for mobile */
+@media (max-width: 768px) {
+  /* Reduce animations on mobile for better performance */
+  .btn:hover {
+    transform: none;
+  }
+  
+  .config-section:hover {
+    transform: none;
+  }
+  
+  /* Optimize scrolling */
+  .admin-main,
+  .media-grid,
+  .updates-list {
+    will-change: scroll-position;
+  }
+  
+  /* Reduce box shadows on mobile */
+  .btn {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .config-section {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Optimize images */
+  .media-item img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  /* Ensure sufficient color contrast */
+  .btn {
+    color: #ffffff;
+  }
+  
+  .btn-secondary {
+    color: #495057;
+    background: #f8f9fa;
+  }
+  
+  /* Improve focus indicators */
+  .btn:focus,
+  .nav-tab:focus,
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+  
+  /* Ensure text is readable */
+  .content-header h2,
+  .section-header h3 {
+    color: #2c3e50;
+  }
+  
+  .content-header p {
+    color: #6c757d;
+  }
+  
+  /* Improve form labels */
+  .form-group label {
+    color: #495057;
+    font-weight: 500;
+  }
+}

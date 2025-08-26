@@ -1722,16 +1722,30 @@ function setupMapTouchHandling() {
     }
   });
   
-  // Also handle mouse events for desktop
-  mapContainer.addEventListener('mouseenter', () => {
-    // Enable interaction on hover for desktop
+  // Handle mouse events for desktop - only enable on mouse down
+  mapContainer.addEventListener('mousedown', () => {
+    // Enable iframe interaction when mouse button is pressed
     mapIframe.style.pointerEvents = 'auto';
   });
   
-  mapContainer.addEventListener('mouseleave', () => {
-    // Disable interaction when mouse leaves
+  mapContainer.addEventListener('mouseup', () => {
+    // Disable iframe interaction when mouse button is released
     mapIframe.style.pointerEvents = 'none';
   });
+  
+  mapContainer.addEventListener('mouseleave', () => {
+    // Disable interaction when mouse leaves the container
+    mapIframe.style.pointerEvents = 'none';
+  });
+  
+  // Prevent wheel events from scrolling the iframe when not actively interacting
+  mapContainer.addEventListener('wheel', (e) => {
+    if (mapIframe.style.pointerEvents === 'none') {
+      // Allow page scrolling when iframe is not active
+      return;
+    }
+    // When iframe is active, let the wheel event pass through to the iframe
+  }, { passive: true });
 }
 
 function escapeHTML(text) {

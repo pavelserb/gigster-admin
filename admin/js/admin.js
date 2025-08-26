@@ -147,8 +147,6 @@ class AdminPanel {
   
   // Update translation value in the translations object
   updateTranslationValue(fieldName, enValue, csValue, ukValue) {
-    console.log('🔄 Updating translation:', { fieldName, enValue, csValue, ukValue });
-    console.log('📊 Current translations object:', this.translations);
     
     // Parse field name to determine the path in translations object
     // Field names can be:
@@ -172,11 +170,8 @@ class AdminPanel {
     }
     // Single word (config tab) - these are not translations, skip
     else {
-      console.log('ℹ️ Skipping config field:', fieldName);
       return;
     }
-    
-    console.log('🔍 Parsed path:', { section, key });
     
     // Initialize section if it doesn't exist
     if (!this.translations.sections) {
@@ -206,31 +201,22 @@ class AdminPanel {
     this.translations.sections.cs[section][key] = csValue;
     this.translations.sections.uk[section][key] = ukValue;
     
-    console.log('✅ Updated translations object:', this.translations);
-    
     // Auto-save translations after a short delay
     this.debouncedSaveTranslations();
   }
   
   // Debounced save translations to avoid too many requests
   debouncedSaveTranslations() {
-    console.log('🔄 debouncedSaveTranslations called');
-    
     if (this.saveTranslationsTimeout) {
-      console.log('🔄 Clearing existing timeout');
       clearTimeout(this.saveTranslationsTimeout);
     }
     
-    console.log('🔄 Setting new timeout for 1 second');
     this.saveTranslationsTimeout = setTimeout(() => {
-      console.log('🔄 Timeout fired, calling saveTranslations...');
       this.saveTranslations().catch(error => {
-        console.error('Failed to save translations:', error);
+  
         this.showError('Ошибка сохранения переводов');
       });
     }, 1000); // Save after 1 second of inactivity
-    
-    console.log('✅ debouncedSaveTranslations completed');
   }
 
   // Initialize translation counters for all fields
@@ -403,9 +389,7 @@ class AdminPanel {
       const translationsResponse = await fetch('/admin/api/translations', { headers });
       if (translationsResponse.ok) {
         this.translations = await translationsResponse.json();
-        console.log('📊 Translations loaded:', this.translations);
-      } else {
-        console.warn('⚠️ Translations response not ok:', translationsResponse.status);
+            } else {
         this.translations = {};
       }
 
@@ -413,27 +397,13 @@ class AdminPanel {
       const updatesResponse = await fetch('/admin/api/updates', { headers });
       if (updatesResponse.ok) {
         const updatesData = await updatesResponse.json();
-        console.log('📊 Updates data received:', updatesData);
-        console.log('📊 Updates data type:', typeof updatesData);
-        console.log('📊 Updates data is array:', Array.isArray(updatesData));
         
         // Handle new structure with languages field and ensure it's always an array
-        console.log('📊 Updates data structure:', {
-          hasUpdates: !!updatesData.updates,
-          updatesIsArray: Array.isArray(updatesData.updates),
-          dataIsArray: Array.isArray(updatesData),
-          dataKeys: Object.keys(updatesData)
-        });
-        
         if (updatesData.updates && Array.isArray(updatesData.updates)) {
-          console.log('✅ Using updatesData.updates array');
           this.updates = updatesData.updates;
         } else if (Array.isArray(updatesData)) {
-          console.log('✅ Using updatesData as array');
           this.updates = updatesData;
         } else {
-          console.warn('⚠️ Updates data is not an array, using empty array');
-          console.warn('⚠️ Data structure:', updatesData);
           this.updates = [];
         }
         // Store languages if present
@@ -441,7 +411,6 @@ class AdminPanel {
           this.updatesLanguages = updatesData.languages;
         }
       } else {
-        console.warn('⚠️ Updates response not ok:', updatesResponse.status);
         this.updates = [];
       }
 
@@ -453,7 +422,6 @@ class AdminPanel {
       }
 
     } catch (error) {
-      console.error('Error loading data:', error);
       this.showError('Ошибка загрузки данных');
     }
   }
@@ -1317,7 +1285,7 @@ class AdminPanel {
     const container = document.getElementById('updatesList');
     
     if (!container) {
-      console.error('Updates container not found!');
+  
       return;
     }
     
@@ -1325,7 +1293,7 @@ class AdminPanel {
 
     // Ensure this.updates is always an array
     if (!Array.isArray(this.updates)) {
-      console.warn('this.updates is not an array, resetting to empty array');
+
       this.updates = [];
     }
 
@@ -1777,7 +1745,7 @@ class AdminPanel {
       // Initialize the integrated media manager
       this.initMediaManager();
     } catch (error) {
-      console.error('Error rendering media section:', error);
+      // Error handling
       this.showError('Ошибка отображения раздела медиафайлов');
     }
   }
@@ -1816,7 +1784,7 @@ class AdminPanel {
         this.renderMediaFolderTree(data);
       }
     } catch (error) {
-      console.error('Error loading media folder tree:', error);
+      // Error handling
     }
   }
 
@@ -1990,10 +1958,10 @@ class AdminPanel {
         this.renderMediaDirectory(data);
         this.updateMediaBreadcrumb(path);
       } else {
-        console.error('Server response not ok:', response.status, response.statusText);
+  
       }
     } catch (error) {
-      console.error('Error loading media directory:', error);
+
     }
   }
 
@@ -2138,7 +2106,7 @@ class AdminPanel {
         this.showError('Ошибка создания папки');
       }
     } catch (error) {
-      console.error('Error creating folder:', error);
+      // Error handling
       this.showError('Ошибка создания папки');
     }
   }
@@ -2178,7 +2146,7 @@ class AdminPanel {
         this.showError(`Ошибка загрузки файла ${file.name}`);
       }
     } catch (error) {
-      console.error('Error uploading file:', error);
+      // Error handling
       this.showError(`Ошибка загрузки файла ${file.name}`);
     }
   }
@@ -2207,14 +2175,12 @@ class AdminPanel {
         navigator.clipboard.writeText(fullPath).then(() => {
           this.showSuccess('Путь скопирован в буфер обмена');
         }).catch((error) => {
-          console.error('Clipboard API failed:', error);
           this.fallbackCopy(fullPath);
         });
       } else {
         this.fallbackCopy(fullPath);
       }
     } catch (error) {
-      console.error('Error in copyMediaPath:', error);
       this.fallbackCopy(fullPath);
     }
   }
@@ -2240,7 +2206,6 @@ class AdminPanel {
         this.showError('Не удалось скопировать путь');
       }
     } catch (error) {
-      console.error('Fallback copy error:', error);
       this.showError('Не удалось скопировать путь');
     }
   }
@@ -2263,7 +2228,6 @@ class AdminPanel {
         this.showError('Ошибка удаления файла');
       }
     } catch (error) {
-      console.error('Error deleting file:', error);
       this.showError('Ошибка удаления файла');
     }
   }
@@ -2445,7 +2409,7 @@ class AdminPanel {
         this.initializeModalAutoResize();
         
       } else {
-        console.warn('Form not found in modal body:', title);
+    
       }
     }, 100);
   }
@@ -2462,14 +2426,14 @@ class AdminPanel {
     const modalBody = document.getElementById('modalBody');
     const translationFields = modalBody.querySelectorAll('.compact-translation-field');
     
-    console.log(`Found ${translationFields.length} translation fields in modal`);
+
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-field');
       if (fieldName) {
         // Update the counter for this field
         this.updateTranslationCounter(fieldName);
-        console.log(`Initialized counter for field: ${fieldName}`);
+
       }
     });
   }
@@ -2480,7 +2444,7 @@ class AdminPanel {
     
     const tryInitialize = () => {
       attempts++;
-      console.log(`Attempt ${attempts} to initialize translation counters`);
+
       
       const modalBody = document.getElementById('modalBody');
       const translationFields = modalBody.querySelectorAll('.compact-translation-field');
@@ -2524,36 +2488,19 @@ class AdminPanel {
     // Get the form ID correctly - e.target is the form element
     const formId = e.target.id || e.target.getAttribute('id');
     
-    console.log('📋 Form submitted:', formId);
-    console.log('📋 Form element tagName:', e.target.tagName);
-    console.log('📋 Form element id:', e.target.id);
-    console.log('📋 Form element getAttribute("id"):', e.target.getAttribute('id'));
-    console.log('📋 Form element outerHTML:', e.target.outerHTML.substring(0, 200) + '...');
-    
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    
-    console.log('📋 Form data collected:', data);
     
     await this._processFormSubmission(formId, data);
     this.closeModal();
   }
 
   async _processFormSubmission(formId, data) {
-    console.log('🔍 Processing form submission:', { formId, data });
-    console.log('🔍 Form ID type:', typeof formId);
-    console.log('🔍 Form ID === "updateForm":', formId === 'updateForm');
-    console.log('🔍 Form ID === "dynamicForm":', formId === 'dynamicForm');
-    
     if (formId === 'dynamicForm') {
-      console.log('📝 Handling dynamic form');
       await this._handleDynamicForm(data);
     } else if (formId === 'updateForm') {
-      console.log('📝 Handling update form');
       await this._handleUpdateForm(data);
     } else {
-      console.log('❓ Handling unknown form:', formId);
-      console.log('❓ Available form IDs:', ['dynamicForm', 'updateForm']);
       await this._handleUnknownForm(data);
     }
   }
@@ -2583,8 +2530,6 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
-    console.log('📝 Processing update form data:', data);
-    
     // Process translation fields for updates
     const processedData = { ...data };
     
@@ -2612,25 +2557,13 @@ class AdminPanel {
       delete processedData.body_uk;
     }
     
-    console.log('📝 Processed update data:', processedData);
-    
     await this.saveUpdate(processedData);
   }
 
   async _handleUnknownForm(data) {
-    console.log('❓ _handleUnknownForm called with data:', data);
-    console.log('❓ Checking conditions:');
-    console.log('❓ - data.title:', !!data.title);
-    console.log('❓ - data.type:', !!data.type);
-    console.log('❓ - data.body:', !!data.body);
-    console.log('❓ - data.title_en:', !!data.title_en);
-    console.log('❓ - data.body_en:', !!data.body_en);
-    
     if (data.title && data.type && data.body) {
-      console.log('✅ Detected as update form (title + type + body)');
       await this.saveUpdate(data);
     } else if (data.title_en && data.type && data.body_en) {
-      console.log('✅ Detected as update form (title_en + type + body_en)');
       // Process translation fields for updates
       const processedData = { ...data };
       
@@ -2658,17 +2591,13 @@ class AdminPanel {
         delete processedData.body_uk;
       }
       
-      console.log('📝 Processed update data in unknown form:', processedData);
       await this.saveUpdate(processedData);
     } else if (data.name || data.q || data.type) {
-      console.log('✅ Detected as dynamic form');
       if (this.editingItem) {
         await this.updateDynamicItem(data);
       } else {
         await this.addDynamicItem(data);
       }
-    } else {
-      console.warn('❌ Cannot determine form type for data:', data);
     }
   }
 
@@ -2879,7 +2808,7 @@ class AdminPanel {
       await operation();
       this.showSuccess(successMessage);
     } catch (error) {
-      console.error('Operation failed:', error);
+      // Error handling
       this.showError(errorMessage);
     }
   }
@@ -3026,7 +2955,7 @@ class AdminPanel {
       
       // If a new file was selected (not empty), ensure it's uploaded
       if (path && path.trim() !== '') {
-        console.log('✅ Media file selected for update:', path);
+    
         // The file should already be on FTP since it was selected from fileManager
         // Just update the field value
       }
@@ -3034,117 +2963,85 @@ class AdminPanel {
   }
 
   async saveUpdate(data) {
-    
     try {
-      console.log('💾 Saving update with data:', data);
-      
       // Generate ID if not provided
       const id = data.id || `update_${Date.now()}`;
       
       // Use custom date if provided, otherwise use current date
       const ts = data.customDate ? new Date(data.customDate).toISOString() : new Date().toISOString();
       
-              // Handle body processing - preserve translation structure while ensuring site compatibility
-        console.log('📝 Processing body:', { type: typeof data.body, value: data.body });
-        
-        let processedBody;
-        if (typeof data.body === 'string') {
-          // If body is a string, convert to translation object
-          console.log('📝 Body is string, converting to translation object');
-          const bodyText = this.processBodyText(data.body);
-          processedBody = {
-            en: bodyText,
-            cs: bodyText,
-            uk: bodyText
-          };
-        } else if (data.body && typeof data.body === 'object') {
-          // If body is an object with translations, preserve structure
-          console.log('📝 Body is object with translations, preserving structure');
-          if (Array.isArray(data.body.en)) {
-            // Already processed as arrays
-            processedBody = {
-              en: data.body.en,
-              cs: data.body.cs || [],
-              uk: data.body.uk || []
-            };
-          } else {
-            // Need to split strings into arrays
-            processedBody = {
-              en: this.processBodyText(data.body.en || ''),
-              cs: this.processBodyText(data.body.cs || ''),
-              uk: this.processBodyText(data.body.uk || '')
-            };
-          }
-        } else {
-          console.log('📝 Body is empty or invalid, using empty translation object');
-          processedBody = { en: [], cs: [], uk: [] };
-        }
-        
-        console.log('📝 Processed body result:', processedBody);
-        
-        // Handle title processing - keep title as object for translations
-        console.log('📝 Processing title:', { type: typeof data.title, value: data.title });
-        
-        let processedTitle;
-        if (typeof data.title === 'string') {
-          // If title is a string, convert to translation object
-          console.log('📝 Title is string, converting to translation object');
-          processedTitle = {
-            en: data.title,
-            cs: data.title,
-            uk: data.title
-          };
-        } else if (data.title && typeof data.title === 'object') {
-          // If title is already an object with translations, use as is
-          console.log('📝 Title is object with translations, using as is');
-          processedTitle = data.title;
-        } else {
-          console.log('📝 Title is empty or invalid, using empty translation object');
-          processedTitle = { en: '', cs: '', uk: '' };
-        }
-        
-        console.log('📝 Processed title result:', processedTitle);
-        
-        const update = {
-          id: id,
-          ts: ts,
-          type: data.type,
-          title: processedTitle,
-          body: processedBody, // Translation object for admin panel and site
-          important: data.important === 'on' || data.important === true,
-          pinned: data.pinned === 'on' || data.pinned === true
+      // Handle body processing - preserve translation structure while ensuring site compatibility
+      let processedBody;
+      if (typeof data.body === 'string') {
+        // If body is a string, convert to translation object
+        const bodyText = this.processBodyText(data.body);
+        processedBody = {
+          en: bodyText,
+          cs: bodyText,
+          uk: bodyText
         };
+      } else if (data.body && typeof data.body === 'object') {
+        // If body is an object with translations, preserve structure
+        if (Array.isArray(data.body.en)) {
+          // Already processed as arrays
+          processedBody = {
+            en: data.body.en,
+            cs: data.body.cs || [],
+            uk: data.body.uk || []
+          };
+        } else {
+          // Need to split strings into arrays
+          processedBody = {
+            en: this.processBodyText(data.body.en || ''),
+            cs: this.processBodyText(data.body.cs || ''),
+            uk: this.processBodyText(data.body.uk || '')
+          };
+        }
+      } else {
+        processedBody = { en: [], cs: [], uk: [] };
+      }
+      
+      // Handle title processing - keep title as object for translations
+      let processedTitle;
+      if (typeof data.title === 'string') {
+        // If title is a string, convert to translation object
+        processedTitle = {
+          en: data.title,
+          cs: data.title,
+          uk: data.title
+        };
+      } else if (data.title && typeof data.title === 'object') {
+        // If title is already an object with translations, use as is
+        processedTitle = data.title;
+      } else {
+        processedTitle = { en: '', cs: '', uk: '' };
+      }
+      
+      const update = {
+        id: id,
+        ts: ts,
+        type: data.type,
+        title: processedTitle,
+        body: processedBody, // Translation object for admin panel and site
+        important: data.important === 'on' || data.important === true,
+        pinned: data.pinned === 'on' || data.pinned === true
+      };
 
       if (data.thumb) {
         update.thumb = data.thumb;
-        console.log('📸 Thumbnail path:', data.thumb);
       }
       if (data.media) {
         update.media = data.media;
-        console.log('🎬 Media path:', data.media);
       }
-
-              console.log('📝 Final update object:', update);
-        console.log('📝 Body structure check:', {
-          body: typeof update.body,
-          bodyKeys: update.body ? Object.keys(update.body) : 'N/A'
-        });
 
       // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
         // Update existing
-        console.log(`✏️ Updating existing update at index ${this.editingUpdateIndex}`);
-        console.log('📝 Original update body structure:', this.updates[this.editingUpdateIndex]?.body);
-        console.log('📝 New update body structure:', update.body);
-        
         // Preserve original body structure if it was an object with translations
         const originalUpdate = this.updates[this.editingUpdateIndex];
         if (originalUpdate && originalUpdate.body && typeof originalUpdate.body === 'object' && !Array.isArray(originalUpdate.body)) {
-          console.log('🔄 Preserving original body structure with translations');
-          
           // Update the content while preserving the translation structure
           if (update.body && typeof update.body === 'object' && update.body.en) {
-            console.log('📝 Updating body content while preserving structure');
             // Update each language with new content
             if (Array.isArray(update.body.en)) {
               originalUpdate.body.en = update.body.en;
@@ -3167,53 +3064,40 @@ class AdminPanel {
         this.editingUpdateIndex = undefined; // Reset editing index
       } else {
         // Add new
-        console.log('➕ Adding new update');
         this.updates.unshift(update);
       }
       
-      console.log('📊 Total updates after save:', this.updates.length);
       this.renderUpdates();
       
       // Auto-save updates
-      console.log('💾 Saving updates to server...');
       await this.saveUpdates();
       this.showSuccess('Обновление сохранено');
       
     } catch (error) {
-      console.error('Error saving update:', error);
       this.showError('Ошибка сохранения обновления');
     }
   }
 
   // Global Actions
   async saveAll() {
-    console.log('🔄 saveAll() called');
-    
     try {
-      console.log('🔄 Updating config from form...');
       // Update config from form data
       this.updateConfigFromForm();
       
-      console.log('🔄 Updating translations from form...');
       // Update translations from form data
       this.updateTranslationsFromForm();
       
-      console.log('🔄 Saving config...');
       // Save config
       await this.saveConfig();
       
-      console.log('🔄 Saving translations...');
       // Save translations
       await this.saveTranslations();
       
-      console.log('🔄 Saving updates...');
       // Save updates
       await this.saveUpdates();
       
-      console.log('✅ All saves completed');
       this.showSuccess('Все изменения сохранены');
     } catch (error) {
-      console.error('❌ Error in saveAll:', error);
       this.showError('Ошибка сохранения');
     }
   }
@@ -3277,38 +3161,12 @@ class AdminPanel {
   
   // Update translations object from form fields
   updateTranslationsFromForm() {
-    console.log('🔄 Updating translations from form...');
-    
-    // Debug: Check what's in the translations tab
-    const translationsTab = document.getElementById('translationsTab');
-    console.log('🔍 Translations tab found:', !!translationsTab);
-    
-    if (translationsTab) {
-      console.log('🔍 Translations tab HTML:', translationsTab.innerHTML.substring(0, 500) + '...');
-    }
-    
     // Get all translation fields from the translations tab
     const translationFields = document.querySelectorAll('#translationsTab input[data-key]');
-    
-    console.log('🔍 Found translation fields:', translationFields.length);
-    
-    // Debug: Check all elements with data-key in translations tab
-    const allDataKeys = document.querySelectorAll('#translationsTab [data-key]');
-    console.log('🔍 All elements with data-key:', allDataKeys.length);
-    
-    allDataKeys.forEach((el, index) => {
-      console.log(`🔍 Element ${index}:`, {
-        tagName: el.tagName,
-        className: el.className,
-        dataKey: el.getAttribute('data-key')
-      });
-    });
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-key');
       if (!fieldName) return;
-      
-      console.log('🔍 Processing field:', fieldName);
       
       // For single-language fields, we need to get the value directly
       const fieldValue = field.value.trim();
@@ -3332,8 +3190,6 @@ class AdminPanel {
       else {
         return;
       }
-      
-      console.log('🔍 Parsed path:', { section, key, value: fieldValue });
       
       // Initialize section if it doesn't exist
       if (!this.translations.sections) {
@@ -3361,17 +3217,10 @@ class AdminPanel {
       // Update the translation value for the current language
       const currentLang = this.currentLanguage || 'en';
       this.translations.sections[currentLang][section][key] = fieldValue;
-      
-      console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     });
     
-    console.log('📊 Final translations object:', this.translations);
-    console.log('✅ updateTranslationsFromForm() completed');
-    
     // Trigger auto-save after updating translations
-    console.log('🔄 Triggering auto-save...');
     this.debouncedSaveTranslations();
-    console.log('✅ Auto-save triggered');
   }
 
   getTranslationValue(fieldData, lang) {
@@ -3589,8 +3438,6 @@ class AdminPanel {
   }
 
   async saveTranslations() {
-    console.log('💾 Saving translations:', this.translations);
-    
     const response = await fetch('/admin/api/translations/save', {
       method: 'POST',
       headers: {
@@ -3600,21 +3447,15 @@ class AdminPanel {
       body: JSON.stringify(this.translations)
     });
 
-    console.log('📡 Save response status:', response.status);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Save error:', errorText);
       throw new Error('Translations save failed');
     }
     
-    const result = await response.json();
-    console.log('✅ Translations saved successfully:', result);
+    await response.json();
   }
 
   async saveUpdates() {
-    console.log('💾 Sending updates to server:', this.updates);
-    
     const response = await fetch('/admin/api/updates/save', {
       method: 'POST',
       headers: {
@@ -3624,16 +3465,12 @@ class AdminPanel {
       body: JSON.stringify(this.updates)
     });
 
-    console.log('📡 Server response status:', response.status);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Server error:', errorText);
       throw new Error('Updates save failed');
     }
     
-    const result = await response.json();
-    console.log('✅ Updates saved successfully:', result);
+    await response.json();
   }
 
   previewSite() {
@@ -3699,7 +3536,7 @@ class AdminPanel {
         title = 'Редактировать контакт';
         break;
       default:
-        console.error('Unknown type:', type);
+  
         return;
     }
     
@@ -3759,7 +3596,7 @@ class AdminPanel {
         // Формируем URL с query параметром для папки
         const url = `/admin/api/media/${filename}${dir ? `?dir=${dir}` : ''}`;
         
-        console.log(`🗑️ Удаляю файл: ${filename} из папки: ${dir || 'root'}`);
+    
         
         const response = await fetch(url, {
           method: 'DELETE',
@@ -3774,7 +3611,6 @@ class AdminPanel {
           this.showError('Ошибка удаления файла');
         }
       } catch (error) {
-        console.error('Error deleting file:', error);
         this.showError('Ошибка удаления файла');
       }
     }
@@ -3990,7 +3826,7 @@ class AdminPanel {
 
       this.showSuccess(`Язык ${name} добавлен успешно`);
     } catch (error) {
-      console.error('Error adding language:', error);
+      // Error handling
       this.showError('Ошибка при добавлении языка');
     }
   }
@@ -4177,8 +4013,8 @@ class AdminPanel {
         this.renderLanguageList();
         this.renderLanguageSettings();
         this.showSuccess(`Язык ${this.config.languages[code].name} ${this.config.languages[code].isActive ? 'активирован' : 'деактивирован'}`);
-      } catch (error) {
-        console.error('Error toggling language:', error);
+          } catch (error) {
+      // Error handling
         this.showError('Ошибка при изменении статуса языка');
       }
     }
@@ -4207,8 +4043,8 @@ class AdminPanel {
         this.renderAllFields();
         
         this.showSuccess(`Язык ${this.config.languages[code].name} удален`);
-      } catch (error) {
-        console.error('Error removing language:', error);
+          } catch (error) {
+      // Error handling
         this.showError('Ошибка при удалении языка');
       }
     }
@@ -4462,7 +4298,7 @@ class AdminPanel {
     
     const tryInitialize = () => {
       attempts++;
-      console.log(`Attempt ${attempts} to initialize modal auto-resize`);
+
       
       const textareas = document.querySelectorAll('#modalBody textarea');
       

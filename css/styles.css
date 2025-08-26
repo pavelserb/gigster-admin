@@ -1960,11 +1960,27 @@ p {
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .artist .links a:hover {
   background: var(--accent);
   color: var(--bg);
+}
+
+.artist .links .social-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+.artist .links a:hover .social-icon {
+  filter: brightness(0) saturate(100%) invert(0%);
 }
 
 /* Artist headliner styles */

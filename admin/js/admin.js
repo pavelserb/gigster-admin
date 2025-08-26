@@ -831,11 +831,18 @@ class AdminPanel {
         <div class="form-row">
           <div class="form-group">
             <label>Тип ссылки</label>
-            <input type="text" name="linkType_${index}" value="${link.t || ''}" placeholder="Website, Instagram, YouTube...">
+            <select name="linkType_${index}" required>
+              <option value="">Выберите тип...</option>
+              <option value="Website" ${link.t === 'Website' ? 'selected' : ''}>Website</option>
+              <option value="Facebook" ${link.t === 'Facebook' ? 'selected' : ''}>Facebook</option>
+              <option value="Instagram" ${link.t === 'Instagram' ? 'selected' : ''}>Instagram</option>
+              <option value="TikTok" ${link.t === 'TikTok' ? 'selected' : ''}>TikTok</option>
+              <option value="YouTube" ${link.t === 'YouTube' ? 'selected' : ''}>YouTube</option>
+            </select>
           </div>
           <div class="form-group">
             <label>URL</label>
-            <input type="url" name="linkUrl_${index}" value="${link.u || ''}" placeholder="https://example.com">
+            <input type="url" name="linkUrl_${index}" value="${link.u || ''}" placeholder="https://example.com" required>
           </div>
           <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${index})">Удалить</button>
         </div>
@@ -2867,11 +2874,18 @@ class AdminPanel {
         <div class="form-row">
           <div class="form-group">
             <label>Тип ссылки</label>
-            <input type="text" name="linkType_${linkIndex}" placeholder="Website, Instagram, YouTube...">
+            <select name="linkType_${linkIndex}" required>
+              <option value="">Выберите тип...</option>
+              <option value="Website">Website</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube">YouTube</option>
+            </select>
           </div>
           <div class="form-group">
             <label>URL</label>
-            <input type="url" name="linkUrl_${linkIndex}" placeholder="https://example.com">
+            <input type="url" name="linkUrl_${linkIndex}" placeholder="https://example.com" required>
           </div>
           <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${linkIndex})">Удалить</button>
         </div>

@@ -838,7 +838,11 @@ function updateArtists() {
         card.classList.add('headliner');
       }
       const linksHtml = (a.links || [])
-        .map(l => `<a class="btn" href="${l.u}" target="_blank" rel="noopener noreferrer">${l.t}</a>`)
+        .map(l => {
+          const icon = getSocialIcon(l.t);
+          const iconHtml = icon ? `<img src="${icon}" alt="${l.t}" class="social-icon">` : '';
+          return `<a class="btn social-btn" href="${l.u}" target="_blank" rel="noopener noreferrer" aria-label="${l.t}">${iconHtml}</a>`;
+        })
         .join('');
       // Create bio content with read more functionality
       const bioText = getTranslation(a.bio, '');
@@ -1540,6 +1544,29 @@ function initMediaSlider() {
   }
   
   // Autoplay is controlled only by button click, not by mouse position
+}
+
+// Get social icon by link type
+function getSocialIcon(linkType) {
+  if (!linkType) return null;
+  
+  const iconMap = {
+    'Website': 'assets/icons/website-white.png',
+    'Facebook': 'assets/icons/facebook-white.png',
+    'Instagram': 'assets/icons/instagram-outline-white.png',
+    'TikTok': 'assets/icons/tiktok-white.png',
+    'YouTube': 'assets/icons/youtube-circle-white.png'
+  };
+  
+  // Case-insensitive matching
+  const normalizedType = linkType.toLowerCase();
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (key.toLowerCase() === normalizedType) {
+      return icon;
+    }
+  }
+  
+  return null;
 }
 
 function escapeHTML(text) {

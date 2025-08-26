@@ -1658,6 +1658,21 @@ function getSocialIcon(linkType) {
   return null;
 }
 
+// Open full map in new tab
+function openFullMap() {
+  const venueRoute = CONFIG.event?.venue?.route;
+  if (venueRoute) {
+    window.open(venueRoute, '_blank', 'noopener,noreferrer');
+  } else {
+    // Fallback to Google Maps with venue coordinates
+    const venueAddress = CONFIG.event?.venue?.address?.en || CONFIG.event?.venue?.address;
+    if (venueAddress) {
+      const encodedAddress = encodeURIComponent(venueAddress);
+      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank', 'noopener,noreferrer');
+    }
+  }
+}
+
 function escapeHTML(text) {
   if (!text) {
     return '';

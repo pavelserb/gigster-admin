@@ -225,87 +225,6 @@ class AdminPanel {
     }, 1000); // Save after 1 second of inactivity
   }
 
-  // Update translations from form fields
-  updateTranslationsFromForm() {
-    console.log('🔄 Updating translations from form...');
-    
-    // Debug: Check what's in the translations tab
-    const translationsTab = document.getElementById('translationsTab');
-    console.log('🔍 Translations tab found:', !!translationsTab);
-    
-    if (translationsTab) {
-      console.log('🔍 Translations tab HTML:', translationsTab.innerHTML.substring(0, 500) + '...');
-    }
-    
-    // Get all translation fields from the translations tab
-    const translationFields = document.querySelectorAll('#translationsTab input[data-key]');
-    
-    console.log('🔍 Found translation fields:', translationFields.length);
-    
-    // Debug: Check all elements with data-key in translations tab
-    const allDataKeys = document.querySelectorAll('#translationsTab [data-key]');
-    console.log('🔍 All elements with data-key:', allDataKeys.length);
-    
-    allDataKeys.forEach((el, index) => {
-      console.log(`🔍 Element ${index}:`, {
-        tagName: el.tagName,
-        className: el.className,
-        dataKey: el.getAttribute('data-key')
-      });
-    });
-    
-    translationFields.forEach(field => {
-      const fieldName = field.getAttribute('data-key');
-      if (!fieldName) return;
-      
-      console.log('🔍 Processing field:', fieldName);
-      
-      // For single language fields, just get the value directly
-      const value = field.value.trim();
-      
-      // Parse field name to determine the path in translations object
-      let section, key;
-      
-      // Try dot notation first (translations tab)
-      if (fieldName.includes('.')) {
-        const pathParts = fieldName.split('.');
-        section = pathParts[0];
-        key = pathParts.slice(1).join('.');
-      }
-      // Try underscore notation (updates tab)
-      else if (fieldName.includes('_')) {
-        const pathParts = fieldName.split('_');
-        section = pathParts[0];
-        key = pathParts.slice(1).join('_');
-      }
-      // Single word - skip
-      else {
-        return;
-      }
-      
-      // Get current language
-      const currentLang = this.currentLanguage || 'en';
-      
-      // Initialize section if it doesn't exist
-      if (!this.translations.sections) {
-        this.translations.sections = {};
-      }
-      if (!this.translations.sections[currentLang]) {
-        this.translations.sections[currentLang] = {};
-      }
-      if (!this.translations.sections[currentLang][section]) {
-        this.translations.sections[currentLang][section] = {};
-      }
-      
-      // Update the translation value for current language
-      this.translations.sections[currentLang][section][key] = value;
-      
-      console.log(`✅ Updated translation: ${currentLang}.${section}.${key} = "${value}"`);
-    });
-    
-    console.log('📊 Final translations object:', this.translations);
-  }
-
   // Initialize translation counters for all fields
   initTranslationCounters() {
     const translationFields = document.querySelectorAll('.compact-translation-field');
@@ -3352,40 +3271,82 @@ class AdminPanel {
     }
     
     // Get all translation fields from the translations tab
-    const translationFields = document.querySelectorAll('#translationsTab .compact-translation-field[data-field]');
+    const translationFields = document.querySelectorAll('#translationsTab input[data-key]');
     
     console.log('🔍 Found translation fields:', translationFields.length);
     
-    // Debug: Check all elements with data-field in translations tab
-    const allDataFields = document.querySelectorAll('#translationsTab [data-field]');
-    console.log('🔍 All elements with data-field:', allDataFields.length);
+    // Debug: Check all elements with data-key in translations tab
+    const allDataKeys = document.querySelectorAll('#translationsTab [data-key]');
+    console.log('🔍 All elements with data-key:', allDataKeys.length);
     
-    allDataFields.forEach((el, index) => {
+    allDataKeys.forEach((el, index) => {
       console.log(`🔍 Element ${index}:`, {
         tagName: el.tagName,
         className: el.className,
-        dataField: el.getAttribute('data-field')
+        dataKey: el.getAttribute('data-key')
       });
     });
     
     translationFields.forEach(field => {
-      const fieldName = field.getAttribute('data-field');
+      const fieldName = field.getAttribute('data-key');
       if (!fieldName) return;
       
       console.log('🔍 Processing field:', fieldName);
       
-      const enInput = document.getElementById(`${fieldName}_en`);
-      const csInput = document.getElementById(`${fieldName}_cs`);
-      const ukInput = document.getElementById(`${fieldName}_uk`);
+      // For single-language fields, we need to get the value directly
+      const fieldValue = field.value.trim();
       
-      if (!enInput || !csInput || !ukInput) {
-        console.warn('⚠️ Missing inputs for field:', fieldName);
+      // Parse field name to determine the path in translations object
+      let section, key;
+      
+      // Try dot notation first (translations tab)
+      if (fieldName.includes('.')) {
+        const pathParts = fieldName.split('.');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('.');
+      }
+      // Try underscore notation (updates tab)
+      else if (fieldName.includes('_')) {
+        const pathParts = fieldName.split('_');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('_');
+      }
+      // Single word - skip
+      else {
         return;
       }
       
-      const enValue = enInput.value.trim();
-      const csValue = csInput.value.trim();
-      const ukValue = ukInput.value.trim();
+      console.log('🔍 Parsed path:', { section, key, value: fieldValue });
+      
+      // Initialize section if it doesn't exist
+      if (!this.translations.sections) {
+        this.translations.sections = {};
+      }
+      if (!this.translations.sections.en) {
+        this.translations.sections.en = {};
+      }
+      if (!this.translations.sections.cs) {
+        this.translations.sections.cs = {};
+      }
+      if (!this.translations.sections.uk) {
+        this.translations.sections.uk = {};
+      }
+      if (!this.translations.sections.en[section]) {
+        this.translations.sections.en[section] = {};
+      }
+      if (!this.translations.sections.cs[section]) {
+        this.translations.sections.cs[section] = {};
+      }
+      if (!this.translations.sections.uk[section]) {
+        this.translations.sections.uk[section] = {};
+      }
+      
+      // Update the translation value for the current language
+      const currentLang = this.currentLanguage || 'en';
+      this.translations.sections[currentLang][section][key] = fieldValue;
+      
+      console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
+    });
       
       // Parse field name to determine the path in translations object
       let section, key;
@@ -3430,12 +3391,7 @@ class AdminPanel {
         this.translations.sections.uk[section] = {};
       }
       
-      // Update the translation values
-      this.translations.sections.en[section][key] = enValue;
-      this.translations.sections.cs[section][key] = csValue;
-      this.translations.sections.uk[section][key] = ukValue;
-      
-      console.log(`✅ Updated translation: ${section}.${key}`, { enValue, csValue, ukValue });
+      console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     });
     
     console.log('📊 Final translations object:', this.translations);

@@ -22,14 +22,14 @@ function setCurrentLang(lang) {
     return;
   }
   
-  const previousLang = CURRENT_LANG;
-  CURRENT_LANG = lang;
+    const previousLang = CURRENT_LANG;
+    CURRENT_LANG = lang;
   
   // Update HTML lang attribute
   document.documentElement.lang = lang;
   
   // Apply new translations
-  applyNewTranslations(lang);
+    applyNewTranslations(lang);
 }
 
 // Get translation for a field (supports both string and object formats)
@@ -48,11 +48,11 @@ async function loadConfig() {
   try {
     const response = await fetch('config.json');
     if (response.ok) {
-      CONFIG = await response.json();
+          CONFIG = await response.json();
     } else {
       console.error('🌐 Main.js: Failed to load config.json');
     }
-  } catch (error) {
+    } catch (error) {
     console.error('🌐 Main.js: Error loading config.json:', error);
   }
 }
@@ -62,8 +62,8 @@ async function loadTranslations() {
   try {
     const response = await fetch('translations.json');
     if (response.ok) {
-      const translations = await response.json();
-      STATIC_TRANSLATIONS = translations;
+    const translations = await response.json();
+          STATIC_TRANSLATIONS = translations;
     } else {
       console.error('🌐 Main.js: Failed to load translations.json');
     }
@@ -260,7 +260,7 @@ function applyBrowserLanguage() {
   const finalLang = savedLang || detectedLang;
   
   if (finalLang !== CURRENT_LANG) {
-    setCurrentLang(finalLang);
+  setCurrentLang(finalLang);
   }
 }
 
@@ -304,14 +304,14 @@ async function init() {
   
   // Initialize media slider
   initMediaSlider();
-  
+
   // Respect prefers-reduced-motion
   const heroVideo = document.getElementById('heroVideo');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     heroVideo?.removeAttribute('autoplay');
     heroVideo?.pause();
   }
-  
+
   // Scroll correction for anchors and sticky header
   window.addEventListener('hashchange', () => {
     if (location.hash) {
@@ -404,20 +404,20 @@ function setupTicketsIslandInteractions() {
     toggleBtn.addEventListener('click', () => {
       const isOpen = menuEl.classList.contains('open');
       if (isOpen) {
-        closeTicketsMenu();
-      } else {
-        openTicketsMenu();
-      }
-    });
-    
+      closeTicketsMenu();
+    } else {
+      openTicketsMenu();
+    }
+  });
+
     // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
       if (menuEl.classList.contains('open') && 
           !menuEl.contains(e.target) && 
           !toggleBtn.contains(e.target)) {
-        closeTicketsMenu();
-      }
-    });
+      closeTicketsMenu();
+    }
+  });
     
     // Close menu when clicking on overlay
     const overlay = document.getElementById('ticketsOverlay');
@@ -428,11 +428,11 @@ function setupTicketsIslandInteractions() {
     }
     
     // Close menu when pressing Escape
-    document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && menuEl.classList.contains('open')) {
-        closeTicketsMenu();
-      }
-    });
+      closeTicketsMenu();
+    }
+  });
   }
 }
 
@@ -851,34 +851,34 @@ function updateArtists() {
   if (artistsGrid) {
     artistsGrid.innerHTML = '';
     (CONFIG.artists || []).forEach(a => {
-      const card = document.createElement('div');
-      card.className = 'card artist';
+    const card = document.createElement('div');
+    card.className = 'card artist';
       if (a.headliner) {
-        card.classList.add('headliner');
-      }
+      card.classList.add('headliner');
+    }
       const linksHtml = (a.links || [])
         .map(l => {
           const icon = getSocialIcon(l.t);
           const iconHtml = icon ? `<img src="${icon}" alt="${l.t}" class="social-icon">` : '';
           return `<a class="btn social-btn" href="${l.u}" target="_blank" rel="noopener noreferrer" aria-label="${l.t}">${iconHtml}</a>`;
         })
-        .join('');
+      .join('');
       // Create bio content with read more functionality
       const bioText = getTranslation(a.bio, '');
       const bioContent = textToParagraphs(bioText);
       
       // Check if bio is long enough to need read more
       const needsReadMore = bioText.length > 200; // Adjust threshold as needed
-      
-      card.innerHTML = `
+    
+    card.innerHTML = `
         <img src="${a.img}" alt="${getTranslation(a.name, 'Artist')}" loading="lazy"/>
         <div class="content">
           <h3>${getTranslation(a.name, 'Artist')}</h3>
           <div class="bio-content">${bioContent}</div>
           ${needsReadMore ? '<button class="read-more" data-action="expand">Read more</button>' : ''}
-          <div class="links row">${linksHtml}</div>
-        </div>`;
-      
+        <div class="links row">${linksHtml}</div>
+      </div>`;
+    
       // Add read more functionality
       if (needsReadMore) {
         const readMoreBtn = card.querySelector('.read-more');
@@ -921,10 +921,10 @@ function updateFaqs() {
   if (faqList) {
     faqList.innerHTML = '';
     (CONFIG.faqs || []).forEach(f => {
-      const d = document.createElement('details');
+    const d = document.createElement('details');
       d.innerHTML = `<summary>${getTranslation(f.q, 'Question')}</summary><div class="answer">${textToParagraphs(getTranslation(f.a, ''))}</div>`;
       faqList.appendChild(d);
-    });
+  });
   }
 }
 
@@ -1566,7 +1566,7 @@ function initMediaSlider() {
         // Only open lightbox if it's a short tap (not a swipe)
         if (touchDuration < 300 && touchDistance < 10) {
           e.preventDefault();
-          openLightbox(index);
+        openLightbox(index);
         }
       });
       

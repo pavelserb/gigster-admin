@@ -35,7 +35,12 @@ class AdminPanel {
       adminInterface: document.getElementById('adminInterface'),
       modalOverlay: document.getElementById('modalOverlay'),
       modalBody: document.getElementById('modalBody'),
-      modalClose: document.getElementById('modalClose')
+      modalClose: document.getElementById('modalClose'),
+      navTabs: document.querySelectorAll('.nav-tab'),
+      tabContents: document.querySelectorAll('.tab-content'),
+      saveAllBtn: document.getElementById('saveAllBtn'),
+      previewBtn: document.getElementById('previewBtn'),
+      logoutBtn: document.getElementById('logoutBtn')
     };
   }
 
@@ -240,19 +245,120 @@ class AdminPanel {
       this.setupInterface();
       this.setupLanguageManagement();
       this.initTranslationCounters();
+      this.restoreActiveTab();
       this.isInitialized = true;
+    }
+  }
+  
+  // Restore active tab from localStorage
+  restoreActiveTab() {
+    const savedTab = localStorage.getItem('adminActiveTab');
+    if (savedTab && document.querySelector(`[data-tab="${savedTab}"]`)) {
+      this.switchTab(savedTab);
+    }
+  }
+  
+  // Setup performance optimizations
+  setupPerformanceOptimizations() {
+    // Debounce form input events for better performance
+    this.setupFormDebouncing();
+    
+    // Optimize scroll performance
+    this.setupScrollOptimizations();
+    
+    // Preload critical resources
+    this.preloadCriticalResources();
+  }
+  
+  // Setup form debouncing for better performance
+  setupFormDebouncing() {
+    const debounce = (func, wait) => {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    };
+    
+    // Apply debouncing to form inputs
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+      const debouncedHandler = debounce((e) => {
+        if (e.target.dataset.autoSave !== 'false') {
+          this.handleFormChange(e);
+        }
+      }, 300);
+      
+      input.addEventListener('input', debouncedHandler);
+      input.addEventListener('change', debouncedHandler);
+    });
+  }
+  
+  // Setup scroll optimizations
+  setupScrollOptimizations() {
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // Handle scroll-based optimizations here
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  }
+  
+  // Preload critical resources
+  preloadCriticalResources() {
+    // Preload critical CSS and JS files
+    const criticalResources = [
+      'css/admin.css',
+      'js/admin.js'
+    ];
+    
+    criticalResources.forEach(resource => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.href = resource;
+      link.as = resource.endsWith('.css') ? 'style' : 'script';
+      document.head.appendChild(link);
+    });
+  }
+  
+  // Handle form changes with performance optimization
+  handleFormChange(event) {
+    const fieldName = event.target.name || event.target.id;
+    
+    // Update specific sections based on field name
+    if (fieldName.includes('event') || fieldName.includes('venue') || fieldName.includes('tickets')) {
+      this.updateConfigFromForm();
+    } else if (fieldName.includes('_en') || fieldName.includes('_cs') || fieldName.includes('_uk')) {
+      this.updateTranslationCounter(fieldName.split('_')[0]);
     }
   }
 
   bindEvents() {
     // Login
     document.getElementById('loginForm')?.addEventListener('submit', (e) => this.handleLogin(e));
-    document.getElementById('logoutBtn')?.addEventListener('click', () => this.logout());
+    this._elements.logoutBtn?.addEventListener('click', () => this.logout());
 
-    // Navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
-    });
+    // Navigation - use event delegation for better performance
+    const navContainer = document.querySelector('.nav-container');
+    if (navContainer) {
+      navContainer.addEventListener('click', (e) => {
+        const tab = e.target.closest('.nav-tab');
+        if (tab) {
+          this.switchTab(tab.dataset.tab);
+        }
+      });
+    }
 
     // Config buttons
     document.getElementById('addSellerBtn')?.addEventListener('click', () => this.addSeller());
@@ -295,9 +401,12 @@ class AdminPanel {
     document.getElementById('previewHtmlBtn')?.addEventListener('click', () => this.previewHtml());
     document.getElementById('saveHtmlBtn')?.addEventListener('click', () => this.saveHtml());
 
-    // Global actions
-    document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAll());
-    document.getElementById('previewBtn')?.addEventListener('click', () => this.previewSite());
+    // Global actions - use cached elements
+    this._elements.saveAllBtn?.addEventListener('click', () => this.saveAll());
+    this._elements.previewBtn?.addEventListener('click', () => this.previewSite());
+    
+    // Add performance optimizations
+    this.setupPerformanceOptimizations();
 
     // Modal
     document.getElementById('modalClose')?.addEventListener('click', () => this.closeModal());
@@ -462,17 +571,49 @@ class AdminPanel {
   }
 
   switchTab(tabName) {
-    // Update navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.classList.remove('active');
-    });
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    // Update navigation with performance optimization
+    const allTabs = document.querySelectorAll('.nav-tab');
+    const targetTab = document.querySelector(`[data-tab="${tabName}"]`);
+    
+    // Use requestAnimationFrame for smooth transitions
+    requestAnimationFrame(() => {
+      allTabs.forEach(tab => {
+        tab.classList.remove('active');
+      });
+      targetTab.classList.add('active');
 
-    // Update content
-    document.querySelectorAll('.tab-content').forEach(content => {
-      content.classList.remove('active');
+      // Update content
+      const allContents = document.querySelectorAll('.tab-content');
+      const targetContent = document.getElementById(`${tabName}Tab`);
+      
+      allContents.forEach(content => {
+        content.classList.remove('active');
+      });
+      targetContent.classList.add('active');
+      
+      // Save active tab to localStorage for persistence
+      localStorage.setItem('adminActiveTab', tabName);
+      
+      // Lazy load content if needed
+      this.lazyLoadTabContent(tabName);
     });
-    document.getElementById(`${tabName}Tab`).classList.add('active');
+  }
+  
+  // Lazy load tab content for better performance
+  lazyLoadTabContent(tabName) {
+    // Add any lazy loading logic here if needed
+    // For now, just trigger any necessary initializations
+    switch(tabName) {
+      case 'media':
+        // Initialize media manager if not already done
+        if (window.mediaManager && !window.mediaManager.isInitialized) {
+          window.mediaManager.init();
+        }
+        break;
+      case 'marketing':
+        // Initialize marketing tools if needed
+        break;
+    }
   }
 
   // Config Management

@@ -146,50 +146,65 @@ class AdminPanel {
     console.log('📊 Current translations object:', this.translations);
     
     // Parse field name to determine the path in translations object
-    // Field names are like "nav.about", "cta.tickets", etc.
-    const pathParts = fieldName.split('.');
+    // Field names can be:
+    // - "nav.about", "cta.tickets" (from translations tab)
+    // - "eventName", "venueName" (from config tab)
+    // - "category_tickets", "badge_important" (from updates tab)
     
-    if (pathParts.length >= 2) {
-      const section = pathParts[0];
-      const key = pathParts.slice(1).join('.');
-      
-      console.log('🔍 Parsed path:', { section, key });
-      
-      // Initialize section if it doesn't exist
-      if (!this.translations.sections) {
-        this.translations.sections = {};
-      }
-      if (!this.translations.sections.en) {
-        this.translations.sections.en = {};
-      }
-      if (!this.translations.sections.cs) {
-        this.translations.sections.cs = {};
-      }
-      if (!this.translations.sections.uk) {
-        this.translations.sections.uk = {};
-      }
-      if (!this.translations.sections.en[section]) {
-        this.translations.sections.en[section] = {};
-      }
-      if (!this.translations.sections.cs[section]) {
-        this.translations.sections.cs[section] = {};
-      }
-      if (!this.translations.sections.uk[section]) {
-        this.translations.sections.uk[section] = {};
-      }
-      
-      // Update the translation values
-      this.translations.sections.en[section][key] = enValue;
-      this.translations.sections.cs[section][key] = csValue;
-      this.translations.sections.uk[section][key] = ukValue;
-      
-      console.log('✅ Updated translations object:', this.translations);
-      
-      // Auto-save translations after a short delay
-      this.debouncedSaveTranslations();
-    } else {
-      console.warn('⚠️ Invalid field name format:', fieldName);
+    let section, key;
+    
+    // Try dot notation first (translations tab)
+    if (fieldName.includes('.')) {
+      const pathParts = fieldName.split('.');
+      section = pathParts[0];
+      key = pathParts.slice(1).join('.');
     }
+    // Try underscore notation (updates tab)
+    else if (fieldName.includes('_')) {
+      const pathParts = fieldName.split('_');
+      section = pathParts[0];
+      key = pathParts.slice(1).join('_');
+    }
+    // Single word (config tab) - these are not translations, skip
+    else {
+      console.log('ℹ️ Skipping config field:', fieldName);
+      return;
+    }
+    
+    console.log('🔍 Parsed path:', { section, key });
+    
+    // Initialize section if it doesn't exist
+    if (!this.translations.sections) {
+      this.translations.sections = {};
+    }
+    if (!this.translations.sections.en) {
+      this.translations.sections.en = {};
+    }
+    if (!this.translations.sections.cs) {
+      this.translations.sections.cs = {};
+    }
+    if (!this.translations.sections.uk) {
+      this.translations.sections.uk = {};
+    }
+    if (!this.translations.sections.en[section]) {
+      this.translations.sections.en[section] = {};
+    }
+    if (!this.translations.sections.cs[section]) {
+      this.translations.sections.cs[section] = {};
+    }
+    if (!this.translations.sections.uk[section]) {
+      this.translations.sections.uk[section] = {};
+    }
+    
+    // Update the translation values
+    this.translations.sections.en[section][key] = enValue;
+    this.translations.sections.cs[section][key] = csValue;
+    this.translations.sections.uk[section][key] = ukValue;
+    
+    console.log('✅ Updated translations object:', this.translations);
+    
+    // Auto-save translations after a short delay
+    this.debouncedSaveTranslations();
   }
   
   // Debounced save translations to avoid too many requests

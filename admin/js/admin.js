@@ -225,6 +225,87 @@ class AdminPanel {
     }, 1000); // Save after 1 second of inactivity
   }
 
+  // Update translations from form fields
+  updateTranslationsFromForm() {
+    console.log('🔄 Updating translations from form...');
+    
+    // Debug: Check what's in the translations tab
+    const translationsTab = document.getElementById('translationsTab');
+    console.log('🔍 Translations tab found:', !!translationsTab);
+    
+    if (translationsTab) {
+      console.log('🔍 Translations tab HTML:', translationsTab.innerHTML.substring(0, 500) + '...');
+    }
+    
+    // Get all translation fields from the translations tab
+    const translationFields = document.querySelectorAll('#translationsTab input[data-key]');
+    
+    console.log('🔍 Found translation fields:', translationFields.length);
+    
+    // Debug: Check all elements with data-key in translations tab
+    const allDataKeys = document.querySelectorAll('#translationsTab [data-key]');
+    console.log('🔍 All elements with data-key:', allDataKeys.length);
+    
+    allDataKeys.forEach((el, index) => {
+      console.log(`🔍 Element ${index}:`, {
+        tagName: el.tagName,
+        className: el.className,
+        dataKey: el.getAttribute('data-key')
+      });
+    });
+    
+    translationFields.forEach(field => {
+      const fieldName = field.getAttribute('data-key');
+      if (!fieldName) return;
+      
+      console.log('🔍 Processing field:', fieldName);
+      
+      // For single language fields, just get the value directly
+      const value = field.value.trim();
+      
+      // Parse field name to determine the path in translations object
+      let section, key;
+      
+      // Try dot notation first (translations tab)
+      if (fieldName.includes('.')) {
+        const pathParts = fieldName.split('.');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('.');
+      }
+      // Try underscore notation (updates tab)
+      else if (fieldName.includes('_')) {
+        const pathParts = fieldName.split('_');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('_');
+      }
+      // Single word - skip
+      else {
+        return;
+      }
+      
+      // Get current language
+      const currentLang = this.currentLanguage || 'en';
+      
+      // Initialize section if it doesn't exist
+      if (!this.translations.sections) {
+        this.translations.sections = {};
+      }
+      if (!this.translations.sections[currentLang]) {
+        this.translations.sections[currentLang] = {};
+      }
+      if (!this.translations.sections[currentLang][section]) {
+        this.translations.sections[currentLang][section] = {};
+      }
+      
+      // Update the translation value for current language
+      this.translations.sections[currentLang][section][key] = value;
+      
+      console.log(`✅ Updated translation: ${currentLang}.${section}.${key} = "${value}"`);
+    });
+    
+    console.log('📊 Final translations object:', this.translations);
+  }
+
   // Initialize translation counters for all fields
   initTranslationCounters() {
     const translationFields = document.querySelectorAll('.compact-translation-field');

@@ -3262,10 +3262,30 @@ class AdminPanel {
   updateTranslationsFromForm() {
     console.log('🔄 Updating translations from form...');
     
+    // Debug: Check what's in the translations tab
+    const translationsTab = document.getElementById('translationsTab');
+    console.log('🔍 Translations tab found:', !!translationsTab);
+    
+    if (translationsTab) {
+      console.log('🔍 Translations tab HTML:', translationsTab.innerHTML.substring(0, 500) + '...');
+    }
+    
     // Get all translation fields from the translations tab
     const translationFields = document.querySelectorAll('#translationsTab .compact-translation-field[data-field]');
     
     console.log('🔍 Found translation fields:', translationFields.length);
+    
+    // Debug: Check all elements with data-field in translations tab
+    const allDataFields = document.querySelectorAll('#translationsTab [data-field]');
+    console.log('🔍 All elements with data-field:', allDataFields.length);
+    
+    allDataFields.forEach((el, index) => {
+      console.log(`🔍 Element ${index}:`, {
+        tagName: el.tagName,
+        className: el.className,
+        dataField: el.getAttribute('data-field')
+      });
+    });
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-field');

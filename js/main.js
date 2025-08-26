@@ -480,8 +480,8 @@ function mountBasics() {
   // Update static translations
   updateStaticTranslations();
   
-  // Update form placeholders
-  updateFormPlaceholders();
+  // Update form placeholders (with retry if translations not ready)
+  updateFormPlaceholdersWithRetry();
   
   // Listen for language changes to update form placeholders
   document.addEventListener('languageChanged', () => {
@@ -1683,6 +1683,35 @@ function updateFormPlaceholders() {
       element.setAttribute('aria-label', translation);
     }
   });
+}
+
+// Update form placeholders with retry mechanism
+function updateFormPlaceholdersWithRetry() {
+  // Try to update immediately
+  if (typeof window.TRANSLATIONS !== 'undefined') {
+    updateFormPlaceholders();
+    return;
+  }
+  
+  // If translations not ready, retry after a short delay
+  let retryCount = 0;
+  const maxRetries = 10;
+  
+  const retryUpdate = () => {
+    if (typeof window.TRANSLATIONS !== 'undefined') {
+      updateFormPlaceholders();
+      return;
+    }
+    
+    retryCount++;
+    if (retryCount < maxRetries) {
+      setTimeout(retryUpdate, 100); // Retry every 100ms
+    } else {
+      console.warn('🌐 Main.js: Failed to load form translations after', maxRetries, 'retries');
+    }
+  };
+  
+  setTimeout(retryUpdate, 100);
 }
 
 // Get translation for form fields from i18n.js translations

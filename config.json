@@ -210,7 +210,6 @@
   "artists": [
     {
       "img": "assets/images/artists/artbat.jpg",
-      "headliner": "on",
       "linkType_0": "Website",
       "linkUrl_0": "https://artbatmusic.com",
       "name": {

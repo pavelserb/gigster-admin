@@ -35,20 +35,24 @@ function detectBrowserLang(supported) {
   return FALLBACK_LANG;
 }
 
+// Load translations from translations.json
 async function loadTranslations() {
   try {
-    const res = await fetch('translations.json', { cache: 'no-store' });
-    TRANSLATIONS = await res.json();
-    console.log('🌐 i18n.js: Translations loaded successfully');
+    const response = await fetch('translations.json');
+    if (response.ok) {
+      TRANSLATIONS = await response.json();
+      
+      // Apply initial translations for current language
+      const currentLang = getLang();
+      if (currentLang) {
+        applyTranslations(currentLang);
+      }
+    } else {
+      console.error('🌐 i18n.js: Failed to load translations.json');
+    }
   } catch (error) {
     console.error('🌐 i18n.js: Error loading translations:', error);
-    TRANSLATIONS = { en: {} };
   }
-  
-  // Apply initial translations based on current language
-  const currentLang = getLang();
-  console.log('🌐 i18n.js: Applying initial translations for language:', currentLang);
-  applyTranslations(currentLang);
 }
 
 function escapeHTML(s){
@@ -60,52 +64,31 @@ function getByPath(dict, path){
   return path.split('.').reduce((acc, k) => (acc && acc[k] != null) ? acc[k] : undefined, dict);
 }
 
+// Apply translations for a specific language
 function applyTranslations(lang) {
-  console.log('🌐 i18n.js: applyTranslations() called with language:', lang);
-  console.log('🌐 i18n.js: TRANSLATIONS available:', !!TRANSLATIONS);
-  console.log('🌐 i18n.js: TRANSLATIONS keys:', Object.keys(TRANSLATIONS));
+  if (!TRANSLATIONS || !TRANSLATIONS.sections || !TRANSLATIONS.sections[lang]) {
+    console.warn('🌐 i18n.js: No translations available for language:', lang);
+    return;
+  }
   
-  // Get translations from the correct path: TRANSLATIONS.sections[lang]
-  const dict = (TRANSLATIONS.sections && TRANSLATIONS.sections[lang]) || 
-               (TRANSLATIONS.sections && TRANSLATIONS.sections[FALLBACK_LANG]) || {};
-  
-  console.log('🌐 i18n.js: Using dictionary for language:', lang, 'with keys:', Object.keys(dict));
-  
+  const dict = TRANSLATIONS.sections[lang];
   const elements = document.querySelectorAll('[data-i18n]');
-  console.log('🌐 i18n.js: Found', elements.length, 'elements with data-i18n attribute');
   
-  elements.forEach((el, index) => {
-    const path = el.getAttribute('data-i18n');
+  elements.forEach((element, index) => {
+    const path = element.getAttribute('data-i18n');
+    if (!path) return;
+    
     const val = getByPath(dict, path);
-    const mode = el.getAttribute('data-i18n-mode') || 'text';
-
-    console.log(`🌐 i18n.js: Element ${index}: path="${path}", value="${val}", mode="${mode}"`);
-
-    if (val == null) {
-      console.warn(`🌐 i18n.js: No translation found for path: ${path}`);
-      return;
+    if (val) {
+      const mode = element.getAttribute('data-i18n-mode') || 'text';
+      
+      if (mode === 'html') {
+        element.innerHTML = val;
+      } else {
+        element.textContent = val;
+      }
     }
-
-    // Абзацы: массив => <p>…</p>; строка с \n\n => сплит на абзацы
-    if (mode === 'paras') {
-      let paras = Array.isArray(val) ? val
-               : String(val).split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
-      el.innerHTML = paras.map(p => `<p>${escapeHTML(p).replace(/\n/g,'<br>')}</p>`).join('');
-      return;
-    }
-
-    // HTML-вставка (если нужно поддержать метки <strong>, <a> и т.п.)
-    if (mode === 'html') {
-      el.innerHTML = String(val);
-      return;
-    }
-
-    // По умолчанию — чистый текст
-    el.textContent = typeof val === 'string' ? val : String(val);
-    console.log(`🌐 i18n.js: Applied translation "${val}" to element ${index}`);
   });
-  
-  console.log('🌐 i18n.js: applyTranslations() completed');
 }
 
 
@@ -233,11 +216,11 @@ window.cycleLang = cycleLang;
 
 // Listen for language changes from main.js
 document.addEventListener('languageChanged', (e) => {
-  const newLang = e.detail?.language || 'en';
-  console.log('🌐 i18n.js: Language changed event received:', newLang);
-  setLang(newLang);
-  applyTranslations(newLang);
-  updateUrlLangParam(newLang);
+  const newLang = e.detail.language;
+  if (newLang) {
+    setLang(newLang);
+    applyTranslations(newLang);
+  }
 });
 
 // Auto-initialize when DOM is ready

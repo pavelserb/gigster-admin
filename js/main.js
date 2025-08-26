@@ -1,136 +1,81 @@
-// Global CONFIG variable
+// Global variables
 let CONFIG = {};
-console.log('🌐 Main.js: CONFIG initialized as:', CONFIG);
-
-// Language management
 let CURRENT_LANG = 'en';
-const SUPPORTED_LANGS = ['en', 'cs', 'uk'];
 let STATIC_TRANSLATIONS = null;
+const SUPPORTED_LANGS = ['en', 'cs', 'uk'];
+const eventTracker = {};
 
-console.log('🌐 Main.js: SUPPORTED_LANGS defined as:', SUPPORTED_LANGS);
-console.log('🌐 Main.js: Initial CURRENT_LANG set to:', CURRENT_LANG);
-console.log('🌐 Main.js: STATIC_TRANSLATIONS initialized as:', STATIC_TRANSLATIONS);
-
-// Analytics tracker
-let eventTracker = null;
-console.log('🌐 Main.js: eventTracker initialized as:', eventTracker);
-
-// Log all global variables for debugging
-console.log('🌐 Main.js: All global variables initialized:', {
-  CONFIG: CONFIG,
-  CURRENT_LANG: CURRENT_LANG,
-  SUPPORTED_LANGS: SUPPORTED_LANGS,
-  STATIC_TRANSLATIONS: STATIC_TRANSLATIONS,
-  eventTracker: eventTracker
-});
+// Initialize UpdatesManager
+let updatesManager = null;
 
 // Get language from localStorage or default to English
 function getCurrentLang() {
   const saved = localStorage.getItem('site_language');
-  const result = SUPPORTED_LANGS.includes(saved) ? saved : 'en';
-  console.log('🌐 Main.js: getCurrentLang() called - saved:', saved, 'result:', result);
+  const result = saved && SUPPORTED_LANGS.includes(saved) ? saved : 'en';
   return result;
 }
 
-// Set current language and save to localStorage
+// Set current language and apply translations
 function setCurrentLang(lang) {
-  console.log('🌐 Main.js: setCurrentLang() called with language:', lang);
-  if (SUPPORTED_LANGS.includes(lang)) {
-    const previousLang = CURRENT_LANG;
-    console.log('🌐 Main.js: Previous language:', previousLang);
-    CURRENT_LANG = lang;
-    localStorage.setItem('site_language', lang);
-    
-    // Track language change if it's not the first load
-    if (eventTracker && previousLang && previousLang !== lang) {
-      eventTracker.track('language_change', {
-        new_language: lang,
-        previous_language: previousLang,
-        source: 'user_selection'
-      });
-    }
-    
-    console.log('🌐 Main.js: Calling applyNewTranslations with language:', lang);
-    applyNewTranslations(lang);
-    
-    // Close dropdown after language selection
-    const langSwitcher = document.querySelector('.lang-switcher');
-    if (langSwitcher) {
-      langSwitcher.classList.remove('open');
-    }
-    
-    console.log('🌐 Main.js: setCurrentLang() completed');
-  } else {
-    console.warn('🌐 Main.js: Unsupported language:', lang);
+  if (!SUPPORTED_LANGS.includes(lang)) {
+    console.warn('🌐 Main.js: Invalid language:', lang);
+    return;
   }
+  
+  const previousLang = CURRENT_LANG;
+  CURRENT_LANG = lang;
+  
+  // Update HTML lang attribute
+  document.documentElement.lang = lang;
+  
+  // Apply new translations
+  applyNewTranslations(lang);
 }
 
-// Get translation for a field (supports both old string and new object format)
+// Get translation for a field (supports both string and object formats)
 function getTranslation(field, fallback = '') {
-  console.log('🌐 Main.js: getTranslation() called with key:', field, 'fallback:', fallback);
-  console.log('🌐 Main.js: Current language:', CURRENT_LANG);
-  console.log('🌐 Main.js: STATIC_TRANSLATIONS keys:', Object.keys(STATIC_TRANSLATIONS));
-  
   if (!field) return fallback;
   
   if (typeof field === 'object') {
-    // New translation object format
-    const result = field[CURRENT_LANG] || field.en || fallback;
-    console.log('🌐 Main.js: getTranslation() called:', {
-      field: field,
-      currentLang: CURRENT_LANG,
-      result: result
-    });
-    return result;
+    return field[CURRENT_LANG] || field.en || fallback;
   }
   
-  // Old string format - return as is
-  console.log('🌐 Main.js: getTranslation returning string as is:', field);
   return field;
 }
 
-// Load CONFIG from JSON file
+// Load config.json
 async function loadConfig() {
   try {
-    console.log('🌐 Main.js: Loading config.json...');
     const response = await fetch('config.json');
-    if (!response.ok) {
-      throw new Error('Failed to load config.json');
+    if (response.ok) {
+      CONFIG = await response.json();
+    } else {
+      console.error('🌐 Main.js: Failed to load config.json');
     }
-    CONFIG = await response.json();
-    console.log('🌐 Main.js: Config loaded successfully');
   } catch (error) {
-    console.error('Error loading CONFIG:', error);
-    // Fallback to empty config
-    CONFIG = {};
+    console.error('🌐 Main.js: Error loading config.json:', error);
   }
 }
 
-// Load new translations from JSON file
-async function loadNewTranslations() {
+// Load translations.json
+async function loadTranslations() {
   try {
-    console.log('🌐 Main.js: Loading translations.json...');
     const response = await fetch('translations.json');
-    if (!response.ok) {
-      throw new Error('Failed to load translations.json');
+    if (response.ok) {
+      const translations = await response.json();
+      STATIC_TRANSLATIONS = translations;
+    } else {
+      console.error('🌐 Main.js: Failed to load translations.json');
     }
-    const translations = await response.json();
-    STATIC_TRANSLATIONS = translations;
-    console.log('🌐 Main.js: Translations loaded:', Object.keys(translations));
-    return translations;
   } catch (error) {
-    console.error('Error loading translations:', error);
-    STATIC_TRANSLATIONS = {};
-    return {};
+    console.error('🌐 Main.js: Error loading translations.json:', error);
   }
 }
 
 // Initialize new language UI
 function initNewLangUI() {
-  console.log('🌐 Main.js: initNewLangUI() called');
   // Set initial language
   CURRENT_LANG = getCurrentLang();
-  console.log('🌐 Main.js: Initial language set to:', CURRENT_LANG);
   
   // Load and apply translations
   loadAndApplyTranslations();
@@ -184,27 +129,34 @@ function initNewLangUI() {
 // Get language flag emoji
 function getLangFlag(lang) {
   const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
-  const result = flags[lang] || '🌐';
-  console.log('🌐 Main.js: getLangFlag() called with:', lang, 'returning:', result);
-  return result;
+  return flags[lang] || '🌐';
 }
 
 // Get language name
 function getLangName(lang) {
   const names = { en: 'EN', cs: 'CS', uk: 'UK' };
-  const result = names[lang] || 'EN';
-  console.log('🌐 Main.js: getLangName() called with:', lang, 'returning:', result);
-  return result;
+  return names[lang] || 'EN';
 }
 
 // Load and apply translations from translations.json
 async function loadAndApplyTranslations() {
-  console.log('🌐 Main.js: loadAndApplyTranslations() called');
+  // Load translations from translations.json
+  try {
+    const response = await fetch('translations.json', { cache: 'no-store' });
+    if (response.ok) {
+      window.STATIC_TRANSLATIONS = await response.json();
+    } else {
+      console.warn('🌐 Main.js: Failed to load translations.json');
+      return;
+    }
+  } catch (error) {
+    console.error('🌐 Main.js: Error loading translations:', error);
+    return;
+  }
   
   // Wait for i18n.js to be ready
   let attempts = 0;
   while (!window.applyTranslations && attempts < 50) {
-    console.log('🌐 Main.js: Waiting for applyTranslations function, attempt:', attempts + 1);
     await new Promise(resolve => setTimeout(resolve, 100));
     attempts++;
   }
@@ -214,12 +166,9 @@ async function loadAndApplyTranslations() {
     return;
   }
   
-  console.log('🌐 Main.js: applyTranslations function found, applying translations for language:', CURRENT_LANG);
-  
   // Apply translations for current language
   try {
     window.applyTranslations(CURRENT_LANG);
-    console.log('🌐 Main.js: Translations applied successfully for language:', CURRENT_LANG);
   } catch (error) {
     console.error('🌐 Main.js: Error applying translations:', error);
   }
@@ -227,46 +176,39 @@ async function loadAndApplyTranslations() {
 
 // Apply new translations to the page
 function applyNewTranslations(lang) {
-  console.log('🌐 Main.js: applyNewTranslations() called with language:', lang);
   CURRENT_LANG = lang;
   
-  // Update all translatable content
+  // Apply translations from translations.json first
+  if (window.applyTranslations) {
+    window.applyTranslations(lang);
+  } else {
+    console.error('🌐 Main.js: applyTranslations function not available');
+    // Try to load and apply translations manually
+    setTimeout(() => {
+      if (window.applyTranslations) {
+        window.applyTranslations(lang);
+      }
+    }, 100);
+  }
+  
+  // Update all translatable content after translations are loaded
   updateEventInfo();
   updateArtists();
   updateFaqs();
   updateTickets();
   updateStaticTranslations();
   
-  // Apply translations from translations.json
-  if (window.applyTranslations) {
-    console.log('🌐 Main.js: Applying static translations for language:', lang);
-    window.applyTranslations(lang);
-    console.log('🌐 Main.js: Static translations applied for language:', lang);
-  } else {
-    console.error('🌐 Main.js: applyTranslations function not available');
-    // Try to load and apply translations manually
-    setTimeout(() => {
-      if (window.applyTranslations) {
-        console.log('🌐 Main.js: Retrying to apply translations for language:', lang);
-        window.applyTranslations(lang);
-      }
-    }, 100);
-  }
-  
   // Update updates manager language
   if (window.updatesManager) {
-    console.log('🌐 Main.js: Calling updatesManager.setLanguage with language:', lang);
     window.updatesManager.setLanguage(lang);
   } else {
     console.warn('🌐 Main.js: updatesManager not available');
   }
 
   // Dispatch language change event for other components
-  console.log('🌐 Main.js: Dispatching languageChanged event with language:', lang);
   document.dispatchEvent(new CustomEvent('languageChanged', {
     detail: { language: lang }
   }));
-  console.log('🌐 Main.js: languageChanged event dispatched');
   
   // Update language switcher UI
   const langSwitcher = document.querySelector('.lang-switcher');
@@ -293,8 +235,6 @@ function applyNewTranslations(lang) {
         </button>
       `).join('');
     }
-    
-    console.log('🌐 Main.js: Language switcher UI updated for language:', lang);
   } else {
     console.warn('🌐 Main.js: Language switcher not found for UI update');
   }
@@ -302,79 +242,74 @@ function applyNewTranslations(lang) {
 
 // Get current language (alias for compatibility)
 function getCurrentLanguage() {
-  console.log('🌐 Main.js: getCurrentLanguage() called, returning:', CURRENT_LANG);
   return CURRENT_LANG;
 }
 
 // Detect browser language
 function detectBrowserLanguage() {
   const browserLang = navigator.language || navigator.userLanguage;
-  const shortLang = browserLang.split('-')[0];
-  const supportedLangs = ['en', 'cs', 'uk'];
-  const result = supportedLangs.includes(shortLang) ? shortLang : 'en';
-  console.log('🌐 Main.js: detectBrowserLanguage() - browser:', browserLang, 'short:', shortLang, 'result:', result);
+  const shortLang = browserLang.split('-')[0].toLowerCase();
+  const result = SUPPORTED_LANGS.includes(shortLang) ? shortLang : 'en';
   return result;
 }
 
 // Apply browser language on first visit
 function applyBrowserLanguage() {
   const detectedLang = detectBrowserLanguage();
-  const savedLang = localStorage.getItem('site_language');
+  const savedLang = getCurrentLang();
   const finalLang = savedLang || detectedLang;
-  console.log('🌐 Main.js: applyBrowserLanguage() - detected:', detectedLang, 'saved:', savedLang, 'final:', finalLang);
-  setCurrentLang(finalLang);
+  
+  if (finalLang !== CURRENT_LANG) {
+    setCurrentLang(finalLang);
+  }
 }
 
-// Main initialization and page logic
-(async function init() {
-  console.log('🌐 Main.js: init() function started');
-  
-  // Load CONFIG from JSON first
+// Main initialization function
+async function init() {
+  // Load config and translations
   await loadConfig();
+  await loadTranslations();
   
-  // i18n init
-  await loadNewTranslations();
+  // Initialize language UI
   initNewLangUI();
-  applyBrowserLanguage(); // Apply browser language on first visit
-  applyNewTranslations(getCurrentLanguage());
-
-  // Analytics tracker will be initialized automatically in analytics.js
-
-  // Basic data from CONFIG
-  mountBasics();
-  setupTicketsIslandInteractions();
-  revealTicketsIsland(900);     // Soft appearance after ~0.9s
+  applyBrowserLanguage();
   
-  // Initialize updates manager
-  if (window.UpdatesManager) {
-    console.log('🌐 Main.js: Initializing UpdatesManager...');
-    window.updatesManager = new UpdatesManager();
-    await window.updatesManager.init();
-    console.log('🌐 Main.js: UpdatesManager initialized');
-  } else {
-    console.warn('🌐 Main.js: UpdatesManager class not available');
-  }
-
-  // Navigation: active section highlighting
-  setupActiveNav();
+  // Setup header overlay
   setupHeaderOverlay();
-
-  // Event handlers
+  
+  // Setup mobile menu
   setupMobileMenu();
+  
+  // Setup form
   setupForm();
+  
+  // Initialize UpdatesManager
+  if (window.UpdatesManager) {
+    updatesManager = new window.UpdatesManager();
+    await updatesManager.init();
+  } else {
+    console.warn('🌐 Main.js: UpdatesManager not available');
+  }
+  
+  // Mount basic content
+  mountBasics();
+  
+  // Setup tickets island interactions
+  setupTicketsIslandInteractions();
+  
+  // Setup active navigation
+  setupActiveNav();
   
   // Initialize media slider
   initMediaSlider();
   
-  // Analytics tracking will be set up after EventTracker is initialized
-
   // Respect prefers-reduced-motion
   const heroVideo = document.getElementById('heroVideo');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     heroVideo?.removeAttribute('autoplay');
     heroVideo?.pause();
   }
-
+  
   // Scroll correction for anchors and sticky header
   window.addEventListener('hashchange', () => {
     if (location.hash) {
@@ -388,19 +323,11 @@ function applyBrowserLanguage() {
     }
   });
   
-  console.log('🌐 Main.js: init() function completed');
-  console.log('🌐 Main.js: Final state:', {
-    CONFIG: CONFIG,
-    CURRENT_LANG: CURRENT_LANG,
-    SUPPORTED_LANGS: SUPPORTED_LANGS,
-    STATIC_TRANSLATIONS: STATIC_TRANSLATIONS,
-    eventTracker: eventTracker,
-    updatesManager: window.updatesManager
-  });
-})();
+  // Reveal tickets island
+  revealTicketsIsland();
+}
 
 function setupHeaderOverlay() {
-  console.log('🌐 Main.js: setupHeaderOverlay() called');
   const header = document.querySelector('header.site');
   const hero = document.getElementById('hero');
   if (!header || !hero) {
@@ -427,55 +354,87 @@ function setupHeaderOverlay() {
 }
 
 function openTicketsMenu(){
-  console.log('🌐 Main.js: openTicketsMenu() called');
   const menu = document.getElementById('ticketsMenu');
   const toggle = document.getElementById('ticketsToggle');
+  const overlay = document.getElementById('ticketsOverlay');
+  
   if (!menu || !toggle) {
     console.warn('🌐 Main.js: No tickets menu or toggle found');
     return;
   }
+  
   menu.classList.add('open');
   toggle.setAttribute('aria-expanded','true');
   toggle.textContent = '▼';
+  
+  // Show overlay
+  if (overlay) {
+    overlay.removeAttribute('hidden');
+  }
 }
 
 function closeTicketsMenu(){
-  console.log('🌐 Main.js: closeTicketsMenu() called');
   const menu = document.getElementById('ticketsMenu');
   const toggle = document.getElementById('ticketsToggle');
+  const overlay = document.getElementById('ticketsOverlay');
+  
   if (!menu || !toggle) {
     console.warn('🌐 Main.js: No tickets menu or toggle found');
     return;
   }
+  
   menu.classList.remove('open');
   toggle.setAttribute('aria-expanded','false');
   toggle.textContent = '▲';
+  
+  // Hide overlay
+  if (overlay) {
+    overlay.setAttribute('hidden', '');
+  }
 }
 
 function setupTicketsIslandInteractions() {
-  console.log('🌐 Main.js: setupTicketsIslandInteractions() called');
-  
   // Floating CTA interactions
   const toggleBtn = document.getElementById('ticketsToggle');
   const menuEl = document.getElementById('ticketsMenu');
   
   if (toggleBtn && menuEl) {
     toggleBtn.addEventListener('click', () => {
-      console.log('🌐 Main.js: Tickets toggle button clicked');
-      const isOpen = menuEl.classList.contains('is-open');
+      const isOpen = menuEl.classList.contains('open');
       if (isOpen) {
         closeTicketsMenu();
       } else {
         openTicketsMenu();
       }
     });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (menuEl.classList.contains('open') && 
+          !menuEl.contains(e.target) && 
+          !toggleBtn.contains(e.target)) {
+        closeTicketsMenu();
+      }
+    });
+    
+    // Close menu when clicking on overlay
+    const overlay = document.getElementById('ticketsOverlay');
+    if (overlay) {
+      overlay.addEventListener('click', () => {
+        closeTicketsMenu();
+      });
+    }
+    
+    // Close menu when pressing Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuEl.classList.contains('open')) {
+        closeTicketsMenu();
+      }
+    });
   }
-  
-  console.log('🌐 Main.js: setupTicketsIslandInteractions() completed');
 }
 
 function revealTicketsIsland(delayMs = 900) {
-  console.log('🌐 Main.js: revealTicketsIsland() called with delay:', delayMs);
   const island = document.querySelector('.floating-cta');
   if (!island) {
     console.warn('🌐 Main.js: No tickets island found');
@@ -497,9 +456,6 @@ function revealTicketsIsland(delayMs = 900) {
 }
 
 function mountBasics() {
-  console.log('🌐 Main.js: mountBasics() called');
-  console.log('🌐 Main.js: Current language:', CURRENT_LANG);
-  
   // Update event info
   updateEventInfo();
   
@@ -514,8 +470,6 @@ function mountBasics() {
   
   // Update static translations
   updateStaticTranslations();
-  
-  console.log('🌐 Main.js: mountBasics() completed');
 }
 
 // Adjust --cta-bar-h to actual bar height
@@ -534,7 +488,6 @@ if (bar) {
 // Render and event handling moved to updates.js module
 
 function setupActiveNav() {
-  console.log('🌐 Main.js: setupActiveNav() called');
   const anchors = Array.from(document.querySelectorAll('nav.primary a'));
   const sections = anchors
     .map(a => document.querySelector(a.getAttribute('href')))
@@ -613,7 +566,6 @@ function setupActiveNav() {
 }
 
 function setupMobileMenu() {
-  console.log('🌐 Main.js: setupMobileMenu() called');
   const hambBtn = document.getElementById('hambBtn');
   const mnav = document.getElementById('mnav');
   const island = document.querySelector('.floating-cta');
@@ -629,7 +581,7 @@ function setupMobileMenu() {
   const openMenu = () => {
     mnav.removeAttribute('hidden');
     hambBtn.setAttribute('aria-expanded', 'true');
-    island?.setAttribute('hidden', '');
+    // Don't hide the floating CTA button - it should remain visible
     closeTicketsMenu(); // Hide dropdown if it was open
   };
 
@@ -656,9 +608,23 @@ function setupMobileMenu() {
       closeMenu();
     }
   });
+  
+  // Закрытие по клику на оверлей (дополнительная проверка)
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('mobile-overlay') && !mnav.hasAttribute('hidden')) {
+      closeMenu();
+    }
+  });
 
   // Закрытие по клику мимо меню
   document.addEventListener('click', (e) => {
+    // Don't close mobile menu if clicking on tickets menu elements
+    const ticketsMenu = document.getElementById('ticketsMenu');
+    const ticketsToggle = document.getElementById('ticketsToggle');
+    if (ticketsMenu?.contains(e.target) || ticketsToggle?.contains(e.target)) {
+      return;
+    }
+    
     if (!mnav.hasAttribute('hidden') && 
         !mnav.contains(e.target) && 
         !hambBtn.contains(e.target)) {
@@ -698,32 +664,24 @@ function setupMobileMenu() {
 
 // Функция для получения текущей активной секции
 function getCurrentActiveSection() {
-  console.log('🌐 Main.js: getCurrentActiveSection() called');
   const activeLink = document.querySelector('nav.primary a.active');
   if (activeLink) {
     const href = activeLink.getAttribute('href');
     const result = href ? href.substring(1) : 'about';
-    console.log('🌐 Main.js: getCurrentActiveSection result:', result);
     return result;
   }
-  console.log('🌐 Main.js: getCurrentActiveSection defaulting to about');
   return 'about';
 }
 
 function setupForm() {
-  console.log('🌐 Main.js: setupForm() called');
   document.getElementById('contactForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log('🌐 Main.js: Contact form submitted');
     alert("Thanks! We'll get back to you soon.");
   });
-  console.log('🌐 Main.js: setupForm() completed');
 }
 
 // Functions to update translations
 function updateStaticTranslations() {
-  console.log('🌐 Main.js: updateStaticTranslations() called');
-  
   // About description
   const aboutDescriptionEl = document.querySelector('[data-i18n="about.body"]');
   if (aboutDescriptionEl && CONFIG.event?.about) {
@@ -775,53 +733,49 @@ function updateStaticTranslations() {
       }
     });
   }
-  
-  console.log('🌐 Main.js: updateStaticTranslations() completed');
 }
 
 function getTranslationFromFile(key, fallback = '') {
-  console.log('🌐 Main.js: getTranslationFromFile() called with key:', key, 'fallback:', fallback);
-  console.log('🌐 Main.js: Current language:', CURRENT_LANG);
-  console.log('🌐 Main.js: Available translations:', Object.keys(STATIC_TRANSLATIONS));
-  
   if (!STATIC_TRANSLATIONS) {
     console.warn('🌐 Main.js: No STATIC_TRANSLATIONS available');
     return fallback;
   }
   
-  // Split key by dots (e.g., "event.name" -> ["event", "name"])
-  const keys = key.split('.');
-  let current = STATIC_TRANSLATIONS;
+  // Get the current language data from sections
+  const currentLangData = STATIC_TRANSLATIONS.sections?.[CURRENT_LANG];
   
-  for (const k of keys) {
-    if (current && typeof current === 'object' && k in current) {
-      current = current[k];
+  if (!currentLangData) {
+    console.warn('🌐 Main.js: No translations found for language:', CURRENT_LANG);
+    // Try fallback to English
+    const fallbackData = STATIC_TRANSLATIONS.sections?.en;
+    if (!fallbackData) {
+      console.warn('🌐 Main.js: No fallback translations found');
+      return fallback;
+    }
+    return getNestedValue(fallbackData, key, fallback);
+  }
+  
+  return getNestedValue(currentLangData, key, fallback);
+}
+
+// Helper function to get nested object values by dot notation
+function getNestedValue(obj, path, fallback = '') {
+  const keys = path.split('.');
+  let current = obj;
+  
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
     } else {
-      console.warn('🌐 Main.js: Key not found in translations:', k);
+      console.warn('🌐 Main.js: Key not found in translations:', key, 'at path:', path);
       return fallback;
     }
   }
   
-  // If we have a translation object, get the current language version
-  if (current && typeof current === 'object' && CURRENT_LANG in current) {
-    const result = current[CURRENT_LANG];
-    console.log('🌐 Main.js: getTranslationFromFile result for', CURRENT_LANG, ':', result);
-    return result;
-  }
-  
-  // Fallback to English if available
-  if (current && typeof current === 'object' && 'en' in current) {
-    const result = current.en;
-    console.log('🌐 Main.js: getTranslationFromFile fallback to English:', result);
-    return result;
-  }
-  
-  console.warn('🌐 Main.js: No valid translation found for key:', key);
-  return fallback;
+  return current || fallback;
 }
 
 function updateEventInfo() {
-  console.log('🌐 Main.js: updateEventInfo() called');
   const e = CONFIG.event;
   
   // --- Titles / hero basics
@@ -870,12 +824,9 @@ function updateEventInfo() {
   if (eventAboutEl) {
     eventAboutEl.innerHTML = textToParagraphs(getTranslation(e.about, ''));
   }
-  
-  console.log('🌐 Main.js: updateEventInfo() completed');
 }
 
 function updateArtists() {
-  console.log('🌐 Main.js: updateArtists() called');
   // Artists
   const artistsGrid = document.getElementById('artistsGrid');
   if (artistsGrid) {
@@ -939,11 +890,9 @@ function updateArtists() {
       artistsGrid.appendChild(card);
     });
   }
-  console.log('🌐 Main.js: updateArtists() completed');
 }
 
 function updateFaqs() {
-  console.log('🌐 Main.js: updateFaqs() called');
   // FAQs
   const faqList = document.getElementById('faqList');
   if (faqList) {
@@ -954,11 +903,9 @@ function updateFaqs() {
       faqList.appendChild(d);
     });
   }
-  console.log('🌐 Main.js: updateFaqs() completed');
 }
 
 function updateTickets() {
-  console.log('🌐 Main.js: updateTickets() called');
   const e = CONFIG.event;
   
   // Floating CTA: primary + drop-up with vendors
@@ -1086,22 +1033,17 @@ function updateTickets() {
       tiersWrap.appendChild(row);
     });
   }
-  
-  console.log('🌐 Main.js: updateTickets() completed');
 }
 
 // Update functions moved to updates.js module
 
 // Utility function to convert multi-line text to HTML paragraphs
 function textToParagraphs(text) {
-  console.log('🌐 Main.js: textToParagraphs() called with text:', text);
   if (!text) {
-    console.log('🌐 Main.js: textToParagraphs: No text provided');
     return [];
   }
   
   const paragraphs = text.split('\n').filter(p => p.trim());
-  console.log('🌐 Main.js: textToParagraphs result:', paragraphs);
   return paragraphs;
 }
 
@@ -1110,7 +1052,6 @@ let lightboxCurrentSlide = 0;
 let lightboxSlides = [];
 
 function openLightbox(slideIndex) {
-  console.log('🌐 Main.js: openLightbox() called with slide index:', slideIndex);
   const lightbox = document.getElementById('lightbox');
   const lightboxMedia = lightbox.querySelector('.lightbox-media');
   
@@ -1136,7 +1077,6 @@ function openLightbox(slideIndex) {
 }
 
 function closeLightbox() {
-  console.log('🌐 Main.js: closeLightbox() called');
   const lightbox = document.getElementById('lightbox');
   
   // Hide lightbox
@@ -1153,7 +1093,6 @@ function closeLightbox() {
 }
 
 function loadLightboxMedia() {
-  console.log('🌐 Main.js: loadLightboxMedia() called');
   const lightboxMedia = document.querySelector('.lightbox-media');
   const currentMedia = lightboxSlides[lightboxCurrentSlide];
   
@@ -1194,29 +1133,24 @@ function loadLightboxMedia() {
 }
 
 function nextLightboxSlide() {
-  console.log('🌐 Main.js: nextLightboxSlide() called, current slide:', lightboxCurrentSlide);
   if (lightboxCurrentSlide < lightboxSlides.length - 1) {
     lightboxCurrentSlide++;
   } else {
     lightboxCurrentSlide = 0; // Loop to first
   }
-  console.log('🌐 Main.js: Moving to slide:', lightboxCurrentSlide);
   loadLightboxMedia();
 }
 
 function prevLightboxSlide() {
-  console.log('🌐 Main.js: prevLightboxSlide() called, current slide:', lightboxCurrentSlide);
   if (lightboxCurrentSlide > 0) {
     lightboxCurrentSlide--;
   } else {
     lightboxCurrentSlide = lightboxSlides.length - 1; // Loop to last
   }
-  console.log('🌐 Main.js: Moving to slide:', lightboxCurrentSlide);
   loadLightboxMedia();
 }
 
 function updateLightboxNav() {
-  console.log('🌐 Main.js: updateLightboxNav() called');
   const prevBtn = document.querySelector('.lightbox-prev');
   const nextBtn = document.querySelector('.lightbox-next');
   
@@ -1231,7 +1165,6 @@ function updateLightboxNav() {
 }
 
 function setupLightboxEvents() {
-  console.log('🌐 Main.js: setupLightboxEvents() called');
   const lightbox = document.getElementById('lightbox');
   const closeBtn = lightbox.querySelector('.lightbox-close');
   const prevBtn = lightbox.querySelector('.lightbox-prev');
@@ -1281,7 +1214,6 @@ function setupLightboxEvents() {
 }
 
 function removeLightboxEvents() {
-  console.log('🌐 Main.js: removeLightboxEvents() called');
   const lightbox = document.getElementById('lightbox');
   const closeBtn = lightbox.querySelector('.lightbox-close');
   const prevBtn = lightbox.querySelector('.lightbox-prev');
@@ -1306,7 +1238,6 @@ function removeLightboxEvents() {
 }
 
 function handleLightboxKeydown(e) {
-  console.log('🌐 Main.js: handleLightboxKeydown() called with key:', e.key);
   switch (e.key) {
     case 'Escape':
       closeLightbox();
@@ -1322,7 +1253,6 @@ function handleLightboxKeydown(e) {
 
 // Initialize media slider
 function initMediaSlider() {
-  console.log('🌐 Main.js: initMediaSlider() called');
   const slider = document.querySelector('.media-slider');
   if (!slider) {
     console.warn('🌐 Main.js: No media slider found');
@@ -1359,7 +1289,6 @@ function initMediaSlider() {
 
   // Update slide visibility with smooth transitions
   function updateSlides() {
-    console.log('🌐 Main.js: updateSlides() called, current slide:', currentSlide);
     // First, fade out all slides
     slides.forEach((slide) => {
       slide.classList.remove('active');
@@ -1383,24 +1312,19 @@ function initMediaSlider() {
 
   // Go to specific slide
   function goToSlide(index) {
-    console.log('🌐 Main.js: goToSlide() called with index:', index);
     currentSlide = index;
     updateSlides();
   }
 
   // Next slide
   function nextSlide() {
-    console.log('🌐 Main.js: nextSlide() called, current slide:', currentSlide);
     currentSlide = (currentSlide + 1) % totalSlides;
-    console.log('🌐 Main.js: Moving to slide:', currentSlide);
     updateSlides();
   }
 
   // Previous slide
   function prevSlide() {
-    console.log('🌐 Main.js: prevSlide() called, current slide:', currentSlide);
     currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-    console.log('🌐 Main.js: Moving to slide:', currentSlide);
     updateSlides();
   }
 
@@ -1498,7 +1422,6 @@ function initMediaSlider() {
   
   // Autoplay functions
   function toggleAutoplay() {
-    console.log('🌐 Main.js: toggleAutoplay() called, current state:', isAutoplayActive);
     if (isAutoplayActive) {
       stopAutoplay();
     } else {
@@ -1507,9 +1430,7 @@ function initMediaSlider() {
   }
   
   function startAutoplay() {
-    console.log('🌐 Main.js: startAutoplay() called');
     if (isAutoplayActive) {
-      console.log('🌐 Main.js: Autoplay already active');
       return;
     }
     
@@ -1523,9 +1444,7 @@ function initMediaSlider() {
   }
   
   function stopAutoplay() {
-    console.log('🌐 Main.js: stopAutoplay() called');
     if (!isAutoplayActive) {
-      console.log('🌐 Main.js: Autoplay not active');
       return;
     }
     
@@ -1543,9 +1462,7 @@ function initMediaSlider() {
 }
 
 function escapeHTML(text) {
-  console.log('🌐 Main.js: escapeHTML() called with text:', text);
   if (!text) {
-    console.log('🌐 Main.js: escapeHTML: No text provided');
     return '';
   }
   
@@ -1556,8 +1473,14 @@ function escapeHTML(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
   
-  console.log('🌐 Main.js: escapeHTML result:', result);
   return result;
+}
+
+// Start initialization when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
 
 

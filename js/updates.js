@@ -21,386 +21,289 @@ class UpdatesManager {
   }
 
   // Initialize translations for current language
-  getTranslations() {
-    const lang = this.currentLang || 'en';
-    console.log('🌐 Updates.js: getTranslations() called with language:', lang);
-    const result = {
-      en: { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'All' },
-      uk: { moreBtn: 'Показати щё', readMore: 'Читати далі', readLess: 'Приховати', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'Всі' },
-      cs: { moreBtn: 'Načíst další', readMore: 'Více', readLess: 'Méně', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'Vše' }
-    }[lang] || { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'All' };
-    console.log('🌐 Updates.js: getTranslations() result:', result);
-    return result;
+  getTranslations(lang) {
+    const translations = {
+      en: {
+        moreBtn: 'Load more',
+        all: 'All'
+      },
+      cs: {
+        moreBtn: 'Načíst více',
+        all: 'Vše'
+      },
+      uk: {
+        moreBtn: 'Завантажити ще',
+        all: 'Всі'
+      }
+    };
+    return translations[lang] || translations.en;
   }
 
   // Set current language and update translations
   setLanguage(lang) {
-    console.log('🌐 Updates.js: Setting language to:', lang);
     this.currentLang = lang;
-    this.L = this.getTranslations();
+    this.L = this.getTranslations(lang);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('site_language', lang);
+    
+    // Update UI elements
     this.updateMoreButtonText();
     this.updateFilterButtons();
     
-    // Save language to localStorage for consistency with main.js
-    localStorage.setItem('site_language', lang);
-    
-    console.log('🌐 Updates.js: Current language set to:', this.currentLang);
+    // Re-render updates with new language
+    this.render();
   }
 
   // Detect current language from DOM or URL
   detectCurrentLanguage() {
-    console.log('🌐 Updates.js: detectCurrentLanguage() called');
-    
-    // Check localStorage first (for consistency with main.js)
+    // Priority 1: Saved language from localStorage
     const savedLang = localStorage.getItem('site_language');
-    console.log('🌐 Updates.js: Saved language from localStorage:', savedLang);
     if (savedLang && ['en', 'cs', 'uk'].includes(savedLang)) {
-      console.log('🌐 Updates.js: Using saved language:', savedLang);
-      this.setLanguage(savedLang);
-      return;
+      return savedLang;
     }
     
-    // Check if language is set in DOM
+    // Priority 2: HTML lang attribute
     const htmlLang = document.documentElement.lang;
-    console.log('🌐 Updates.js: HTML lang attribute:', htmlLang);
     if (htmlLang && ['en', 'cs', 'uk'].includes(htmlLang)) {
-      console.log('🌐 Updates.js: Using HTML lang:', htmlLang);
-      this.setLanguage(htmlLang);
-      return;
+      return htmlLang;
     }
-
-    // Check URL parameter
+    
+    // Priority 3: URL lang parameter
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
-    console.log('🌐 Updates.js: URL lang parameter:', urlLang);
     if (urlLang && ['en', 'cs', 'uk'].includes(urlLang)) {
-      console.log('🌐 Updates.js: Using URL lang:', urlLang);
-      this.setLanguage(urlLang);
-      return;
+      return urlLang;
     }
-
+    
     // Default to English
-    console.log('🌐 Updates.js: Defaulting to English');
-    this.setLanguage('en');
+    return 'en';
   }
 
   // Initialize the updates manager
   async init() {
-    console.log('🌐 Updates.js: init() called');
-    await this.loadUpdatesData();
-    this.setupDOM();
-    this.setupEventListeners();
-    this.processDeepLink();
-    this.render();
-    this.setupSocialMeta();
+    // Detect and set initial language
+    const detectedLang = this.detectCurrentLanguage();
+    this.setLanguage(detectedLang);
     
-    // Synchronize language with main.js
+    // Synchronize with main.js language if available
     if (window.CURRENT_LANG && window.CURRENT_LANG !== this.currentLang) {
-      console.log('🌐 Updates.js: Synchronizing language with main.js:', window.CURRENT_LANG);
       this.setLanguage(window.CURRENT_LANG);
-      this.render(); // Re-render with synchronized language
     }
     
-    console.log('🌐 Updates.js: init() completed with language:', this.currentLang);
+    // Load updates data
+    await this.loadUpdatesData();
+    
+    // Setup DOM and event listeners
+    this.setupDOM();
+    this.setupEventListeners();
+    
+    // Setup social meta
+    this.setupSocialMeta();
+    
+    // Process deep links if any
+    this.processDeepLink();
+    
+    // Initial render
+    this.render();
   }
 
   // Load updates data from JSON
   async loadUpdatesData() {
     try {
-      console.log('🌐 Updates.js: Loading updates data...');
-      const response = await fetch('updates.json', { cache: 'no-store' });
-      const updatesRaw = await response.json();
-      this.items = [...updatesRaw].sort((a, b) => 
-        (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.ts) - new Date(a.ts)
-      );
-      console.log('🌐 Updates.js: Loaded', this.items.length, 'updates');
-      console.log('🌐 Updates.js: Sample update structure:', this.items[0]);
+      const response = await fetch('updates.json');
+      if (!response.ok) {
+        throw new Error('Failed to load updates.json');
+      }
       
-      // Log the structure of the first few updates for debugging
-      this.items.slice(0, 3).forEach((update, index) => {
-        console.log(`🌐 Updates.js: Update ${index} structure:`, {
-          id: update.id,
-          title: update.title,
-          body: update.body,
-          titleType: typeof update.title,
-          bodyType: typeof update.body,
-          titleKeys: update.title ? Object.keys(update.title) : 'N/A',
-          bodyKeys: update.body ? Object.keys(update.body) : 'N/A'
-        });
-      });
+      const data = await response.json();
+      this.items = data.updates || [];
       
       // Ensure CONFIG is available for translations
       if (!window.CONFIG) {
-        console.log('🌐 Updates.js: CONFIG not available, loading config.json...');
         try {
           const configResponse = await fetch('config.json');
           if (configResponse.ok) {
             window.CONFIG = await configResponse.json();
-            console.log('🌐 Updates.js: CONFIG loaded successfully');
-          } else {
-            console.warn('🌐 Updates.js: Failed to load config.json');
           }
         } catch (error) {
-          console.error('🌐 Updates.js: Error loading config.json:', error);
+          console.warn('🌐 Updates.js: Failed to load config.json:', error);
         }
-      } else {
-        console.log('🌐 Updates.js: CONFIG already available');
       }
+      
+      // Process each update to ensure proper structure
+      this.items.forEach((update, index) => {
+        if (!update.id) {
+          update.id = `update-${index + 1}`;
+        }
+      });
+      
     } catch (error) {
-      console.error('Error loading updates:', error);
+      console.error('🌐 Updates.js: Error loading updates:', error);
       this.items = [];
     }
   }
 
   // Setup DOM references
   setupDOM() {
-    console.log('🌐 Updates.js: setupDOM() called');
-    this.list = document.getElementById('updatesList');
+    // Get DOM elements
+    this.container = document.getElementById('updatesList');
     this.toolbar = document.querySelector('.upd-toolbar');
-    this.moreBtn = document.getElementById('updatesMoreBtn');
+    this.moreBtn = document.querySelector('.more-btn');
     
-    if (!this.list) {
-      console.warn('🌐 Updates.js: No updates list found');
+    if (!this.container) {
+      console.warn('🌐 Updates.js: Updates container not found');
       return;
     }
     
-    // Ensure "Load more" button exists
-    if (!this.moreBtn) {
-      const holder = document.createElement('div');
-      holder.className = 'upd-more';
-      holder.innerHTML = `<button id="updatesMoreBtn" class="btn">Load more</button>`;
-      this.list.after(holder);
-      this.moreBtn = holder.querySelector('#updatesMoreBtn');
-    }
-    
+    // Update more button text
     this.updateMoreButtonText();
+    
+    // Update filter buttons
+    this.updateFilterButtons();
   }
 
   // Update more button text
   updateMoreButtonText() {
-    console.log('🌐 Updates.js: updateMoreButtonText() called');
     if (this.moreBtn) {
       this.moreBtn.textContent = this.L.moreBtn;
-      this.moreBtn.setAttribute('aria-label', this.L.moreBtn);
-      console.log('🌐 Updates.js: More button text updated to:', this.L.moreBtn);
-    } else {
-      console.warn('🌐 Updates.js: No more button found');
     }
   }
 
   // Update filter buttons text
   updateFilterButtons() {
-    console.log('🌐 Updates.js: updateFilterButtons() called');
-    if (!this.toolbar) {
-      console.warn('🌐 Updates.js: No toolbar found for filter buttons update');
-      return;
-    }
-
-    const filterButtons = this.toolbar.querySelectorAll('[data-filter]');
-    filterButtons.forEach(button => {
-      const filterType = button.getAttribute('data-filter');
+    if (!this.toolbar) return;
+    
+    const filterButtons = this.toolbar.querySelectorAll('.chip.sm');
+    filterButtons.forEach(btn => {
+      const filterType = btn.dataset.filter;
+      if (!filterType) return;
+      
       let translatedText = '';
-
-      switch (filterType) {
-        case 'all':
-          translatedText = this.L.all;
-          break;
-        case 'tickets':
-        case 'lineup':
-        case 'logistics':
-        case 'announcement':
-          translatedText = this.getUpdateTypeTranslation(filterType);
-          break;
-        default:
-          translatedText = filterType;
+      
+      if (filterType === 'all') {
+        translatedText = this.L.all;
+      } else {
+        // Get translation from CONFIG.updateCategories
+        translatedText = this.getUpdateTypeTranslation(filterType);
       }
-
-      button.textContent = translatedText;
-      console.log(`🌐 Updates.js: Updated filter button "${filterType}" to "${translatedText}"`);
+      
+      if (translatedText && btn.textContent !== translatedText) {
+        btn.textContent = translatedText;
+      }
     });
   }
 
   // Setup event listeners
   setupEventListeners() {
-    console.log('🌐 Updates.js: setupEventListeners() called');
-    
     // Filter buttons
-    this.toolbar?.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-filter]');
-      if (!btn) return;
-      
-      console.log('�� Updates.js: Filter button clicked:', btn.dataset.filter);
-      
-      this.toolbar.querySelectorAll('.chip.sm').forEach(b => 
-        b.classList.toggle('is-active', b === btn)
-      );
-      
-      this.currentFilter = btn.getAttribute('data-filter');
-      this.page = 0;
-      this.pendingDeepOpen = null;
-      this.resetSocialMeta();
-      this.render();
-    });
-
+    if (this.toolbar) {
+      this.toolbar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip.sm');
+        if (!btn) return;
+        
+        const filterType = btn.dataset.filter;
+        if (filterType) {
+          this.filterUpdates(filterType);
+        }
+      });
+    }
+    
     // Load more button
-    this.moreBtn?.addEventListener('click', () => {
-      console.log('🌐 Updates.js: Load more button clicked');
-      this.page++;
-      this.render();
-      this.showThumbnails();
-    });
-
-    // Language change listener
+    if (this.moreBtn) {
+      this.moreBtn.addEventListener('click', () => {
+        this.loadMore();
+      });
+    }
+    
+    // Language change event from main.js
     document.addEventListener('languageChanged', (e) => {
-      const newLang = e.detail?.language || 'en';
-      console.log('🌐 Language changed in updates.js:', newLang);
-      console.log('🌐 Event details:', e.detail);
+      const newLang = e.detail.language;
       this.setLanguage(newLang);
-      console.log('🌐 About to re-render updates with language:', this.currentLang);
-      this.render(); // Re-render with new language
-      
-      // Update language switcher UI if it exists
-      const langSwitcher = document.querySelector('.lang-switcher');
-      if (langSwitcher) {
-        // Update current language display
-        const langCurrent = langSwitcher.querySelector('.lang-current');
-        if (langCurrent) {
-          const langFlag = langCurrent.querySelector('.lang-flag');
-          const langName = langCurrent.querySelector('.lang-name');
-          if (langFlag) langFlag.textContent = this.getLangFlag(newLang);
-          if (langName) langName.textContent = this.getLangName(newLang);
-        }
-        
-        // Update dropdown options
-        const langDropdown = langSwitcher.querySelector('.lang-dropdown');
-        if (langDropdown) {
-          const options = langDropdown.querySelectorAll('.lang-option');
-          options.forEach(option => {
-            const lang = option.getAttribute('data-lang');
-            if (lang) {
-              const flag = option.querySelector('.lang-flag');
-              const name = option.querySelector('.lang-name');
-              if (flag) flag.textContent = this.getLangFlag(lang);
-              if (name) name.textContent = this.getLangName(lang);
-            }
-          });
-        }
-        
-        console.log('🌐 Updates.js: Language switcher UI updated for language:', newLang);
-      }
     });
-
-    // Initial language detection
-    console.log('🌐 Updates.js: Calling detectCurrentLanguage()');
-    this.detectCurrentLanguage();
-    console.log('🌐 Updates.js: Event listeners setup completed');
+    
+    // Update language switcher UI
+    this.updateLanguageSwitcherUI();
   }
 
   // Process deep link from URL
   processDeepLink() {
-    console.log('🌐 Updates.js: processDeepLink() called');
     const urlParams = new URLSearchParams(window.location.search);
-    const updateId = urlParams.get('u');
+    const updateId = urlParams.get('update');
     
     if (updateId) {
-      console.log('🌐 Updates.js: Deep link found for update:', updateId);
-      this.pendingDeepOpen = updateId;
-      // Find the update in our data
-      const targetUpdate = this.items.find(item => item.id === updateId);
+      const targetUpdate = this.items.find(u => u.id === updateId);
       if (targetUpdate) {
-        console.log('🌐 Updates.js: Target update found:', targetUpdate);
-        // Set the page to show this update expanded
-        this.page = Math.ceil(this.items.indexOf(targetUpdate) / this.pageSize) - 1;
-        this.page = Math.max(0, this.page);
-      } else {
-        console.warn('🌐 Updates.js: Target update not found:', updateId);
+        this.pendingDeepOpen = updateId;
+        this.handleDeepLink();
       }
-    } else {
-      console.log('🌐 Updates.js: No deep link found');
     }
   }
 
   // Render updates
   render() {
-    console.log('🌐 Updates.js: render() called with language:', this.currentLang);
-    if (!this.list) return;
+    if (!this.container) return;
     
-    this.list.innerHTML = '';
-    const filtered = this.items.filter(i => 
-      this.currentFilter === 'all' ? true : i.type === this.currentFilter
-    );
-    const slice = filtered.slice(0, (this.page + 1) * this.pageSize);
-    console.log('🌐 Updates.js: Rendering', slice.length, 'updates');
-
-    slice.forEach((u) => {
-      const shouldExpand = this.pendingDeepOpen && u.id === this.pendingDeepOpen;
-      const card = this.renderUpdateCard(u, shouldExpand);
-      this.list.appendChild(card);
+    const startIndex = 0;
+    const endIndex = this.items.length;
+    const slice = this.items.slice(startIndex, endIndex);
+    
+    this.container.innerHTML = '';
+    
+    slice.forEach(update => {
+      const card = this.renderUpdateCard(update);
+      this.container.appendChild(card);
     });
-
-    // Show/hide load more button
-    if (this.moreBtn) {
-      this.moreBtn.style.display = slice.length < filtered.length ? 'inline-flex' : 'none';
-    }
-
-    // Handle deep link processing
-    this.handleDeepLink();
     
-    // Show thumbnails
-    this.showThumbnails();
+    // Handle deep link if pending
+    if (this.pendingDeepOpen) {
+      this.handleDeepLink();
+    }
   }
 
   // Handle deep link after rendering
   handleDeepLink() {
-    console.log('🌐 Updates.js: handleDeepLink() called');
-    if (!this.pendingDeepOpen || !this.list) {
-      console.log('🌐 Updates.js: No pending deep link or list not ready');
-      return;
-    }
+    if (!this.pendingDeepOpen || !this.container) return;
     
-    const target = Array.from(this.list.querySelectorAll('.upd'))
-      .find(x => x.dataset.id === this.pendingDeepOpen);
-    
-    if (target) {
-      // Add flash effect
-      target.classList.add('flash');
-      setTimeout(() => target.classList.remove('flash'), 1200);
+    const targetCard = this.container.querySelector(`[data-update-id="${this.pendingDeepOpen}"]`);
+    if (targetCard) {
+      // Expand the card
+      const details = targetCard.querySelector('details');
+      if (details) {
+        details.setAttribute('open', '');
+      }
       
-      // Hide thumb preview since card is open
-      this.hideThumbPreview(target);
+      // Scroll to the card
+      this.scrollToCard(targetCard);
       
-      // Auto-scroll to card
-      this.scrollToCard(target);
-      
-      // Clear URL after showing card
-      setTimeout(() => {
-        this.clearUrlParameter();
-      }, 1500);
-      
+      // Clear the pending deep link
       this.pendingDeepOpen = null;
     }
   }
 
   // Hide thumb preview for open card
   hideThumbPreview(card) {
-    console.log('🌐 Updates.js: hideThumbPreview() called');
-    const thumb = card.querySelector('.preview .thumb');
-    if (thumb && !card.classList.contains('thumb-is-media')) {
+    const thumb = card.querySelector('.thumb');
+    if (thumb) {
       thumb.style.display = 'none';
     }
   }
 
   // Scroll to specific card
   scrollToCard(card) {
-    console.log('🌐 Updates.js: scrollToCard() called');
-    const hdr = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
-    const y = card.getBoundingClientRect().top + window.scrollY - (hdr + 12);
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    if (!card) return;
+    
+    const headerHeight = 80;
+    const cardTop = card.offsetTop - headerHeight;
+    
+    window.scrollTo({
+      top: cardTop,
+      behavior: 'smooth'
+    });
   }
 
   // Clear URL parameter
   clearUrlParameter() {
-    console.log('🌐 Updates.js: clearUrlParameter() called');
     const u = new URL(location.href);
     u.searchParams.delete('u');
     history.replaceState(null, '', u);
@@ -409,7 +312,6 @@ class UpdatesManager {
   // Show thumbnails for cards with has-thumb class
   // But don't show thumb for cards that are already expanded
   showThumbnails() {
-    console.log('🌐 Updates.js: showThumbnails() called');
     if (!this.list) {
       console.warn('🌐 Updates.js: No list found for showThumbnails');
       return;
@@ -431,136 +333,43 @@ class UpdatesManager {
   }
 
   // Render individual update card
-  renderUpdateCard(u, expandFirst = false) {
-    const isNew = this.daysAgo(u.ts) <= 7;
+  renderUpdateCard(update) {
+    const card = document.createElement('article');
+    card.className = 'upd';
+    card.dataset.updateId = update.id;
     
-    console.log('🌐 Updates.js: Rendering card for update:', u.id, 'with language:', this.currentLang);
-    console.log('🌐 Updates.js: Update data:', {
-      id: u.id,
-      title: u.title,
-      body: u.body,
-      titleType: typeof u.title,
-      bodyType: typeof u.body,
-      currentLang: this.currentLang
-    });
+    // Get translations
+    const titleTranslation = this.getTranslation(update.title, '');
+    const bodyTranslation = this.getTranslation(update.body, '');
+    const ctaLabelTranslation = this.getTranslation(update.cta?.label, '');
     
-    // Parse body text
-    const bodyText = (() => {
-      const translation = this.getTranslation(u.body, '') || '';
-      console.log('🌐 Updates.js: Body translation for update', u.id, ':', translation);
-      return translation;
-    })();
-    let paras = [];
-    
-    if (Array.isArray(bodyText)) {
-      paras = bodyText.filter(line => line.trim());
-    } else if (typeof bodyText === 'string') {
-      paras = bodyText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
-    }
-    
-    // Create snippet from first two lines
-    let snippet = '';
-    if (paras.length > 0) {
-      const firstTwoLines = paras.slice(0, 2).join(' ');
-      snippet = `<div class="snippet">${this.escapeHTML(firstTwoLines)}</div>`;
-    }
-
-    // Handle CTAs
-    const ctas = (u.cta || []);
-    const primary = ctas.find(c => c.primary) || ctas[0] || null;
-    const extras = ctas.filter(c => c !== primary);
-    
-    const btnHTML = (c, extra = false) => {
-      const url = this.withUTM(c.url || '#', 'updates', 'artbat2025');
-      const external = /^https?:\/\//i.test(url);
-      const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
-      const cls = (c.primary ? 'btn primary' : 'btn') + (extra ? ' extra' : '');
-      const label = (() => {
-        const translation = this.getTranslation(c.label, 'Learn more') || 'Learn more';
-        console.log('🌐 Updates.js: CTA label translation:', translation);
-        return translation;
-      })();
-      return `<a class="${cls}" href="${url}"${attrs}>${this.escapeHTML(label)}</a>`;
-    };
-
-    // Handle thumbnail
-    let thumbSrc = '';
-    if (u.thumb) {
-      thumbSrc = u.thumb;
-    } else if (Array.isArray(u.gallery) && u.gallery.length > 0) {
-      thumbSrc = u.gallery[0];
-    } else if (u.media) {
-      thumbSrc = u.media;
-    }
-    
-    const thumbAlt = u.thumbAlt || u.alt || '';
-    const thumbHTML = thumbSrc ? 
-      `<img class="thumb" src="${thumbSrc}" alt="${this.escapeHTML(thumbAlt)}" loading="lazy" decoding="async">` : '';
-
-    // Create card element
-    const idSafe = (u.id || Math.random().toString(36).slice(2));
-    const bodyId = `upd-body-${idSafe}`;
-    const headId = `upd-head-${idSafe}`;
-
-    const wrap = document.createElement('article');
-    wrap.className = 'upd' + (thumbSrc ? ' has-thumb' : '');
-    if (u.pinned) wrap.classList.add('pinned');
-    wrap.setAttribute('aria-expanded', expandFirst ? 'true' : 'false');
-    if (u.id) wrap.dataset.id = u.id;
-
-    const shareIcon = `
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" d="M15 8a3 3 0 1 0-2.83-4H12a3 3 0 0 0 0 6c.73 0 1.4-.26 1.93-.69l3.2 1.84a3 3 0 1 0 .7-1.24l-3.21-1.85A2.96 2.96 0 0 0 15 8Zm-6 8a3 3 0 1 0 2.83 4H12a3 3 0 0 0 0-6c-.73 0-1.4.26-1.93.69l-3.2-1.84a3 3 0 1 0-.7 1.24l3.21 1.85c-.24.43-.38.93-.38 1.46Z"/>
-      </svg>`;
-
-    wrap.innerHTML = `
-      <div class="head">
-        <button class="toggle" aria-expanded="${expandFirst ? 'true' : 'false'}" aria-controls="${bodyId}" id="${headId}">
-          <div class="hrow1">
-            <div class="hleft">
-              <time datetime="${u.ts}">${this.fmtDate(u.ts)}</time>
-              ${isNew ? `<span class="badge new">${this.getUpdateBadgeTranslation('new')}</span>` : ''}
-              ${u.type ? `<span class="badge">${this.getUpdateTypeTranslation(u.type) || u.type}</span>` : ''}
-            </div>
-            <div class="hright">
-              ${u.important ? `<span class="badge imp">${this.getUpdateBadgeTranslation('important')}</span>` : ''}
-            </div>
+    // Build card HTML
+    card.innerHTML = `
+      <header>
+        <div class="meta">
+          <span class="date">${this.fmtDate(update.ts)}</span>
+          ${update.type ? `<span class="type">${this.getUpdateTypeTranslation(update.type)}</span>` : ''}
+          ${update.badge ? `<span class="badge ${update.badge}">${this.getUpdateBadgeTranslation(update.badge)}</span>` : ''}
+        </div>
+        <h3>${this.escapeHTML(titleTranslation)}</h3>
+      </header>
+      
+      <details>
+        <summary>${this.escapeHTML(bodyTranslation.split('\n')[0])}</summary>
+        <div class="body">
+          ${this.escapeHTML(bodyTranslation).split('\n').map(p => `<p>${p}</p>`).join('')}
+        </div>
+        ${update.cta ? `
+          <div class="cta">
+            <a href="${update.cta.url}" class="btn" target="_blank" rel="noopener noreferrer">
+              ${this.escapeHTML(ctaLabelTranslation)}
+            </a>
           </div>
-          <div class="hrow2"><span class="title">${(() => {
-          const titleTranslation = this.getTranslation(u.title, '') || '';
-          console.log('🌐 Updates.js: Title translation for update', u.id, ':', titleTranslation);
-          return this.escapeHTML(titleTranslation);
-        })()}</span></div>
-        </button>
-        <span class="chev" aria-hidden="true">▾</span>
-      </div>
-
-      <div class="preview">
-        ${snippet}
-        ${paras.length > 2 ? `<button class="readmore" type="button">${this.L.readMore}</button>` : ''}
-        ${thumbHTML}
-      </div>
-
-      <div id="${bodyId}" class="body" role="region" aria-labelledby="${headId}">
-        ${paras.slice(2).map(p => `<p class="text">${this.escapeHTML(p)}</p>`).join('')}
-        <div class="lazy-slot"></div>
-      </div>
-
-      <div class="footer">
-        <div class="left">
-          ${primary ? btnHTML(primary, false) : ''}
-          ${extras.map(c => btnHTML(c, true)).join('')}
-        </div>
-        <div class="right">
-          <button class="share" aria-label="Share update" title="Share" data-id="${this.escapeHTML(u.id || '')}">${shareIcon}</button>
-        </div>
-      </div>
+        ` : ''}
+      </details>
     `;
-
-    // Setup card functionality
-    this.setupCardFunctionality(wrap, u, paras, bodyId, headId, expandFirst);
     
-    return wrap;
+    return card;
   }
 
   // Setup card functionality (toggle, read more, share, etc.)
@@ -574,12 +383,10 @@ class UpdatesManager {
           await navigator.share({ 
             title: (() => {
               const translation = this.getTranslation(u.title, '') || document.title;
-              console.log('🌐 Updates.js: Title translation for social meta:', translation);
               return translation;
             })(),
             text: (() => {
               const translation = this.getTranslation(u.title, '') || '';
-              console.log('🌐 Updates.js: Text translation for social meta:', translation);
               return translation;
             })(),
             url: uurl.toString() 
@@ -694,226 +501,111 @@ class UpdatesManager {
 
   // Social meta management
   setupSocialMeta() {
-    console.log('🌐 Updates.js: setupSocialMeta() called');
-    if (!this.initialSocialMeta) {
-      console.warn('🌐 Updates.js: No initial social meta data');
-      return;
-    }
-    const DEFAULT_SHARE_IMAGE = 'assets/updates/social-default.jpg';
-    const metaSel = (attr, key) => document.querySelector(`meta[${attr}="${key}"]`);
-    const ensureMeta = (attr, key) => {
-      let el = metaSel(attr, key);
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, key);
-        document.head.appendChild(el);
-      }
-      return el;
-    };
-    
-    const setOg = (prop, content) => {
-      if (!content) return;
-      ensureMeta('property', prop).setAttribute('content', content);
-    };
-    const setTw = (name, content) => {
-      if (!content) return;
-      ensureMeta('name', name).setAttribute('content', content);
-    };
-
+    // Store initial social meta values
     this.initialSocialMeta = {
       title: document.title,
-      desc: metaSel('name', 'description')?.getAttribute('content') || '',
-      ogTitle: metaSel('property', 'og:title')?.getAttribute('content') || '',
-      ogDesc: metaSel('property', 'og:description')?.getAttribute('content') || '',
-      ogImage: metaSel('property', 'og:image')?.getAttribute('content') || DEFAULT_SHARE_IMAGE,
-      url: location.href
+      ogTitle: this.getMetaContent('og:title'),
+      ogDesc: this.getMetaContent('og:description'),
+      twitterTitle: this.getMetaContent('twitter:title'),
+      twitterDesc: this.getMetaContent('twitter:description')
     };
   }
-
-  // Update social meta for specific update
-  updateSocialMeta(u) {
-    const bodyText = (() => {
-      const translation = this.getTranslation(u.body, '') || '';
-      console.log('🌐 Updates.js: Body translation for updateSocialMeta:', translation);
-      return translation;
-    })();
-    let firstPara = this.initialSocialMeta.desc;
+  
+  updateSocialMeta(update) {
+    if (!update) return;
     
-    if (Array.isArray(bodyText) && bodyText.length > 0) {
-      firstPara = bodyText[0].trim() || this.initialSocialMeta.desc;
-    } else if (typeof bodyText === 'string') {
-      firstPara = bodyText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean)[0] || this.initialSocialMeta.desc;
-    }
+    const title = this.getTranslation(update.title, '') || this.initialSocialMeta.title;
+    const body = this.getTranslation(update.body, '') || '';
     
-    const image = u.media || (Array.isArray(u.gallery) && u.gallery[0]) || u.thumb || this.initialSocialMeta.ogImage;
-    const title = (() => {
-      const translation = this.getTranslation(u.title, '');
-      console.log('🌐 Updates.js: Title translation for updateSocialMeta:', translation);
-      return translation;
-    })() ?
-      `${(() => {
-        const translation = this.getTranslation(u.title, '');
-        console.log('🌐 Updates.js: Title translation for updateSocialMeta (concatenated):', translation);
-        return translation;
-      })()} • ${this.initialSocialMeta.title}` : this.initialSocialMeta.title;
+    // Update Open Graph
+    this.setMetaContent('og:title', title);
+    this.setMetaContent('og:description', body);
     
-    document.title = title;
-    
-    const metaSel = (attr, key) => document.querySelector(`meta[${attr}="${key}"]`);
-    const ensureMeta = (attr, key) => {
-      let el = metaSel(attr, key);
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, key);
-        document.head.appendChild(el);
-      }
-      return el;
-    };
-    
-    const setOg = (prop, content) => {
-      if (!content) return;
-      ensureMeta('property', prop).setAttribute('content', content);
-    };
-    const setTw = (name, content) => {
-      if (!content) return;
-      ensureMeta('name', name).setAttribute('content', content);
-    };
-    
-    if (this.initialSocialMeta.desc) {
-      ensureMeta('name', 'description').setAttribute('content', firstPara);
-    }
-    setOg('og:title', (() => {
-      const translation = this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title;
-      console.log('🌐 Updates.js: Title translation for og:title:', translation);
-      return translation;
-    })());
-    setOg('og:description', (() => {
-      const translation = this.getTranslation(u.body, '') || this.initialSocialMeta.ogDesc || '';
-      console.log('🌐 Updates.js: Body translation for og:description:', translation);
-      return translation;
-    })());
-    setOg('og:image', image);
-    setOg('og:url', new URL(location.href).toString());
-    
-    // Twitter Card
-    setTw('twitter:card', 'summary_large_image');
-    setTw('twitter:title', (() => {
-      const translation = this.getTranslation(u.title, '') || this.initialSocialMeta.ogTitle || this.initialSocialMeta.title;
-      console.log('🌐 Updates.js: Title translation for twitter:title:', translation);
-      return translation;
-    })());
-    setTw('twitter:description', (() => {
-      const translation = this.getTranslation(u.body, '') || '';
-      console.log('🌐 Updates.js: Body translation for twitter:description:', translation);
-      return translation;
-    })());
-    setTw('twitter:image', image);
+    // Update Twitter
+    this.setMetaContent('twitter:title', title);
+    this.setMetaContent('twitter:description', body);
   }
-
-  // Reset social meta to initial state
+  
   resetSocialMeta() {
-    console.log('🌐 Updates.js: resetSocialMeta() called');
-    if (!this.initialSocialMeta) {
-      console.warn('🌐 Updates.js: No initial social meta data to reset to');
-      return;
-    }
-    document.title = this.initialSocialMeta.title;
-    
-    const metaSel = (attr, key) => document.querySelector(`meta[${attr}="${key}"]`);
-    const ensureMeta = (attr, key) => {
-      let el = metaSel(attr, key);
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, key);
-        document.head.appendChild(el);
+    // Restore initial social meta values
+    this.setMetaContent('og:title', this.initialSocialMeta.ogTitle);
+    this.setMetaContent('og:description', this.initialSocialMeta.ogDesc);
+    this.setMetaContent('twitter:title', this.initialSocialMeta.twitterTitle);
+    this.setMetaContent('twitter:description', this.initialSocialMeta.twitterDesc);
+  }
+  
+  getMetaContent(property) {
+    const meta = document.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
+    return meta ? meta.getAttribute('content') : '';
+  }
+  
+  setMetaContent(property, content) {
+    let meta = document.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
+    if (!meta) {
+      meta = document.createElement('meta');
+      if (property.startsWith('og:')) {
+        meta.setAttribute('property', property);
+      } else {
+        meta.setAttribute('name', property);
       }
-      return el;
-    };
-    
-    const setOg = (prop, content) => {
-      if (!content) return;
-      ensureMeta('property', prop).setAttribute('content', content);
-    };
-    const setTw = (name, content) => {
-      if (!content) return;
-      ensureMeta('name', name).setAttribute('content', content);
-    };
-    
-    if (this.initialSocialMeta.desc) {
-      ensureMeta('name', 'description').setAttribute('content', this.initialSocialMeta.desc);
+      document.head.appendChild(meta);
     }
-    setOg('og:title', this.initialSocialMeta.ogTitle || this.initialSocialMeta.title);
-    setOg('og:description', this.initialSocialMeta.ogDesc || this.initialSocialMeta.desc);
-    setOg('og:image', this.initialSocialMeta.ogImage);
-    setOg('og:url', this.initialSocialMeta.url);
-    setTw('twitter:card', 'summary_large_image');
-    setTw('twitter:title', this.initialSocialMeta.ogTitle || this.initialSocialMeta.title);
-    setTw('twitter:description', this.initialSocialMeta.ogDesc || this.initialSocialMeta.desc);
-    setTw('twitter:image', this.initialSocialMeta.ogImage);
+    meta.setAttribute('content', content);
   }
 
   // Set URL parameter
-  setUrlParameter(value) {
-    console.log('🌐 Updates.js: setUrlParameter() called with value:', value);
-    const u = new URL(location.href);
-    if (value) u.searchParams.set('u', value);
-    else u.searchParams.delete('u');
-    history.replaceState(null, '', u);
+  setUrlParameter(key, value) {
+    const url = new URL(window.location);
+    if (value) {
+      url.searchParams.set(key, value);
+    } else {
+      url.searchParams.delete(key);
+    }
+    window.history.replaceState({}, '', url);
+  }
+  
+  clearUrlParameter(key) {
+    this.setUrlParameter(key, null);
   }
 
   // Utility functions
   daysAgo(ts) {
-    console.log('🌐 Updates.js: daysAgo() called with timestamp:', ts);
-    const d = (Date.now() - new Date(ts).getTime()) / 86400000;
-    console.log('🌐 Updates.js: daysAgo result:', d);
-    return d;
+    const now = new Date();
+    const then = new Date(ts);
+    const diffTime = Math.abs(now - then);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   }
 
   fmtDate(ts) {
-    console.log('🌐 Updates.js: fmtDate() called with timestamp:', ts);
-    try {
-      const result = new Date(ts).toLocaleDateString(document.documentElement.lang || 'en', { 
-        day: '2-digit', 
-        month: 'short' 
-      });
-      console.log('🌐 Updates.js: fmtDate result:', result);
-      return result;
-    } catch (error) {
-      console.error('🌐 Updates.js: fmtDate error:', error);
-      return ts;
-    }
-  }
-
-  escapeHTML(s) {
-    console.log('🌐 Updates.js: escapeHTML() called with string:', s);
-    const result = String(s).replace(/[&<>"']/g, c =>
-      c === '&' ? '&amp;' :
-      c === '<' ? '&lt;'  :
-      c === '>' ? '&gt;'  :
-      c === '"' ? '&quot;': '&#39;'
-    );
-    console.log('🌐 Updates.js: escapeHTML result:', result);
+    const date = new Date(ts);
+    const result = date.toLocaleDateString(this.currentLang, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
     return result;
   }
 
-  withUTM(url, medium = 'updates', campaign = 'artbat2025') {
-    console.log('🌐 Updates.js: withUTM() called with url:', url, 'medium:', medium, 'campaign:', campaign);
-    try {
-      const u = new URL(url, location.href);
-      if (!/^https?:/i.test(u.protocol)) {
-        console.log('🌐 Updates.js: withUTM returning original url (not http/https):', url);
-        return url;
-      }
-      u.searchParams.set('utm_source', 'site');
-      u.searchParams.set('utm_medium', medium);
-      u.searchParams.set('utm_campaign', campaign);
-      const result = u.toString();
-      console.log('🌐 Updates.js: withUTM result:', result);
-      return result;
-    } catch (error) {
-      console.error('🌐 Updates.js: withUTM error:', error);
+  escapeHTML(s) {
+    if (!s) return '';
+    const result = s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    return result;
+  }
+
+  withUTM(url, medium, campaign) {
+    if (!url || !url.startsWith('http')) {
       return url;
     }
+    
+    const separator = url.includes('?') ? '&' : '?';
+    const result = `${url}${separator}utm_source=artbat2025&utm_medium=${medium}&utm_campaign=${campaign}`;
+    return result;
   }
 
   getTranslation(field, fallback = '') {
@@ -921,11 +613,6 @@ class UpdatesManager {
     
     if (typeof field === 'object') {
       const result = field[this.currentLang] || field.en || fallback;
-      console.log('🌐 Updates.js: getTranslation called:', {
-        field: field,
-        currentLang: this.currentLang,
-        result: result
-      });
       return result;
     }
     
@@ -933,32 +620,26 @@ class UpdatesManager {
   }
 
   getUpdateTypeTranslation(type) {
-    console.log('🌐 Updates.js: getUpdateTypeTranslation() called with type:', type);
+    if (!type) return '';
     
-    // Check if CONFIG is available and has update categories
     if (window.CONFIG && window.CONFIG.updateCategories && window.CONFIG.updateCategories[type]) {
       const translation = this.getTranslation(window.CONFIG.updateCategories[type], type);
-      console.log('🌐 Updates.js: getUpdateTypeTranslation result:', translation);
       return translation;
     }
     
     // Fallback to original type
-    console.log('🌐 Updates.js: getUpdateTypeTranslation fallback to:', type);
     return type;
   }
 
   getUpdateBadgeTranslation(badgeType) {
-    console.log('🌐 Updates.js: getUpdateBadgeTranslation() called with badgeType:', badgeType);
+    if (!badgeType) return '';
     
-    // Check if CONFIG is available and has badge types
     if (window.CONFIG && window.CONFIG.updateBadges && window.CONFIG.updateBadges[badgeType]) {
       const translation = this.getTranslation(window.CONFIG.updateBadges[badgeType], badgeType);
-      console.log('🌐 Updates.js: getUpdateBadgeTranslation result:', translation);
       return translation;
     }
     
     // Fallback to original badge type
-    console.log('🌐 Updates.js: getUpdateBadgeTranslation fallback to:', badgeType);
     return badgeType;
   }
 
@@ -966,7 +647,6 @@ class UpdatesManager {
   getLangFlag(lang) {
     const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
     const result = flags[lang] || '🌐';
-    console.log('🌐 Updates.js: getLangFlag() called with:', lang, 'returning:', result);
     return result;
   }
 
@@ -974,8 +654,72 @@ class UpdatesManager {
   getLangName(lang) {
     const names = { en: 'EN', cs: 'CS', uk: 'UK' };
     const result = names[lang] || 'EN';
-    console.log('🌐 Updates.js: getLangName() called with:', lang, 'returning:', result);
     return result;
+  }
+
+  // Helper functions
+  filterUpdates(filterType) {
+    if (!this.toolbar) return;
+    
+    // Update active filter button
+    this.toolbar.querySelectorAll('.chip.sm').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.filter === filterType);
+    });
+    
+    // Filter updates
+    const filtered = filterType === 'all' ? 
+      this.items : 
+      this.items.filter(item => item.type === filterType);
+    
+    // Re-render with filtered items
+    this.renderFiltered(filtered);
+  }
+  
+  renderFiltered(filteredItems) {
+    if (!this.container) return;
+    
+    this.container.innerHTML = '';
+    
+    filteredItems.forEach(update => {
+      const card = this.renderUpdateCard(update);
+      this.container.appendChild(card);
+    });
+  }
+  
+  loadMore() {
+    // For now, just re-render all items
+    // In the future, this could implement pagination
+    this.render();
+  }
+  
+  updateLanguageSwitcherUI() {
+    // Update language switcher UI if it exists
+    const langSwitcher = document.querySelector('.lang-switcher');
+    if (langSwitcher) {
+      // Update current language display
+      const langCurrent = langSwitcher.querySelector('.lang-current');
+      if (langCurrent) {
+        const langFlag = langCurrent.querySelector('.lang-flag');
+        const langName = langCurrent.querySelector('.lang-name');
+        if (langFlag) langFlag.textContent = this.getLangFlag(this.currentLang);
+        if (langName) langName.textContent = this.getLangName(this.currentLang);
+      }
+      
+      // Update dropdown options
+      const langDropdown = langSwitcher.querySelector('.lang-dropdown');
+      if (langDropdown) {
+        const options = langDropdown.querySelectorAll('.lang-option');
+        options.forEach(option => {
+          const lang = option.getAttribute('data-lang');
+          if (lang) {
+            const flag = option.querySelector('.lang-flag');
+            const name = option.querySelector('.lang-name');
+            if (flag) flag.textContent = this.getLangFlag(lang);
+            if (name) name.textContent = this.getLangName(lang);
+          }
+        });
+      }
+    }
   }
 }
 

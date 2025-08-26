@@ -3394,6 +3394,9 @@ class AdminPanel {
       console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     
     console.log('📊 Final translations object:', this.translations);
+    
+    // Trigger auto-save after updating translations
+    this.debouncedSaveTranslations();
   }
 
   getTranslationValue(fieldData, lang) {

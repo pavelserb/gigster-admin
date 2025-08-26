@@ -482,6 +482,11 @@ function mountBasics() {
   
   // Update form placeholders
   updateFormPlaceholders();
+  
+  // Listen for language changes to update form placeholders
+  document.addEventListener('languageChanged', () => {
+    updateFormPlaceholders();
+  });
 }
 
 // Adjust --cta-bar-h to actual bar height
@@ -1672,12 +1677,44 @@ function updateFormPlaceholders() {
   const elements = document.querySelectorAll('[data-i18n-placeholder]');
   elements.forEach(element => {
     const key = element.getAttribute('data-i18n-placeholder');
-    const translation = getTranslationFromFile(key);
+    const translation = getFormTranslation(key);
     if (translation) {
       element.placeholder = translation;
       element.setAttribute('aria-label', translation);
     }
   });
+}
+
+// Get translation for form fields from i18n.js translations
+function getFormTranslation(key) {
+  // Check if i18n.js translations are available
+  if (typeof window.TRANSLATIONS === 'undefined') {
+    console.warn('🌐 Main.js: TRANSLATIONS not available from i18n.js');
+    return null;
+  }
+  
+  const currentLang = localStorage.getItem('site_language') || 'en';
+  const langData = window.TRANSLATIONS.sections?.[currentLang];
+  
+  if (!langData) {
+    console.warn('🌐 Main.js: No translations found for language:', currentLang);
+    return null;
+  }
+  
+  // Get nested value using dot notation
+  const keys = key.split('.');
+  let current = langData;
+  
+  for (const k of keys) {
+    if (current && typeof current === 'object' && k in current) {
+      current = current[k];
+    } else {
+      console.warn('🌐 Main.js: Key not found in form translations:', k, 'at path:', key);
+      return null;
+    }
+  }
+  
+  return current || null;
 }
 
 // Setup contact form submission

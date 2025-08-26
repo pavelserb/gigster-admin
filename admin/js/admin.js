@@ -142,6 +142,9 @@ class AdminPanel {
   
   // Update translation value in the translations object
   updateTranslationValue(fieldName, enValue, csValue, ukValue) {
+    console.log('🔄 Updating translation:', { fieldName, enValue, csValue, ukValue });
+    console.log('📊 Current translations object:', this.translations);
+    
     // Parse field name to determine the path in translations object
     // Field names are like "nav.about", "cta.tickets", etc.
     const pathParts = fieldName.split('.');
@@ -149,6 +152,8 @@ class AdminPanel {
     if (pathParts.length >= 2) {
       const section = pathParts[0];
       const key = pathParts.slice(1).join('.');
+      
+      console.log('🔍 Parsed path:', { section, key });
       
       // Initialize section if it doesn't exist
       if (!this.translations.sections) {
@@ -178,8 +183,12 @@ class AdminPanel {
       this.translations.sections.cs[section][key] = csValue;
       this.translations.sections.uk[section][key] = ukValue;
       
+      console.log('✅ Updated translations object:', this.translations);
+      
       // Auto-save translations after a short delay
       this.debouncedSaveTranslations();
+    } else {
+      console.warn('⚠️ Invalid field name format:', fieldName);
     }
   }
   
@@ -365,6 +374,10 @@ class AdminPanel {
       const translationsResponse = await fetch('/admin/api/translations', { headers });
       if (translationsResponse.ok) {
         this.translations = await translationsResponse.json();
+        console.log('📊 Translations loaded:', this.translations);
+      } else {
+        console.warn('⚠️ Translations response not ok:', translationsResponse.status);
+        this.translations = {};
       }
 
       // Load updates
@@ -3436,6 +3449,8 @@ class AdminPanel {
   }
 
   async saveTranslations() {
+    console.log('💾 Saving translations:', this.translations);
+    
     const response = await fetch('/admin/api/translations/save', {
       method: 'POST',
       headers: {
@@ -3445,9 +3460,16 @@ class AdminPanel {
       body: JSON.stringify(this.translations)
     });
 
+    console.log('📡 Save response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Save error:', errorText);
       throw new Error('Translations save failed');
     }
+    
+    const result = await response.json();
+    console.log('✅ Translations saved successfully:', result);
   }
 
   async saveUpdates() {

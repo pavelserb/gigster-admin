@@ -109,11 +109,11 @@ body {
   flex-direction: column;
 }
 
-/* Header - Fixed */
+/* Header - Fixed with integrated navigation */
 .admin-header {
   background: white;
   border-bottom: 1px solid #e1e5e9;
-  padding: 12px 0;
+  padding: 8px 0;
   position: fixed;
   top: 0;
   left: 0;
@@ -128,6 +128,13 @@ body {
   padding: 0 24px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
   align-items: center;
 }
 
@@ -243,45 +250,33 @@ body {
   gap: 8px;
 }
 
-/* Navigation - Fixed */
-.admin-nav {
-  background: white;
-  border-bottom: 1px solid #e1e5e9;
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.nav-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 24px;
+/* Navigation tabs in header */
+.nav-tabs {
   display: flex;
   gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding: 4px 0;
 }
 
-.nav-container::-webkit-scrollbar {
+.nav-tabs::-webkit-scrollbar {
   display: none;
 }
 
 .nav-tab {
-  padding: 12px 16px;
+  padding: 8px 12px;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
   font-weight: 500;
   color: #666;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  border-radius: 6px;
 }
 
 .nav-tab:hover {
@@ -292,14 +287,15 @@ body {
 .nav-tab.active {
   color: #667eea;
   border-bottom-color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
 }
 
-/* Main Content - Adjusted for fixed header/nav */
+/* Main Content - Adjusted for integrated header */
 .admin-main {
   flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 120px 24px 32px;
+  padding: 80px 24px 32px;
   width: 100%;
 }
 
@@ -806,40 +802,57 @@ body {
   margin: 0 auto;
 }
 
-/* Updates */
+/* Updates - Compact Design */
 .updates-container {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Categories Management */
+.updates-main-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.updates-settings-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Categories Management - Compact */
 .categories-management {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .categories-toolbar {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .categories-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .category-item {
-  background: white;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border: 1px solid #e8ecf1;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .category-item:hover {
@@ -876,32 +889,32 @@ body {
   gap: 8px;
 }
 
-/* Badges Management */
+/* Badges Management - Compact */
 .badges-management {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .badges-toolbar {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .badges-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .badge-item {
-  background: white;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border: 1px solid #e8ecf1;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .badge-item:hover {
@@ -1051,19 +1064,22 @@ body {
   word-break: break-all;
 }
 
-/* Media */
+/* Media - Compact Design */
 .media-container {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 32px;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .media-upload,
 .media-browser {
   background: white;
   border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .media-upload h3,
@@ -1175,25 +1191,29 @@ body {
   word-break: break-word;
 }
 
-/* HTML Editor */
+/* HTML Editor - Compact Design */
 .html-editor-container {
   background: white;
   border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .editor-toolbar {
   display: flex;
   gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
 }
 
 .html-editor {
   width: 100%;
-  min-height: 600px;
+  min-height: 500px;
   padding: 16px;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
@@ -2180,11 +2200,20 @@ body {
 }
 
 .translations-container {
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 15px;
-  background: #f8f9fa;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.language-management-section,
+.translation-editor-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .lang-input-group {
@@ -2714,17 +2743,21 @@ textarea:focus {
   line-height: 1.6;
 }
 
-/* Marketing Tab Styles */
+/* Marketing Tab Styles - Compact Design */
 .marketing-container {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .marketing-section {
   background: white;
   border-radius: 12px;
   padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .marketing-section h3 {
@@ -3032,17 +3065,30 @@ textarea:focus {
 @media (max-width: 768px) {
   /* Header adjustments */
   .admin-header {
-    padding: 8px 0;
+    padding: 6px 0;
   }
   
   .header-content {
     padding: 0 16px;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
   
-  .header-left h1 {
-    font-size: 18px;
+  .header-left {
+    width: 100%;
+  }
+  
+  .nav-tabs {
+    width: 100%;
+    gap: 2px;
+  }
+  
+  .nav-tab {
+    padding: 6px 8px;
+    font-size: 12px;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
   }
   
   .header-right {
@@ -3056,24 +3102,9 @@ textarea:focus {
     font-size: 12px;
   }
   
-  /* Navigation adjustments */
-  .admin-nav {
-    top: 80px;
-  }
-  
-  .nav-container {
-    padding: 0 16px;
-    gap: 2px;
-  }
-  
-  .nav-tab {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  
   /* Main content adjustments */
   .admin-main {
-    padding: 140px 16px 24px;
+    padding: 100px 16px 24px;
   }
   
   .content-header {
@@ -3197,20 +3228,74 @@ textarea:focus {
     min-width: auto;
     text-align: center;
   }
+  
+  /* Updates adjustments */
+  .updates-container {
+    gap: 16px;
+  }
+  
+  .updates-main-section,
+  .updates-settings-section {
+    padding: 16px;
+  }
+  
+  /* Media adjustments */
+  .media-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .media-upload,
+  .media-browser {
+    padding: 16px;
+  }
+  
+  /* Translations adjustments */
+  .translations-container {
+    gap: 16px;
+  }
+  
+  .language-management-section,
+  .translation-editor-section {
+    padding: 16px;
+  }
+  
+  /* HTML Editor adjustments */
+  .html-editor-container {
+    padding: 16px;
+  }
+  
+  .html-editor {
+    min-height: 400px;
+  }
+  
+  /* Marketing adjustments */
+  .marketing-container {
+    gap: 16px;
+  }
+  
+  .marketing-section {
+    padding: 16px;
+  }
 }
 
 /* Extra small devices */
 @media (max-width: 480px) {
   .admin-main {
-    padding: 120px 12px 20px;
+    padding: 90px 12px 20px;
   }
   
   .header-content {
     padding: 0 12px;
   }
   
-  .nav-container {
-    padding: 0 12px;
+  .nav-tabs {
+    gap: 1px;
+  }
+  
+  .nav-tab {
+    padding: 4px 6px;
+    font-size: 11px;
   }
   
   .config-section {

@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
   
   <!-- Styles -->
-      <link rel="stylesheet" href="css/admin.css?v=13">
+      <link rel="stylesheet" href="css/admin.css?v=16">
   
   <!-- Icons -->
   <link rel="icon" href="../assets/icons/favicon.ico">
@@ -45,14 +45,18 @@
 
   <!-- Main Admin Interface -->
   <div id="adminInterface" class="admin-interface" style="display: none;">
-    <!-- Header -->
+    <!-- Header with integrated navigation -->
     <header class="admin-header">
       <div class="header-content">
         <div class="header-left">
-          <h1>ARTBAT Prague - Админка</h1>
-        </div>
-        <div class="header-center">
-          <!-- Language management moved to Translations tab -->
+          <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="config">Конфигурация</button>
+            <button class="nav-tab" data-tab="updates">Обновления</button>
+            <button class="nav-tab" data-tab="media">Медиафайлы</button>
+            <button class="nav-tab" data-tab="translations">Переводы</button>
+            <button class="nav-tab" data-tab="marketing">Маркетинг</button>
+            <button class="nav-tab" data-tab="html">HTML редактор</button>
+          </div>
         </div>
         <div class="header-right">
           <button id="previewBtn" class="btn btn-secondary">Предпросмотр</button>
@@ -61,18 +65,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Navigation -->
-    <nav class="admin-nav">
-      <div class="nav-container">
-        <button class="nav-tab active" data-tab="config">Конфигурация</button>
-        <button class="nav-tab" data-tab="updates">Обновления</button>
-        <button class="nav-tab" data-tab="media">Медиафайлы</button>
-        <button class="nav-tab" data-tab="translations">Переводы</button>
-        <button class="nav-tab" data-tab="marketing">Маркетинг</button>
-        <button class="nav-tab" data-tab="html">HTML редактор</button>
-      </div>
-    </nav>
 
     <!-- Main Content -->
     <main class="admin-main">

@@ -40,7 +40,8 @@ class AdminPanel {
       tabContents: document.querySelectorAll('.tab-content'),
       saveAllBtn: document.getElementById('saveAllBtn'),
       previewBtn: document.getElementById('previewBtn'),
-      logoutBtn: document.getElementById('logoutBtn')
+      logoutBtn: document.getElementById('logoutBtn'),
+      navTabsContainer: document.querySelector('.nav-tabs')
     };
   }
 
@@ -350,9 +351,9 @@ class AdminPanel {
     this._elements.logoutBtn?.addEventListener('click', () => this.logout());
 
     // Navigation - use event delegation for better performance
-    const navContainer = document.querySelector('.nav-container');
-    if (navContainer) {
-      navContainer.addEventListener('click', (e) => {
+    const navTabs = document.querySelector('.nav-tabs');
+    if (navTabs) {
+      navTabs.addEventListener('click', (e) => {
         const tab = e.target.closest('.nav-tab');
         if (tab) {
           this.switchTab(tab.dataset.tab);

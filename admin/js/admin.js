@@ -3187,24 +3187,33 @@ class AdminPanel {
 
   // Global Actions
   async saveAll() {
+    console.log('🔄 saveAll() called');
+    
     try {
+      console.log('🔄 Updating config from form...');
       // Update config from form data
       this.updateConfigFromForm();
       
+      console.log('🔄 Updating translations from form...');
       // Update translations from form data
       this.updateTranslationsFromForm();
       
+      console.log('🔄 Saving config...');
       // Save config
       await this.saveConfig();
       
+      console.log('🔄 Saving translations...');
       // Save translations
       await this.saveTranslations();
       
+      console.log('🔄 Saving updates...');
       // Save updates
       await this.saveUpdates();
       
+      console.log('✅ All saves completed');
       this.showSuccess('Все изменения сохранены');
     } catch (error) {
+      console.error('❌ Error in saveAll:', error);
       this.showError('Ошибка сохранения');
     }
   }
@@ -3402,6 +3411,7 @@ class AdminPanel {
       console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     
     console.log('📊 Final translations object:', this.translations);
+    console.log('✅ updateTranslationsFromForm() completed');
     
     // Trigger auto-save after updating translations
     console.log('🔄 Triggering auto-save...');

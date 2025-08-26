@@ -34,7 +34,8 @@
         "connect": "Connect"
       },
       "cta": {
-        "tickets": "Buy tickets"
+        "tickets": "Buy tickets",
+        "chooseSeller": "Choose your seller:"
       },
       "hero": {
         "tagline": "ARTBAT is returning to Prague at a whole new level"
@@ -83,7 +84,8 @@
         "connect": "Kontakt"
       },
       "cta": {
-        "tickets": "Koupit vstupenky"
+        "tickets": "Koupit vstupenky",
+        "chooseSeller": "Vyberte svého prodejce:"
       },
       "hero": {
         "tagline": "ARTBAT se vrací do Prahy na zcela nové úrovni"
@@ -132,7 +134,8 @@
         "connect": "Контакти"
       },
       "cta": {
-        "tickets": "Купити квитки"
+        "tickets": "Купити квитки",
+        "chooseSeller": "Виберіть свого продавця:"
       },
       "hero": {
         "tagline": "ARTBAT повертається до Праги на зовсім новому рівні"

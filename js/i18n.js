@@ -1,11 +1,11 @@
 // i18n with dropdown menu (animated), ?lang=xx deep link, persistence
 let TRANSLATIONS = {};
 const FALLBACK_LANG = 'en';
-const LANG_LABELS = { en: 'English', ru: 'Русский', cs: 'Čeština' };
-const LANG_CODES  = { en: 'EN',      ru: 'RU',      cs: 'CS'  }; // text on button
+const LANG_LABELS = { en: 'English', cs: 'Čeština', uk: 'Українська' };
+const LANG_CODES  = { en: 'EN',      cs: 'CS',      uk: 'UK'  }; // text on button
 
 // --- helpers
-const getLang = () => localStorage.getItem('lang') || FALLBACK_LANG;
+const getLang = () => localStorage.getItem('site_language') || FALLBACK_LANG;
 function updateLangButton(code){
   const btn = document.getElementById('langBtn');
   if (!btn) return;
@@ -14,7 +14,7 @@ function updateLangButton(code){
   btn.setAttribute('aria-label', `Language: ${codeText}`);
 }
 const setLang = (l) => {
-  localStorage.setItem('lang', l);
+  localStorage.setItem('site_language', l);
   document.documentElement.lang = l;
   updateLangButton(l);
 };
@@ -39,24 +39,17 @@ async function loadTranslations() {
   try {
     const res = await fetch('translations.json', { cache: 'no-store' });
     TRANSLATIONS = await res.json();
-  } catch {
+    console.log('🌐 i18n.js: Translations loaded successfully');
+  } catch (error) {
+    console.error('🌐 i18n.js: Error loading translations:', error);
     TRANSLATIONS = { en: {} };
   }
-  const supported = Object.keys(TRANSLATIONS);
-  let initial = langFromUrl() || localStorage.getItem('lang');
-  if (!initial || !supported.includes(initial)) initial = detectBrowserLang(supported);
-  setLang(initial);
+  
+  // Apply initial translations based on current language
+  const currentLang = getLang();
+  console.log('🌐 i18n.js: Applying initial translations for language:', currentLang);
+  applyTranslations(currentLang);
 }
-
-// function applyTranslations(lang) {
-//   const dict = (TRANSLATIONS[lang] || TRANSLATIONS[FALLBACK_LANG] || {});
-//   document.querySelectorAll('[data-i18n]').forEach(el => {
-//     const path = el.getAttribute('data-i18n').split('.');
-//     let cur = dict;
-//     for (const p of path) cur = (cur || {})[p];
-//     if (typeof cur === 'string') el.textContent = cur;
-//   });
-// }
 
 function escapeHTML(s){
   return s.replace(/[&<>"']/g, m =>
@@ -68,12 +61,30 @@ function getByPath(dict, path){
 }
 
 function applyTranslations(lang) {
-  const dict = (TRANSLATIONS[lang] || TRANSLATIONS[FALLBACK_LANG] || {});
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const val = getByPath(dict, el.getAttribute('data-i18n'));
+  console.log('🌐 i18n.js: applyTranslations() called with language:', lang);
+  console.log('🌐 i18n.js: TRANSLATIONS available:', !!TRANSLATIONS);
+  console.log('🌐 i18n.js: TRANSLATIONS keys:', Object.keys(TRANSLATIONS));
+  
+  // Get translations from the correct path: TRANSLATIONS.sections[lang]
+  const dict = (TRANSLATIONS.sections && TRANSLATIONS.sections[lang]) || 
+               (TRANSLATIONS.sections && TRANSLATIONS.sections[FALLBACK_LANG]) || {};
+  
+  console.log('🌐 i18n.js: Using dictionary for language:', lang, 'with keys:', Object.keys(dict));
+  
+  const elements = document.querySelectorAll('[data-i18n]');
+  console.log('🌐 i18n.js: Found', elements.length, 'elements with data-i18n attribute');
+  
+  elements.forEach((el, index) => {
+    const path = el.getAttribute('data-i18n');
+    const val = getByPath(dict, path);
     const mode = el.getAttribute('data-i18n-mode') || 'text';
 
-    if (val == null) return;
+    console.log(`🌐 i18n.js: Element ${index}: path="${path}", value="${val}", mode="${mode}"`);
+
+    if (val == null) {
+      console.warn(`🌐 i18n.js: No translation found for path: ${path}`);
+      return;
+    }
 
     // Абзацы: массив => <p>…</p>; строка с \n\n => сплит на абзацы
     if (mode === 'paras') {
@@ -91,7 +102,10 @@ function applyTranslations(lang) {
 
     // По умолчанию — чистый текст
     el.textContent = typeof val === 'string' ? val : String(val);
+    console.log(`🌐 i18n.js: Applied translation "${val}" to element ${index}`);
   });
+  
+  console.log('🌐 i18n.js: applyTranslations() completed');
 }
 
 
@@ -216,3 +230,19 @@ window.applyTranslations = applyTranslations;
 window.initLangUI = initLangUI;
 window.getLang = getLang;
 window.cycleLang = cycleLang;
+
+// Listen for language changes from main.js
+document.addEventListener('languageChanged', (e) => {
+  const newLang = e.detail?.language || 'en';
+  console.log('🌐 i18n.js: Language changed event received:', newLang);
+  setLang(newLang);
+  applyTranslations(newLang);
+  updateUrlLangParam(newLang);
+});
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadTranslations);
+} else {
+  loadTranslations();
+}

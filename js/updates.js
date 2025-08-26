@@ -25,10 +25,10 @@ class UpdatesManager {
     const lang = this.currentLang || 'en';
     console.log('🌐 Updates.js: getTranslations() called with language:', lang);
     const result = {
-      en: { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT' },
-      uk: { moreBtn: 'Показати щё', readMore: 'Читати далі', readLess: 'Приховати', NEW: 'NEW', IMPORTANT: 'IMPORTANT' },
-      cs: { moreBtn: 'Načíst další', readMore: 'Více', readLess: 'Méně', NEW: 'NEW', IMPORTANT: 'IMPORTANT' }
-    }[lang] || { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT' };
+      en: { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'All' },
+      uk: { moreBtn: 'Показати щё', readMore: 'Читати далі', readLess: 'Приховати', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'Всі' },
+      cs: { moreBtn: 'Načíst další', readMore: 'Více', readLess: 'Méně', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'Vše' }
+    }[lang] || { moreBtn: 'Load more', readMore: 'Read more', readLess: 'Read less', NEW: 'NEW', IMPORTANT: 'IMPORTANT', all: 'All' };
     console.log('🌐 Updates.js: getTranslations() result:', result);
     return result;
   }
@@ -39,12 +39,26 @@ class UpdatesManager {
     this.currentLang = lang;
     this.L = this.getTranslations();
     this.updateMoreButtonText();
+    this.updateFilterButtons();
+    
+    // Save language to localStorage for consistency with main.js
+    localStorage.setItem('site_language', lang);
+    
     console.log('🌐 Updates.js: Current language set to:', this.currentLang);
   }
 
   // Detect current language from DOM or URL
   detectCurrentLanguage() {
     console.log('🌐 Updates.js: detectCurrentLanguage() called');
+    
+    // Check localStorage first (for consistency with main.js)
+    const savedLang = localStorage.getItem('site_language');
+    console.log('🌐 Updates.js: Saved language from localStorage:', savedLang);
+    if (savedLang && ['en', 'cs', 'uk'].includes(savedLang)) {
+      console.log('🌐 Updates.js: Using saved language:', savedLang);
+      this.setLanguage(savedLang);
+      return;
+    }
     
     // Check if language is set in DOM
     const htmlLang = document.documentElement.lang;
@@ -79,6 +93,14 @@ class UpdatesManager {
     this.processDeepLink();
     this.render();
     this.setupSocialMeta();
+    
+    // Synchronize language with main.js
+    if (window.CURRENT_LANG && window.CURRENT_LANG !== this.currentLang) {
+      console.log('🌐 Updates.js: Synchronizing language with main.js:', window.CURRENT_LANG);
+      this.setLanguage(window.CURRENT_LANG);
+      this.render(); // Re-render with synchronized language
+    }
+    
     console.log('🌐 Updates.js: init() completed with language:', this.currentLang);
   }
 
@@ -106,6 +128,24 @@ class UpdatesManager {
           bodyKeys: update.body ? Object.keys(update.body) : 'N/A'
         });
       });
+      
+      // Ensure CONFIG is available for translations
+      if (!window.CONFIG) {
+        console.log('🌐 Updates.js: CONFIG not available, loading config.json...');
+        try {
+          const configResponse = await fetch('config.json');
+          if (configResponse.ok) {
+            window.CONFIG = await configResponse.json();
+            console.log('🌐 Updates.js: CONFIG loaded successfully');
+          } else {
+            console.warn('🌐 Updates.js: Failed to load config.json');
+          }
+        } catch (error) {
+          console.error('🌐 Updates.js: Error loading config.json:', error);
+        }
+      } else {
+        console.log('🌐 Updates.js: CONFIG already available');
+      }
     } catch (error) {
       console.error('Error loading updates:', error);
       this.items = [];
@@ -148,6 +188,38 @@ class UpdatesManager {
     }
   }
 
+  // Update filter buttons text
+  updateFilterButtons() {
+    console.log('🌐 Updates.js: updateFilterButtons() called');
+    if (!this.toolbar) {
+      console.warn('🌐 Updates.js: No toolbar found for filter buttons update');
+      return;
+    }
+
+    const filterButtons = this.toolbar.querySelectorAll('[data-filter]');
+    filterButtons.forEach(button => {
+      const filterType = button.getAttribute('data-filter');
+      let translatedText = '';
+
+      switch (filterType) {
+        case 'all':
+          translatedText = this.L.all;
+          break;
+        case 'tickets':
+        case 'lineup':
+        case 'logistics':
+        case 'announcement':
+          translatedText = this.getUpdateTypeTranslation(filterType);
+          break;
+        default:
+          translatedText = filterType;
+      }
+
+      button.textContent = translatedText;
+      console.log(`🌐 Updates.js: Updated filter button "${filterType}" to "${translatedText}"`);
+    });
+  }
+
   // Setup event listeners
   setupEventListeners() {
     console.log('🌐 Updates.js: setupEventListeners() called');
@@ -157,7 +229,7 @@ class UpdatesManager {
       const btn = e.target.closest('[data-filter]');
       if (!btn) return;
       
-      console.log('🌐 Updates.js: Filter button clicked:', btn.dataset.filter);
+      console.log('�� Updates.js: Filter button clicked:', btn.dataset.filter);
       
       this.toolbar.querySelectorAll('.chip.sm').forEach(b => 
         b.classList.toggle('is-active', b === btn)
@@ -186,6 +258,36 @@ class UpdatesManager {
       this.setLanguage(newLang);
       console.log('🌐 About to re-render updates with language:', this.currentLang);
       this.render(); // Re-render with new language
+      
+      // Update language switcher UI if it exists
+      const langSwitcher = document.querySelector('.lang-switcher');
+      if (langSwitcher) {
+        // Update current language display
+        const langCurrent = langSwitcher.querySelector('.lang-current');
+        if (langCurrent) {
+          const langFlag = langCurrent.querySelector('.lang-flag');
+          const langName = langCurrent.querySelector('.lang-name');
+          if (langFlag) langFlag.textContent = this.getLangFlag(newLang);
+          if (langName) langName.textContent = this.getLangName(newLang);
+        }
+        
+        // Update dropdown options
+        const langDropdown = langSwitcher.querySelector('.lang-dropdown');
+        if (langDropdown) {
+          const options = langDropdown.querySelectorAll('.lang-option');
+          options.forEach(option => {
+            const lang = option.getAttribute('data-lang');
+            if (lang) {
+              const flag = option.querySelector('.lang-flag');
+              const name = option.querySelector('.lang-name');
+              if (flag) flag.textContent = this.getLangFlag(lang);
+              if (name) name.textContent = this.getLangName(lang);
+            }
+          });
+        }
+        
+        console.log('🌐 Updates.js: Language switcher UI updated for language:', newLang);
+      }
     });
 
     // Initial language detection
@@ -417,7 +519,7 @@ class UpdatesManager {
           <div class="hrow1">
             <div class="hleft">
               <time datetime="${u.ts}">${this.fmtDate(u.ts)}</time>
-              ${isNew ? `<span class="badge new">${this.L.NEW}</span>` : ''}
+              ${isNew ? `<span class="badge new">${this.getUpdateBadgeTranslation('new')}</span>` : ''}
               ${u.type ? `<span class="badge">${this.getUpdateTypeTranslation(u.type) || u.type}</span>` : ''}
             </div>
             <div class="hright">
@@ -832,16 +934,48 @@ class UpdatesManager {
 
   getUpdateTypeTranslation(type) {
     console.log('🌐 Updates.js: getUpdateTypeTranslation() called with type:', type);
-    // This would need to be implemented based on your CONFIG structure
-    console.log('🌐 Updates.js: getUpdateTypeTranslation returning:', type);
+    
+    // Check if CONFIG is available and has update categories
+    if (window.CONFIG && window.CONFIG.updateCategories && window.CONFIG.updateCategories[type]) {
+      const translation = this.getTranslation(window.CONFIG.updateCategories[type], type);
+      console.log('🌐 Updates.js: getUpdateTypeTranslation result:', translation);
+      return translation;
+    }
+    
+    // Fallback to original type
+    console.log('🌐 Updates.js: getUpdateTypeTranslation fallback to:', type);
     return type;
   }
 
   getUpdateBadgeTranslation(badgeType) {
     console.log('🌐 Updates.js: getUpdateBadgeTranslation() called with badgeType:', badgeType);
-    // This would need to be implemented based on your CONFIG structure
-    console.log('🌐 Updates.js: getUpdateBadgeTranslation returning:', badgeType);
+    
+    // Check if CONFIG is available and has badge types
+    if (window.CONFIG && window.CONFIG.updateBadges && window.CONFIG.updateBadges[badgeType]) {
+      const translation = this.getTranslation(window.CONFIG.updateBadges[badgeType], badgeType);
+      console.log('🌐 Updates.js: getUpdateBadgeTranslation result:', translation);
+      return translation;
+    }
+    
+    // Fallback to original badge type
+    console.log('🌐 Updates.js: getUpdateBadgeTranslation fallback to:', badgeType);
     return badgeType;
+  }
+
+  // Get language flag emoji
+  getLangFlag(lang) {
+    const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
+    const result = flags[lang] || '🌐';
+    console.log('🌐 Updates.js: getLangFlag() called with:', lang, 'returning:', result);
+    return result;
+  }
+
+  // Get language name
+  getLangName(lang) {
+    const names = { en: 'EN', cs: 'CS', uk: 'UK' };
+    const result = names[lang] || 'EN';
+    console.log('🌐 Updates.js: getLangName() called with:', lang, 'returning:', result);
+    return result;
   }
 }
 

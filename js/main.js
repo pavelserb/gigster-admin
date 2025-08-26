@@ -132,6 +132,9 @@ function initNewLangUI() {
   CURRENT_LANG = getCurrentLang();
   console.log('🌐 Main.js: Initial language set to:', CURRENT_LANG);
   
+  // Load and apply translations
+  loadAndApplyTranslations();
+  
   // Create language switcher in header
   const header = document.querySelector('.container.hdr');
   if (!header) {
@@ -194,6 +197,34 @@ function getLangName(lang) {
   return result;
 }
 
+// Load and apply translations from translations.json
+async function loadAndApplyTranslations() {
+  console.log('🌐 Main.js: loadAndApplyTranslations() called');
+  
+  // Wait for i18n.js to be ready
+  let attempts = 0;
+  while (!window.applyTranslations && attempts < 50) {
+    console.log('🌐 Main.js: Waiting for applyTranslations function, attempt:', attempts + 1);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    attempts++;
+  }
+  
+  if (!window.applyTranslations) {
+    console.error('🌐 Main.js: applyTranslations function not available after waiting');
+    return;
+  }
+  
+  console.log('🌐 Main.js: applyTranslations function found, applying translations for language:', CURRENT_LANG);
+  
+  // Apply translations for current language
+  try {
+    window.applyTranslations(CURRENT_LANG);
+    console.log('🌐 Main.js: Translations applied successfully for language:', CURRENT_LANG);
+  } catch (error) {
+    console.error('🌐 Main.js: Error applying translations:', error);
+  }
+}
+
 // Apply new translations to the page
 function applyNewTranslations(lang) {
   console.log('🌐 Main.js: applyNewTranslations() called with language:', lang);
@@ -205,6 +236,22 @@ function applyNewTranslations(lang) {
   updateFaqs();
   updateTickets();
   updateStaticTranslations();
+  
+  // Apply translations from translations.json
+  if (window.applyTranslations) {
+    console.log('🌐 Main.js: Applying static translations for language:', lang);
+    window.applyTranslations(lang);
+    console.log('🌐 Main.js: Static translations applied for language:', lang);
+  } else {
+    console.error('🌐 Main.js: applyTranslations function not available');
+    // Try to load and apply translations manually
+    setTimeout(() => {
+      if (window.applyTranslations) {
+        console.log('🌐 Main.js: Retrying to apply translations for language:', lang);
+        window.applyTranslations(lang);
+      }
+    }, 100);
+  }
   
   // Update updates manager language
   if (window.updatesManager) {
@@ -225,13 +272,19 @@ function applyNewTranslations(lang) {
   const langSwitcher = document.querySelector('.lang-switcher');
   if (langSwitcher) {
     // Update current language display
-    langSwitcher.querySelector('.lang-current .lang-flag').textContent = getLangFlag(lang);
-    langSwitcher.querySelector('.lang-current .lang-name').textContent = getLangName(lang);
+    const langCurrent = langSwitcher.querySelector('.lang-current');
+    if (langCurrent) {
+      langCurrent.innerHTML = `
+        <span class="lang-flag">${getLangFlag(lang)}</span>
+        <span class="lang-name">${getLangName(lang)}</span>
+        <button class="lang-toggle" aria-label="Сменить язык">▼</button>
+      `;
+    }
     
-    // Rebuild dropdown with new language options
-    const dropdown = langSwitcher.querySelector('.lang-dropdown');
-    if (dropdown) {
-      dropdown.innerHTML = SUPPORTED_LANGS.filter(l => l !== lang).map(l => `
+    // Update dropdown options
+    const langDropdown = langSwitcher.querySelector('.lang-dropdown');
+    if (langDropdown) {
+      langDropdown.innerHTML = SUPPORTED_LANGS.filter(l => l !== lang).map(l => `
         <button class="lang-option" 
                 data-lang="${l}" 
                 onclick="setCurrentLang('${l}')">
@@ -240,6 +293,10 @@ function applyNewTranslations(lang) {
         </button>
       `).join('');
     }
+    
+    console.log('🌐 Main.js: Language switcher UI updated for language:', lang);
+  } else {
+    console.warn('🌐 Main.js: Language switcher not found for UI update');
   }
 }
 
@@ -692,7 +749,7 @@ function updateStaticTranslations() {
     // Add header
     const header = document.createElement('div');
     header.className = 'cta-menu-header';
-    header.textContent = getTranslation('Choose your seller:', 'Choose your seller:');
+    header.textContent = getTranslationFromFile('cta.chooseSeller', 'Choose your seller:');
     ticketsMenu.appendChild(header);
     
     (CONFIG.authorizedSellers || []).forEach(s => {

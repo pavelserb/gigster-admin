@@ -3177,6 +3177,9 @@ class AdminPanel {
       // Update config from form data
       this.updateConfigFromForm();
       
+      // Update translations from form data
+      this.updateTranslationsFromForm();
+      
       // Save config
       await this.saveConfig();
       
@@ -3247,6 +3250,81 @@ class AdminPanel {
       cs: csValue,
       uk: ukValue
     };
+  }
+  
+  // Update translations object from form fields
+  updateTranslationsFromForm() {
+    console.log('🔄 Updating translations from form...');
+    
+    // Get all translation fields from the translations tab
+    const translationFields = document.querySelectorAll('#translationsTab [data-field]');
+    
+    translationFields.forEach(field => {
+      const fieldName = field.getAttribute('data-field');
+      if (!fieldName) return;
+      
+      const enInput = document.getElementById(`${fieldName}_en`);
+      const csInput = document.getElementById(`${fieldName}_cs`);
+      const ukInput = document.getElementById(`${fieldName}_uk`);
+      
+      if (!enInput || !csInput || !ukInput) return;
+      
+      const enValue = enInput.value.trim();
+      const csValue = csInput.value.trim();
+      const ukValue = ukInput.value.trim();
+      
+      // Parse field name to determine the path in translations object
+      let section, key;
+      
+      // Try dot notation first (translations tab)
+      if (fieldName.includes('.')) {
+        const pathParts = fieldName.split('.');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('.');
+      }
+      // Try underscore notation (updates tab)
+      else if (fieldName.includes('_')) {
+        const pathParts = fieldName.split('_');
+        section = pathParts[0];
+        key = pathParts.slice(1).join('_');
+      }
+      // Single word - skip
+      else {
+        return;
+      }
+      
+      // Initialize section if it doesn't exist
+      if (!this.translations.sections) {
+        this.translations.sections = {};
+      }
+      if (!this.translations.sections.en) {
+        this.translations.sections.en = {};
+      }
+      if (!this.translations.sections.cs) {
+        this.translations.sections.cs = {};
+      }
+      if (!this.translations.sections.uk) {
+        this.translations.sections.uk = {};
+      }
+      if (!this.translations.sections.en[section]) {
+        this.translations.sections.en[section] = {};
+      }
+      if (!this.translations.sections.cs[section]) {
+        this.translations.sections.cs[section] = {};
+      }
+      if (!this.translations.sections.uk[section]) {
+        this.translations.sections.uk[section] = {};
+      }
+      
+      // Update the translation values
+      this.translations.sections.en[section][key] = enValue;
+      this.translations.sections.cs[section][key] = csValue;
+      this.translations.sections.uk[section][key] = ukValue;
+      
+      console.log(`✅ Updated translation: ${section}.${key}`, { enValue, csValue, ukValue });
+    });
+    
+    console.log('📊 Final translations object:', this.translations);
   }
 
   getTranslationValue(fieldData, lang) {

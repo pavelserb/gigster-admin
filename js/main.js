@@ -1328,21 +1328,36 @@ function initMediaSlider() {
     updateSlides();
   }
 
-  // Event listeners
-  prevBtn.addEventListener('click', () => {
+  // Event listeners for navigation buttons
+  const handlePrevClick = () => {
     prevSlide();
     // Stop autoplay when user manually navigates
     if (isAutoplayActive) {
       stopAutoplay();
     }
-  });
+  };
   
-  nextBtn.addEventListener('click', () => {
+  const handleNextClick = () => {
     nextSlide();
     // Stop autoplay when user manually navigates
     if (isAutoplayActive) {
       stopAutoplay();
     }
+  };
+  
+  // Add both click and touch events for better mobile support
+  prevBtn.addEventListener('click', handlePrevClick);
+  nextBtn.addEventListener('click', handleNextClick);
+  
+  // Add touch events for mobile devices
+  prevBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handlePrevClick();
+  });
+  
+  nextBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleNextClick();
   });
   
   // Autoplay button
@@ -1373,27 +1388,37 @@ function initMediaSlider() {
   // Touch/swipe support
   let startX = 0;
   let currentX = 0;
+  let isSwiping = false;
 
   slider.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
+    isSwiping = false;
   });
 
   slider.addEventListener('touchmove', (e) => {
     currentX = e.touches[0].clientX;
+    const diff = Math.abs(startX - currentX);
+    if (diff > 10) {
+      isSwiping = true;
+    }
   });
 
-  slider.addEventListener('touchend', () => {
+  slider.addEventListener('touchend', (e) => {
+    if (!isSwiping) return;
+    
     const diff = startX - currentX;
     const threshold = 50;
     
     if (Math.abs(diff) > threshold) {
-      if (diff > 0 && currentSlide < totalSlides - 1) {
+      if (diff > 0) {
+        // Swipe left - next slide
         nextSlide();
         // Stop autoplay when user manually navigates
         if (isAutoplayActive) {
           stopAutoplay();
         }
-      } else if (diff < 0 && currentSlide > 0) {
+      } else {
+        // Swipe right - previous slide
         prevSlide();
         // Stop autoplay when user manually navigates
         if (isAutoplayActive) {
@@ -1401,19 +1426,75 @@ function initMediaSlider() {
         }
       }
     }
+    
+    isSwiping = false;
   });
 
   // Initialize
   updateSlides();
   
-  // Add click handlers for lightbox
+  // Add click handlers for lightbox and video controls
   slides.forEach((slide, index) => {
     const media = slide.querySelector('img, video');
     if (media) {
       media.style.cursor = 'pointer';
-      media.addEventListener('click', () => {
-        openLightbox(index);
+      
+      // Handle both click and touch events for lightbox
+      let touchStartTime = 0;
+      let touchStartY = 0;
+      
+      media.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+        touchStartY = e.touches[0].clientY;
       });
+      
+      media.addEventListener('touchend', (e) => {
+        const touchEndTime = Date.now();
+        const touchDuration = touchEndTime - touchStartTime;
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchDistance = Math.abs(touchStartY - touchEndY);
+        
+        // Only open lightbox if it's a short tap (not a swipe)
+        if (touchDuration < 300 && touchDistance < 10) {
+          e.preventDefault();
+          openLightbox(index);
+        }
+      });
+      
+      media.addEventListener('click', (e) => {
+        // Only handle click if it's not a touch device or if it's a mouse click
+        if (!('ontouchstart' in window) || e.detail > 0) {
+          openLightbox(index);
+        }
+      });
+      
+      // Special handling for video elements
+      if (media.tagName === 'VIDEO') {
+        // Stop autoplay when video starts playing
+        media.addEventListener('play', () => {
+          if (isAutoplayActive) {
+            stopAutoplay();
+          }
+        });
+        
+        // Resume autoplay when video ends
+        media.addEventListener('ended', () => {
+          if (!isAutoplayActive) {
+            startAutoplay();
+          }
+        });
+        
+        // Stop autoplay when user interacts with video controls
+        media.addEventListener('click', (e) => {
+          // Don't stop autoplay if clicking on the video itself (for lightbox)
+          // Only stop if clicking on controls or when video starts playing
+          if (e.target === media && !media.paused) {
+            if (isAutoplayActive) {
+              stopAutoplay();
+            }
+          }
+        });
+      }
     }
   });
   

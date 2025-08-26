@@ -471,6 +471,9 @@ function mountBasics() {
   // Update venue photos
   updateVenuePhotos();
   
+  // Setup smart map touch handling
+  setupMapTouchHandling();
+  
   // Update static translations
   updateStaticTranslations();
 }
@@ -1671,6 +1674,64 @@ function openFullMap() {
       window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank', 'noopener,noreferrer');
     }
   }
+}
+
+// Smart map touch handling - only allow interaction with two fingers
+function setupMapTouchHandling() {
+  const mapContainer = document.querySelector('.map-container');
+  const mapIframe = document.getElementById('mapFrame');
+  
+  if (!mapContainer || !mapIframe) return;
+  
+  let touchCount = 0;
+  let isMultiTouch = false;
+  
+  // Track touch events on the container
+  mapContainer.addEventListener('touchstart', (e) => {
+    touchCount = e.touches.length;
+    isMultiTouch = touchCount >= 2;
+    
+    if (isMultiTouch) {
+      // Enable iframe interaction for multi-touch
+      mapIframe.style.pointerEvents = 'auto';
+    } else {
+      // Disable iframe interaction for single touch
+      mapIframe.style.pointerEvents = 'none';
+      // Prevent default to allow page scrolling
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  mapContainer.addEventListener('touchmove', (e) => {
+    touchCount = e.touches.length;
+    isMultiTouch = touchCount >= 2;
+    
+    if (!isMultiTouch) {
+      // Disable iframe interaction for single touch
+      mapIframe.style.pointerEvents = 'none';
+    }
+  });
+  
+  mapContainer.addEventListener('touchend', (e) => {
+    touchCount = e.touches.length;
+    isMultiTouch = touchCount >= 2;
+    
+    if (!isMultiTouch) {
+      // Disable iframe interaction when multi-touch ends
+      mapIframe.style.pointerEvents = 'none';
+    }
+  });
+  
+  // Also handle mouse events for desktop
+  mapContainer.addEventListener('mouseenter', () => {
+    // Enable interaction on hover for desktop
+    mapIframe.style.pointerEvents = 'auto';
+  });
+  
+  mapContainer.addEventListener('mouseleave', () => {
+    // Disable interaction when mouse leaves
+    mapIframe.style.pointerEvents = 'none';
+  });
 }
 
 function escapeHTML(text) {

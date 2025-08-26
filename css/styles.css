@@ -2307,8 +2307,9 @@ p {
 .map {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  border: 0;
   display: block;
+  pointer-events: none; /* По умолчанию отключаем взаимодействие */
 }
 
 .map-overlay {

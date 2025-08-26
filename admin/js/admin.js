@@ -15,6 +15,9 @@ class AdminPanel {
     this.currentMediaFilter = 'all';
     this.currentMediaSearch = '';
     
+    // Translation save timeout
+    this.saveTranslationsTimeout = null;
+    
     // Cache frequently used DOM elements
     this._cacheDOMElements();
     
@@ -132,6 +135,64 @@ class AdminPanel {
       if (csInput.tagName === 'TEXTAREA') this.autoResizeTextarea(csInput);
       if (ukInput.tagName === 'TEXTAREA') this.autoResizeTextarea(ukInput);
     }, 0);
+    
+    // Update translations object
+    this.updateTranslationValue(fieldName, enValue, csValue, ukValue);
+  }
+  
+  // Update translation value in the translations object
+  updateTranslationValue(fieldName, enValue, csValue, ukValue) {
+    // Parse field name to determine the path in translations object
+    const pathParts = fieldName.split('_');
+    
+    if (pathParts.length >= 2) {
+      const section = pathParts[0];
+      const key = pathParts.slice(1).join('_');
+      
+      // Initialize section if it doesn't exist
+      if (!this.translations.sections) {
+        this.translations.sections = {};
+      }
+      if (!this.translations.sections.en) {
+        this.translations.sections.en = {};
+      }
+      if (!this.translations.sections.cs) {
+        this.translations.sections.cs = {};
+      }
+      if (!this.translations.sections.uk) {
+        this.translations.sections.uk = {};
+      }
+      if (!this.translations.sections.en[section]) {
+        this.translations.sections.en[section] = {};
+      }
+      if (!this.translations.sections.cs[section]) {
+        this.translations.sections.cs[section] = {};
+      }
+      if (!this.translations.sections.uk[section]) {
+        this.translations.sections.uk[section] = {};
+      }
+      
+      // Update the translation values
+      this.translations.sections.en[section][key] = enValue;
+      this.translations.sections.cs[section][key] = csValue;
+      this.translations.sections.uk[section][key] = ukValue;
+      
+      // Auto-save translations after a short delay
+      this.debouncedSaveTranslations();
+    }
+  }
+  
+  // Debounced save translations to avoid too many requests
+  debouncedSaveTranslations() {
+    if (this.saveTranslationsTimeout) {
+      clearTimeout(this.saveTranslationsTimeout);
+    }
+    this.saveTranslationsTimeout = setTimeout(() => {
+      this.saveTranslations().catch(error => {
+        console.error('Failed to save translations:', error);
+        this.showError('Ошибка сохранения переводов');
+      });
+    }, 1000); // Save after 1 second of inactivity
   }
 
   // Initialize translation counters for all fields

@@ -42,6 +42,9 @@ async function loadTranslations() {
     if (response.ok) {
       TRANSLATIONS = await response.json();
       
+      // Export to window for main.js to access
+      window.TRANSLATIONS = TRANSLATIONS;
+      
       // Apply initial translations for current language
       const currentLang = getLang();
       if (currentLang) {

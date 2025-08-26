@@ -143,11 +143,12 @@ class AdminPanel {
   // Update translation value in the translations object
   updateTranslationValue(fieldName, enValue, csValue, ukValue) {
     // Parse field name to determine the path in translations object
-    const pathParts = fieldName.split('_');
+    // Field names are like "nav.about", "cta.tickets", etc.
+    const pathParts = fieldName.split('.');
     
     if (pathParts.length >= 2) {
       const section = pathParts[0];
-      const key = pathParts.slice(1).join('_');
+      const key = pathParts.slice(1).join('.');
       
       // Initialize section if it doesn't exist
       if (!this.translations.sections) {

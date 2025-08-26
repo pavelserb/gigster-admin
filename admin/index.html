@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
   
   <!-- Styles -->
-      <link rel="stylesheet" href="css/admin.css?v=17">
+      <link rel="stylesheet" href="css/admin.css?v=19">
   
   <!-- Icons -->
   <link rel="icon" href="../assets/icons/favicon.ico">
@@ -600,31 +600,20 @@
           <p>Управление изображениями, видео и другими файлами</p>
         </div>
         
-        <div class="config-sections">
-          <!-- Media Sidebar Section -->
-          <div class="config-section">
-            <div class="section-header">
-              <h3>📁 Управление папками</h3>
-              <p>Создание и навигация по структуре папок</p>
+        <div class="media-container">
+          <!-- Media Sidebar -->
+          <div class="media-sidebar">
+            <div class="media-sidebar-header">
+              <h3>📁 Папки</h3>
+              <button id="createFolderBtn" class="btn btn-secondary btn-small">Создать папку</button>
             </div>
-            
-            <div class="media-sidebar-content">
-              <div class="media-sidebar-header">
-                <button id="createFolderBtn" class="btn btn-secondary btn-small">Создать папку</button>
-              </div>
-              <div id="mediaFolderTree" class="media-folder-tree">
-                <!-- Folder tree will be generated here -->
-              </div>
+            <div id="mediaFolderTree" class="media-folder-tree">
+              <!-- Folder tree will be generated here -->
             </div>
           </div>
           
-          <!-- Media Main Section -->
-          <div class="config-section">
-            <div class="section-header">
-              <h3>📂 Управление файлами</h3>
-              <p>Загрузка, просмотр и управление медиафайлами</p>
-            </div>
-            
+          <!-- Media Main Content -->
+          <div class="media-main">
             <div class="media-toolbar">
               <div class="media-breadcrumb" id="mediaBreadcrumb">
                 <!-- Breadcrumb navigation -->

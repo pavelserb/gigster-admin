@@ -18,6 +18,9 @@ class AdminPanel {
     // Translation save timeout
     this.saveTranslationsTimeout = null;
     
+    // Initialization flag
+    this.isInitialized = false;
+    
     // Cache frequently used DOM elements
     this._cacheDOMElements();
     
@@ -136,8 +139,10 @@ class AdminPanel {
       if (ukInput.tagName === 'TEXTAREA') this.autoResizeTextarea(ukInput);
     }, 0);
     
-    // Update translations object
-    this.updateTranslationValue(fieldName, enValue, csValue, ukValue);
+    // Update translations object (only for actual changes, not initialization)
+    if (this.isInitialized) {
+      this.updateTranslationValue(fieldName, enValue, csValue, ukValue);
+    }
   }
   
   // Update translation value in the translations object
@@ -241,6 +246,7 @@ class AdminPanel {
       this.setupInterface();
       this.setupLanguageManagement();
       this.initTranslationCounters();
+      this.isInitialized = true;
     }
   }
 
@@ -3257,17 +3263,24 @@ class AdminPanel {
     console.log('🔄 Updating translations from form...');
     
     // Get all translation fields from the translations tab
-    const translationFields = document.querySelectorAll('#translationsTab [data-field]');
+    const translationFields = document.querySelectorAll('#translationsTab .compact-translation-field[data-field]');
+    
+    console.log('🔍 Found translation fields:', translationFields.length);
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-field');
       if (!fieldName) return;
       
+      console.log('🔍 Processing field:', fieldName);
+      
       const enInput = document.getElementById(`${fieldName}_en`);
       const csInput = document.getElementById(`${fieldName}_cs`);
       const ukInput = document.getElementById(`${fieldName}_uk`);
       
-      if (!enInput || !csInput || !ukInput) return;
+      if (!enInput || !csInput || !ukInput) {
+        console.warn('⚠️ Missing inputs for field:', fieldName);
+        return;
+      }
       
       const enValue = enInput.value.trim();
       const csValue = csInput.value.trim();

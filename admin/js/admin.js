@@ -3364,51 +3364,6 @@ class AdminPanel {
       
       console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     });
-      
-      // Parse field name to determine the path in translations object
-      let section, key;
-      
-      // Try dot notation first (translations tab)
-      if (fieldName.includes('.')) {
-        const pathParts = fieldName.split('.');
-        section = pathParts[0];
-        key = pathParts.slice(1).join('.');
-      }
-      // Try underscore notation (updates tab)
-      else if (fieldName.includes('_')) {
-        const pathParts = fieldName.split('_');
-        section = pathParts[0];
-        key = pathParts.slice(1).join('_');
-      }
-      // Single word - skip
-      else {
-        return;
-      }
-      
-      // Initialize section if it doesn't exist
-      if (!this.translations.sections) {
-        this.translations.sections = {};
-      }
-      if (!this.translations.sections.en) {
-        this.translations.sections.en = {};
-      }
-      if (!this.translations.sections.cs) {
-        this.translations.sections.cs = {};
-      }
-      if (!this.translations.sections.uk) {
-        this.translations.sections.uk = {};
-      }
-      if (!this.translations.sections.en[section]) {
-        this.translations.sections.en[section] = {};
-      }
-      if (!this.translations.sections.cs[section]) {
-        this.translations.sections.cs[section] = {};
-      }
-      if (!this.translations.sections.uk[section]) {
-        this.translations.sections.uk[section] = {};
-      }
-      
-      console.log(`✅ Updated translation: ${section}.${key} (${currentLang})`, { value: fieldValue });
     
     console.log('📊 Final translations object:', this.translations);
     console.log('✅ updateTranslationsFromForm() completed');

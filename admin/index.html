@@ -10,11 +10,10 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
   
   <!-- Styles -->
-      <link rel="stylesheet" href="css/admin.css?v=13">
-      <link rel="stylesheet" href="css/mobile-optimizations.css?v=2">
+      <link rel="stylesheet" href="css/admin.css?v=11">
   
   <!-- Icons -->
   <link rel="icon" href="../assets/icons/favicon.ico">
@@ -46,11 +45,14 @@
 
   <!-- Main Admin Interface -->
   <div id="adminInterface" class="admin-interface" style="display: none;">
-    <!-- Fixed Header -->
+    <!-- Header -->
     <header class="admin-header">
       <div class="header-content">
         <div class="header-left">
           <h1>ARTBAT Prague - Админка</h1>
+        </div>
+        <div class="header-center">
+          <!-- Language management moved to Translations tab -->
         </div>
         <div class="header-right">
           <button id="previewBtn" class="btn btn-secondary">Предпросмотр</button>
@@ -60,7 +62,7 @@
       </div>
     </header>
 
-    <!-- Fixed Navigation -->
+    <!-- Navigation -->
     <nav class="admin-nav">
       <div class="nav-container">
         <button class="nav-tab active" data-tab="config">Конфигурация</button>
@@ -818,10 +820,9 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/performance-optimizations.js"></script>
   <script src="js/fileManager.js?v=2"></script>
   <script src="js/pixelManager.js?v=1"></script>
-  <script src="js/admin.js?v=68"></script>
+             <script src="js/admin.js?v=67"></script>
 </body>
 </html>
 

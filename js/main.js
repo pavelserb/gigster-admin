@@ -287,6 +287,8 @@ async function init() {
   if (window.UpdatesManager) {
     updatesManager = new window.UpdatesManager();
     await updatesManager.init();
+    // Export to window for language switching
+    window.updatesManager = updatesManager;
   } else {
     console.warn('🌐 Main.js: UpdatesManager not available');
   }

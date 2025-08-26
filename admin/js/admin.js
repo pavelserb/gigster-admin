@@ -214,15 +214,23 @@ class AdminPanel {
   
   // Debounced save translations to avoid too many requests
   debouncedSaveTranslations() {
+    console.log('🔄 debouncedSaveTranslations called');
+    
     if (this.saveTranslationsTimeout) {
+      console.log('🔄 Clearing existing timeout');
       clearTimeout(this.saveTranslationsTimeout);
     }
+    
+    console.log('🔄 Setting new timeout for 1 second');
     this.saveTranslationsTimeout = setTimeout(() => {
+      console.log('🔄 Timeout fired, calling saveTranslations...');
       this.saveTranslations().catch(error => {
         console.error('Failed to save translations:', error);
         this.showError('Ошибка сохранения переводов');
       });
     }, 1000); // Save after 1 second of inactivity
+    
+    console.log('✅ debouncedSaveTranslations completed');
   }
 
   // Initialize translation counters for all fields
@@ -3396,7 +3404,9 @@ class AdminPanel {
     console.log('📊 Final translations object:', this.translations);
     
     // Trigger auto-save after updating translations
+    console.log('🔄 Triggering auto-save...');
     this.debouncedSaveTranslations();
+    console.log('✅ Auto-save triggered');
   }
 
   getTranslationValue(fieldData, lang) {

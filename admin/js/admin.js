@@ -2638,6 +2638,24 @@ class AdminPanel {
     this._processSellerCheckboxes(processedData, data);
     this._processTierCheckboxes(processedData, data);
     
+    // Process bio field for artists to preserve paragraph structure
+    if (type === 'artist' && processedData.bio && typeof processedData.bio === 'object') {
+      Object.keys(processedData.bio).forEach(lang => {
+        if (processedData.bio[lang]) {
+          processedData.bio[lang] = this.processBodyText(processedData.bio[lang]).join('\n');
+        }
+      });
+    }
+    
+    // Process FAQ answers to preserve paragraph structure
+    if (type === 'faq' && processedData.a && typeof processedData.a === 'object') {
+      Object.keys(processedData.a).forEach(lang => {
+        if (processedData.a[lang]) {
+          processedData.a[lang] = this.processBodyText(processedData.a[lang]).join('\n');
+        }
+      });
+    }
+    
     return processedData;
   }
 
@@ -3082,7 +3100,16 @@ class AdminPanel {
     this.config.event.flag = document.getElementById('eventFlag')?.value || '';
     this.config.event.heroBackground = document.getElementById('heroBackground')?.value || '';
     this.config.event.showCountdown = document.getElementById('showCountdown')?.checked || false;
-    this.config.event.about = this.collectTranslationField('eventAbout');
+    // Process about field to preserve paragraph structure
+    const aboutField = this.collectTranslationField('eventAbout');
+    if (aboutField && typeof aboutField === 'object') {
+      Object.keys(aboutField).forEach(lang => {
+        if (aboutField[lang]) {
+          aboutField[lang] = this.processBodyText(aboutField[lang]).join('\n');
+        }
+      });
+    }
+    this.config.event.about = aboutField;
 
     // Update venue info
     if (!this.config.event.venue) this.config.event.venue = {};

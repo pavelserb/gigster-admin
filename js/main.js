@@ -1040,11 +1040,11 @@ function updateTickets() {
 // Utility function to convert multi-line text to HTML paragraphs
 function textToParagraphs(text) {
   if (!text) {
-    return [];
+    return '';
   }
   
   const paragraphs = text.split('\n').filter(p => p.trim());
-  return paragraphs;
+  return paragraphs.map(p => `<p>${escapeHTML(p)}</p>`).join('');
 }
 
 // Lightbox functionality

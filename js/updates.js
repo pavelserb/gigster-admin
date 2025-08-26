@@ -12,7 +12,7 @@ class UpdatesManager {
     this.L = this.getTranslations();
     
     // DOM references
-    this.list = null;
+    this.container = null;
     this.toolbar = null;
     this.moreBtn = null;
     
@@ -25,14 +25,20 @@ class UpdatesManager {
     const translations = {
       en: {
         moreBtn: 'Load more',
+        readMore: 'Read more',
+        readLess: 'Read less',
         all: 'All'
       },
       cs: {
         moreBtn: 'Načíst více',
+        readMore: 'Více',
+        readLess: 'Méně',
         all: 'Vše'
       },
       uk: {
         moreBtn: 'Завантажити ще',
+        readMore: 'Читати далі',
+        readLess: 'Приховати',
         all: 'Всі'
       }
     };
@@ -116,8 +122,11 @@ class UpdatesManager {
         throw new Error('Failed to load updates.json');
       }
       
-      const data = await response.json();
-      this.items = data.updates || [];
+      const updatesRaw = await response.json();
+      // Sort updates: pinned first, then by date (newest first)
+      this.items = [...updatesRaw].sort((a, b) => 
+        (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.ts) - new Date(a.ts)
+      );
       
       // Ensure CONFIG is available for translations
       if (!window.CONFIG) {
@@ -149,11 +158,20 @@ class UpdatesManager {
     // Get DOM elements
     this.container = document.getElementById('updatesList');
     this.toolbar = document.querySelector('.upd-toolbar');
-    this.moreBtn = document.querySelector('.more-btn');
+    this.moreBtn = document.querySelector('.more-btn') || document.getElementById('updatesMoreBtn');
     
     if (!this.container) {
       console.warn('🌐 Updates.js: Updates container not found');
       return;
+    }
+    
+    // Ensure "Load more" button exists
+    if (!this.moreBtn) {
+      const holder = document.createElement('div');
+      holder.className = 'upd-more';
+      holder.innerHTML = `<button class="more-btn btn">${this.L.moreBtn}</button>`;
+      this.container.after(holder);
+      this.moreBtn = holder.querySelector('.more-btn');
     }
     
     // Update more button text
@@ -219,7 +237,9 @@ class UpdatesManager {
     // Language change event from main.js
     document.addEventListener('languageChanged', (e) => {
       const newLang = e.detail.language;
-      this.setLanguage(newLang);
+      if (newLang) {
+        this.setLanguage(newLang);
+      }
     });
     
     // Update language switcher UI
@@ -244,21 +264,42 @@ class UpdatesManager {
   render() {
     if (!this.container) return;
     
-    const startIndex = 0;
-    const endIndex = this.items.length;
-    const slice = this.items.slice(startIndex, endIndex);
+    // Filter updates based on current filter
+    const filtered = this.currentFilter === 'all' ? 
+      this.items : 
+      this.items.filter(item => item.type === this.currentFilter);
+    
+    // Get slice for current page
+    const slice = filtered.slice(0, (this.page + 1) * this.pageSize);
     
     this.container.innerHTML = '';
     
     slice.forEach(update => {
-      const card = this.renderUpdateCard(update);
+      const shouldExpand = this.pendingDeepOpen && update.id === this.pendingDeepOpen;
+      const card = this.renderUpdateCard(update, shouldExpand);
       this.container.appendChild(card);
     });
+    
+    // Show/hide load more button
+    if (this.moreBtn) {
+      const hasMoreItems = slice.length < filtered.length;
+      this.moreBtn.style.display = hasMoreItems ? 'inline-flex' : 'none';
+      
+      // Update button text
+      if (hasMoreItems) {
+        const remaining = filtered.length - slice.length;
+        const nextBatch = Math.min(remaining, this.pageSize);
+        this.moreBtn.textContent = `${this.L.moreBtn} (${nextBatch})`;
+      }
+    }
     
     // Handle deep link if pending
     if (this.pendingDeepOpen) {
       this.handleDeepLink();
     }
+    
+    // Show thumbnails
+    this.showThumbnails();
   }
 
   // Handle deep link after rendering
@@ -283,8 +324,8 @@ class UpdatesManager {
 
   // Hide thumb preview for open card
   hideThumbPreview(card) {
-    const thumb = card.querySelector('.thumb');
-    if (thumb) {
+    const thumb = card.querySelector('.preview .thumb');
+    if (thumb && !card.classList.contains('thumb-is-media')) {
       thumb.style.display = 'none';
     }
   }
@@ -312,12 +353,12 @@ class UpdatesManager {
   // Show thumbnails for cards with has-thumb class
   // But don't show thumb for cards that are already expanded
   showThumbnails() {
-    if (!this.list) {
-      console.warn('🌐 Updates.js: No list found for showThumbnails');
+    if (!this.container) {
+      console.warn('🌐 Updates.js: No container found for showThumbnails');
       return;
     }
     
-    this.list.querySelectorAll('.upd.has-thumb .preview .thumb').forEach(thumb => {
+    this.container.querySelectorAll('.upd.has-thumb .preview .thumb').forEach(thumb => {
       const card = thumb.closest('.upd');
       const isExpanded = card.getAttribute('aria-expanded') === 'true';
       const isThumbMedia = card.classList.contains('thumb-is-media');
@@ -333,170 +374,235 @@ class UpdatesManager {
   }
 
   // Render individual update card
-  renderUpdateCard(update) {
-    const card = document.createElement('article');
-    card.className = 'upd';
-    card.dataset.updateId = update.id;
+  renderUpdateCard(update, shouldExpand = false) {
+    const isNew = this.daysAgo(update.ts) <= 7;
     
-    // Get translations
-    const titleTranslation = this.getTranslation(update.title, '');
-    const bodyTranslation = this.getTranslation(update.body, '');
-    const ctaLabelTranslation = this.getTranslation(update.cta?.label, '');
+    // Parse body text
+    const bodyText = this.getTranslation(update.body, '') || '';
+    let paras = [];
     
-    // Build card HTML
-    card.innerHTML = `
-      <header>
-        <div class="meta">
-          <span class="date">${this.fmtDate(update.ts)}</span>
-          ${update.type ? `<span class="type">${this.getUpdateTypeTranslation(update.type)}</span>` : ''}
-          ${update.badge ? `<span class="badge ${update.badge}">${this.getUpdateBadgeTranslation(update.badge)}</span>` : ''}
-        </div>
-        <h3>${this.escapeHTML(titleTranslation)}</h3>
-      </header>
-      
-      <details>
-        <summary>${this.escapeHTML(bodyTranslation.split('\n')[0])}</summary>
-        <div class="body">
-          ${this.escapeHTML(bodyTranslation).split('\n').map(p => `<p>${p}</p>`).join('')}
-        </div>
-        ${update.cta ? `
-          <div class="cta">
-            <a href="${update.cta.url}" class="btn" target="_blank" rel="noopener noreferrer">
-              ${this.escapeHTML(ctaLabelTranslation)}
-            </a>
+    if (Array.isArray(bodyText)) {
+      paras = bodyText.filter(line => line.trim());
+    } else if (typeof bodyText === 'string') {
+      paras = bodyText.split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+    }
+    
+    // Create snippet from first two lines
+    let snippet = '';
+    if (paras.length > 0) {
+      const firstTwoLines = paras.slice(0, 2).join(' ');
+      snippet = `<div class="snippet">${this.escapeHTML(firstTwoLines)}</div>`;
+    }
+    
+    // Handle CTAs
+    const ctas = (update.cta || []);
+    const primary = ctas.find(c => c.primary) || ctas[0] || null;
+    const extras = ctas.filter(c => c !== primary);
+    
+    const btnHTML = (c, extra = false) => {
+      const url = this.withUTM(c.url || '#', 'updates', 'artbat2025');
+      const external = /^https?:\/\//i.test(url);
+      const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+      const cls = (c.primary ? 'btn primary' : 'btn') + (extra ? ' extra' : '');
+      const label = this.getTranslation(c.label, 'Learn more') || 'Learn more';
+      return `<a class="${cls}" href="${url}"${attrs}>${this.escapeHTML(label)}</a>`;
+    };
+    
+    // Handle thumbnail
+    let thumbSrc = '';
+    if (update.thumb) {
+      thumbSrc = update.thumb;
+    } else if (Array.isArray(update.gallery) && update.gallery.length > 0) {
+      thumbSrc = update.gallery[0];
+    } else if (update.media) {
+      thumbSrc = update.media;
+    }
+    
+    const thumbAlt = update.thumbAlt || update.alt || '';
+    const thumbHTML = thumbSrc ? 
+      `<img class="thumb" src="${thumbSrc}" alt="${this.escapeHTML(thumbAlt)}" loading="lazy" decoding="async">` : '';
+    
+    // Create card element
+    const idSafe = (update.id || Math.random().toString(36).slice(2));
+    const bodyId = `upd-body-${idSafe}`;
+    const headId = `upd-head-${idSafe}`;
+    
+    const wrap = document.createElement('article');
+    wrap.className = 'upd' + (thumbSrc ? ' has-thumb' : '');
+    if (update.pinned) wrap.classList.add('pinned');
+    wrap.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+    if (update.id) wrap.dataset.id = update.id;
+    
+    const shareIcon = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M15 8a3 3 0 1 0-2.83-4H12a3 3 0 0 0 0 6c.73 0 1.4-.26 1.93-.69l3.2 1.84a3 3 0 1 0 .7-1.24l-3.21-1.85A2.96 2.96 0 0 0 15 8Zm-6 8a3 3 0 1 0 2.83 4H12a3 3 0 0 0 0-6c-.73 0-1.4.26-1.93.69l-3.2 1.84a3 3 0 1 0 .7 1.24l3.21 1.85c-.24.43-.38.93-.38 1.46Z"/>
+      </svg>`;
+    
+    wrap.innerHTML = `
+      <div class="head">
+        <button class="toggle" aria-expanded="${shouldExpand ? 'true' : 'false'}" aria-controls="${bodyId}" id="${headId}">
+          <div class="hrow1">
+            <div class="hleft">
+              <time datetime="${update.ts}">${this.fmtDate(update.ts)}</time>
+              ${isNew ? `<span class="badge new">${this.getUpdateBadgeTranslation('new')}</span>` : ''}
+              ${update.type ? `<span class="badge">${this.getUpdateTypeTranslation(update.type) || update.type}</span>` : ''}
+            </div>
+            <div class="hright">
+              ${update.important ? `<span class="badge imp">${this.getUpdateBadgeTranslation('important')}</span>` : ''}
+            </div>
           </div>
-        ` : ''}
-      </details>
+          <div class="hrow2"><span class="title">${this.escapeHTML(this.getTranslation(update.title, '') || '')}</span></div>
+        </button>
+        <span class="chev" aria-hidden="true">▾</span>
+      </div>
+      
+      <div class="preview">
+        ${snippet}
+        ${paras.length > 2 ? `<button class="readmore" type="button">${this.L.readMore || 'Read more'}</button>` : ''}
+        ${thumbHTML}
+      </div>
+      
+      <div id="${bodyId}" class="body" role="region" aria-labelledby="${headId}">
+        ${paras.slice(2).map(p => `<p class="text">${this.escapeHTML(p)}</p>`).join('')}
+        <div class="lazy-slot"></div>
+      </div>
+      
+      <div class="footer">
+        <div class="left">
+          ${primary ? btnHTML(primary, false) : ''}
+          ${extras.map(c => btnHTML(c, true)).join('')}
+        </div>
+        <div class="right">
+          <button class="share" aria-label="Share update" title="Share" data-id="${this.escapeHTML(update.id || '')}">${shareIcon}</button>
+        </div>
+      </div>
     `;
     
-    return card;
+    // Setup card functionality
+    this.setupCardFunctionality(wrap, update, paras, bodyId, headId, shouldExpand);
+    
+    return wrap;
   }
 
   // Setup card functionality (toggle, read more, share, etc.)
-  setupCardFunctionality(wrap, u, paras, bodyId, headId, expandFirst) {
-    // Share functionality
-    wrap.querySelector('.share')?.addEventListener('click', async (ev) => {
-      const uurl = new URL(location.href);
-      if (u.id) uurl.searchParams.set('u', u.id);
-      try {
-        if (navigator.share) {
-          await navigator.share({ 
-            title: (() => {
-              const translation = this.getTranslation(u.title, '') || document.title;
-              return translation;
-            })(),
-            text: (() => {
-              const translation = this.getTranslation(u.title, '') || '';
-              return translation;
-            })(),
-            url: uurl.toString() 
-          });
-        } else {
-          await navigator.clipboard.writeText(uurl.toString());
-          ev.currentTarget.setAttribute('title', 'Copied!');
-          setTimeout(() => ev.currentTarget.setAttribute('title', 'Share'), 1200);
-        }
-      } catch {}
-    });
-
-    // Lazy media loading
+  setupCardFunctionality(wrap, update, paras, bodyId, headId, shouldExpand) {
+    // Toggle functionality
+    const toggleBtn = wrap.querySelector('.toggle');
+    const head = wrap.querySelector('.head');
+    const body = wrap.querySelector(`#${bodyId}`);
+    const chev = wrap.querySelector('.chev');
+    const readMoreBtn = wrap.querySelector('.readmore');
     const lazySlot = wrap.querySelector('.lazy-slot');
+    
+    // Lazy media loading
     let lazyMounted = false;
-    const firstGallery = Array.isArray(u.gallery) && u.gallery[0];
-    const mediaComparable = u.video ? '' : (u.media || firstGallery || '');
-    const sameAsMedia = mediaComparable && u.thumb && mediaComparable === u.thumb;
-
+    const firstGallery = Array.isArray(update.gallery) && update.gallery[0];
+    const mediaComparable = update.video ? '' : (update.media || firstGallery || '');
+    const sameAsMedia = mediaComparable && update.thumb && mediaComparable === update.thumb;
+    
     const mountLazyOnce = () => {
-      if (lazyMounted) return;
+      if (lazyMounted || !lazySlot) return;
       lazyMounted = true;
+      
       if (sameAsMedia) {
         wrap.classList.add('thumb-is-media');
         lazySlot.remove();
       } else {
-        lazySlot.insertAdjacentHTML('beforebegin', this.buildMediaHTML(u));
+        const mediaHTML = this.buildMediaHTML(update);
+        if (mediaHTML) {
+          lazySlot.insertAdjacentHTML('beforebegin', mediaHTML);
+        }
         lazySlot.remove();
       }
     };
-
-    // Toggle functionality
-    const updatesRoot = document.querySelector('.updates');
-    const toggleBtn = wrap.querySelector('.toggle');
-    const readMoreBtn = wrap.querySelector('.readmore');
-    const pvThumb = wrap.querySelector('.preview .thumb');
-
-    const openCard = (nowOpen) => {
-      // Close other cards
-      if (updatesRoot) {
-        updatesRoot.querySelectorAll('.upd[aria-expanded="true"]').forEach(x => {
-          if (x === wrap) return;
-          x.setAttribute('aria-expanded', 'false');
-          x.querySelector('.toggle')?.setAttribute('aria-expanded', 'false');
-          const rb = x.querySelector('.readmore');
-          if (rb) rb.textContent = this.L.readMore;
-          const t = x.querySelector('.preview .thumb');
-          if (t && !x.classList.contains('thumb-is-media')) t.style.display = '';
+    
+    const toggleCard = () => {
+      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      const newExpanded = !isExpanded;
+      
+      // Update button state
+      toggleBtn.setAttribute('aria-expanded', newExpanded);
+      wrap.setAttribute('aria-expanded', newExpanded);
+      chev.textContent = newExpanded ? '▴' : '▾';
+      
+      // Show/hide body content
+      if (newExpanded) {
+        body.style.display = 'block';
+        this.hideThumbPreview(wrap);
+        
+        // Load media when expanding
+        mountLazyOnce();
+      } else {
+        body.style.display = 'none';
+        this.showThumbnails();
+      }
+      
+      // Update read more button text
+      if (readMoreBtn) {
+        readMoreBtn.textContent = newExpanded ? (this.L.readLess || 'Read less') : (this.L.readMore || 'Read more');
+      }
+    };
+    
+    if (toggleBtn && body) {
+      // Click on toggle button
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCard();
+      });
+      
+      // Click on entire head area
+      if (head) {
+        head.addEventListener('click', (e) => {
+          // Don't trigger if clicking on buttons inside head
+          if (e.target.closest('button')) return;
+          toggleCard();
         });
       }
       
-      // Open/close current card
-      wrap.setAttribute('aria-expanded', String(nowOpen));
-      toggleBtn.setAttribute('aria-expanded', String(nowOpen));
-      if (readMoreBtn) {
-        readMoreBtn.textContent = nowOpen ? this.L.readLess : this.L.readMore;
-      }
-
-      if (pvThumb) {
-        if (nowOpen && !sameAsMedia) pvThumb.style.display = 'none';
-        else if (!nowOpen) pvThumb.style.display = '';
-      }
-
-      if (nowOpen) {
-        mountLazyOnce();
-        this.scrollToCard(wrap);
-        if (u.id) this.setUrlParameter(u.id);
-        this.updateSocialMeta(u);
+      // Set initial state
+      if (shouldExpand) {
+        toggleCard(); // Trigger the toggle to expand
+        mountLazyOnce(); // Load media immediately if expanded on creation
       } else {
-        this.clearUrlParameter();
-        this.resetSocialMeta();
+        body.style.display = 'none'; // Hide body initially
       }
-    };
-
-    toggleBtn.addEventListener('click', () => 
-      openCard(wrap.getAttribute('aria-expanded') !== 'true')
-    );
+    }
     
+    // Read more functionality
     if (readMoreBtn) {
-      readMoreBtn.addEventListener('click', () => openCard(true));
+      readMoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Expand the card when read more is clicked
+        if (toggleBtn) {
+          toggleCard();
+        }
+      });
     }
-
-    if (expandFirst) {
-      mountLazyOnce();
-      // Hide thumb immediately if card is expanded on creation
-      if (pvThumb && !sameAsMedia) {
-        pvThumb.style.display = 'none';
-      }
+    
+    // Share functionality
+    const shareBtn = wrap.querySelector('.share');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const uurl = new URL(location.href);
+        if (update.id) uurl.searchParams.set('u', update.id);
+        try {
+          if (navigator.share) {
+            await navigator.share({ 
+              title: this.getTranslation(update.title, '') || document.title,
+              text: this.getTranslation(update.title, '') || '',
+              url: uurl.toString() 
+            });
+          } else {
+            await navigator.clipboard.writeText(uurl.toString());
+            ev.currentTarget.setAttribute('title', 'Copied!');
+            setTimeout(() => ev.currentTarget.setAttribute('title', 'Share'), 1200);
+          }
+        } catch (error) {
+          console.warn('🌐 Updates.js: Share failed:', error);
+        }
+      });
     }
-  }
-
-  // Build media HTML
-  buildMediaHTML(u) {
-    const mediaAlt = u.mediaAlt || u.alt || '';
-    if (u.video) {
-      return `<div class="media">
-        <video controls preload="metadata" ${u.poster ? `poster="${u.poster}"` : ''}>
-          <source src="${u.video}" type="video/mp4">
-        </video>
-      </div>`;
-    }
-    if (Array.isArray(u.gallery) && u.gallery.length) {
-      return `<div class="media">${
-        u.gallery.map(src => `<img loading="lazy" decoding="async" src="${src}" alt="${this.escapeHTML(u.galleryAlt || mediaAlt)}">`).join('')
-      }</div>`;
-    }
-    if (u.media) {
-      return `<div class="media"><img loading="lazy" decoding="async" src="${u.media}" alt="${this.escapeHTML(mediaAlt)}"></div>`;
-    }
-    return '';
   }
 
   // Social meta management
@@ -666,29 +772,17 @@ class UpdatesManager {
       btn.classList.toggle('is-active', btn.dataset.filter === filterType);
     });
     
-    // Filter updates
-    const filtered = filterType === 'all' ? 
-      this.items : 
-      this.items.filter(item => item.type === filterType);
+    // Set current filter and reset page
+    this.currentFilter = filterType;
+    this.page = 0;
+    this.pendingDeepOpen = null;
     
     // Re-render with filtered items
-    this.renderFiltered(filtered);
-  }
-  
-  renderFiltered(filteredItems) {
-    if (!this.container) return;
-    
-    this.container.innerHTML = '';
-    
-    filteredItems.forEach(update => {
-      const card = this.renderUpdateCard(update);
-      this.container.appendChild(card);
-    });
+    this.render();
   }
   
   loadMore() {
-    // For now, just re-render all items
-    // In the future, this could implement pagination
+    this.page++;
     this.render();
   }
   
@@ -720,6 +814,40 @@ class UpdatesManager {
         });
       }
     }
+  }
+
+  // Build media HTML for gallery, video, or single media
+  buildMediaHTML(update) {
+    const mediaAlt = update.mediaAlt || update.alt || '';
+    
+    // Video
+    if (update.video) {
+      return `<div class="media">
+        <video controls preload="metadata" ${update.poster ? `poster="${update.poster}"` : ''}>
+          <source src="${update.video}" type="video/mp4">
+        </video>
+      </div>`;
+    }
+    
+    // Gallery (multiple images)
+    if (Array.isArray(update.gallery) && update.gallery.length > 0) {
+      return `<div class="media">${
+        update.gallery.map((src, index) => {
+          const clickHandler = window.openLightbox ? `onclick="window.openLightbox(${index})"` : '';
+          const cursorStyle = window.openLightbox ? 'cursor: pointer;' : '';
+          return `<img loading="lazy" decoding="async" src="${src}" alt="${this.escapeHTML(update.galleryAlt || mediaAlt)}" style="${cursorStyle}" ${clickHandler}>`;
+        }).join('')
+      }</div>`;
+    }
+    
+    // Single media file
+    if (update.media) {
+      const clickHandler = window.openLightbox ? 'onclick="window.openLightbox(0)"' : '';
+      const cursorStyle = window.openLightbox ? 'cursor: pointer;' : '';
+      return `<div class="media"><img loading="lazy" decoding="async" src="${update.media}" alt="${this.escapeHTML(mediaAlt)}" style="${cursorStyle}" ${clickHandler}></div>`;
+    }
+    
+    return '';
   }
 }
 

@@ -468,6 +468,9 @@ function mountBasics() {
   // Update tickets
   updateTickets();
   
+  // Update venue photos
+  updateVenuePhotos();
+  
   // Update static translations
   updateStaticTranslations();
 }
@@ -1036,6 +1039,92 @@ function updateTickets() {
         </div>`;
       tiersWrap.appendChild(row);
     });
+  }
+}
+
+function updateVenuePhotos() {
+  const venuePhotosSlider = document.getElementById('venuePhotosSlider');
+  if (!venuePhotosSlider) {
+    console.warn('🌐 Main.js: No venue photos slider found');
+    return;
+  }
+
+  const photos = CONFIG.event?.venue?.photos || [];
+  
+  if (photos.length === 0) {
+    venuePhotosSlider.innerHTML = '<div class="venue-slide"><div class="venue-placeholder">No photos available</div></div>';
+    return;
+  }
+
+  venuePhotosSlider.innerHTML = '';
+  
+  photos.forEach((photo, index) => {
+    const slide = document.createElement('div');
+    slide.className = 'venue-slide';
+    if (index === 0) slide.classList.add('active');
+    
+    slide.innerHTML = `
+      <img src="${photo}" alt="Venue photo ${index + 1}" loading="lazy" decoding="async">
+    `;
+    
+    venuePhotosSlider.appendChild(slide);
+  });
+
+  // Initialize venue slider if there are multiple photos
+  if (photos.length > 1) {
+    initVenueSlider();
+  }
+}
+
+// Initialize venue photos slider
+function initVenueSlider() {
+  const slider = document.getElementById('venuePhotosSlider');
+  if (!slider) return;
+
+  const slides = slider.querySelectorAll('.venue-slide');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+
+  // Create navigation dots if multiple slides
+  if (totalSlides > 1) {
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'venue-dots';
+    
+    slides.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'venue-dot';
+      dot.setAttribute('aria-label', `Go to venue photo ${index + 1}`);
+      if (index === 0) dot.classList.add('active');
+      
+      dot.addEventListener('click', () => {
+        goToVenueSlide(index);
+      });
+      
+      dotsContainer.appendChild(dot);
+    });
+    
+    slider.appendChild(dotsContainer);
+  }
+
+  function goToVenueSlide(index) {
+    // Remove active class from all slides and dots
+    slides.forEach(slide => slide.classList.remove('active'));
+    const dots = slider.querySelectorAll('.venue-dot');
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    // Add active class to current slide and dot
+    slides[index].classList.add('active');
+    if (dots[index]) dots[index].classList.add('active');
+    
+    currentSlide = index;
+  }
+
+  // Auto-advance slides every 5 seconds
+  if (totalSlides > 1) {
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      goToVenueSlide(currentSlide);
+    }, 5000);
   }
 }
 

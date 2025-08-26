@@ -1827,8 +1827,8 @@ p {
 }
 
 .artist:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  /* transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3); */
   border-color: var(--accent);
 }
 
@@ -1916,6 +1916,7 @@ p {
 /* Read more */
 .artist .read-more {
   margin-top: 6px;
+  margin-bottom: 0.875rem;
   appearance: none;
   /* border: 1px solid var(--border); */
   border: none;
@@ -1952,19 +1953,21 @@ p {
 }
 
 .artist .links a {
-  color: var(--accent);
+  /* color: var(--accent); */
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 8px 12px;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
+  /* padding: 8px 12px; */
+  padding: 0;
+  /* border: 1px solid var(--accent); */
+  /* border-radius: 8px; */
   text-decoration: none;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
+  /* min-width: 44px; */
+  /* min-height: 44px; */
+  min-height: fit-content;
 }
 
 .artist .links a:hover {
@@ -2182,26 +2185,28 @@ p {
   border: 1px solid var(--border);
 }
 
-.venue-slider img {
+.venue-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.venue-slide.active {
+  opacity: 1;
+}
+
+.venue-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: opacity 0.3s ease;
 }
 
-.venue-slider img:not(.active) {
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.venue-slider img.active {
-  opacity: 1;
-}
-
-.venue-slider .slider-controls {
+.venue-dots {
   position: absolute;
   bottom: 16px;
   left: 50%;
@@ -2211,17 +2216,22 @@ p {
   z-index: 10;
 }
 
-.venue-slider .slider-dot {
+.venue-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
+  border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.venue-slider .slider-dot.active {
+.venue-dot.active {
   background: var(--accent);
+}
+
+.venue-dot:hover {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .venue-slider .slider-nav {

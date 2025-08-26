@@ -4375,23 +4375,29 @@ class AdminPanel {
   }
 
   toggleUpdatesSettings() {
-    const settingsSection = document.querySelector('.updates-settings-section');
-    if (settingsSection) {
-      settingsSection.classList.toggle('collapsed');
+    const settingsContent = document.getElementById('updatesSettingsContent');
+    const sectionHeader = document.querySelector('.section-header.collapsible');
+    
+    if (settingsContent && sectionHeader) {
+      settingsContent.classList.toggle('collapsed');
+      sectionHeader.classList.toggle('collapsed');
       
       // Save state to localStorage
-      const isCollapsed = settingsSection.classList.contains('collapsed');
+      const isCollapsed = settingsContent.classList.contains('collapsed');
       localStorage.setItem('updatesSettingsCollapsed', isCollapsed);
     }
   }
 
   // Initialize updates settings state on load
   initializeUpdatesSettings() {
-    const settingsSection = document.querySelector('.updates-settings-section');
-    if (settingsSection) {
+    const settingsContent = document.getElementById('updatesSettingsContent');
+    const sectionHeader = document.querySelector('.section-header.collapsible');
+    
+    if (settingsContent && sectionHeader) {
       const isCollapsed = localStorage.getItem('updatesSettingsCollapsed') === 'true';
       if (isCollapsed) {
-        settingsSection.classList.add('collapsed');
+        settingsContent.classList.add('collapsed');
+        sectionHeader.classList.add('collapsed');
       }
     }
   }

@@ -488,6 +488,37 @@ app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   }
 });
 
+// Auto-update HTML endpoint
+app.post('/admin/api/html/update', authenticateToken, async (req, res) => {
+  try {
+    const { content, filename } = req.body;
+    
+    if (!content || !filename) {
+      return res.status(400).json({ error: 'Missing content or filename' });
+    }
+    
+    const result = await withFTP(async (ftp) => {
+      const localPath = path.join(__dirname, 'temp', filename);
+      const remotePath = `${FTP_CONFIG.remotePath}/${filename}`;
+      
+      await fs.mkdir(path.dirname(localPath), { recursive: true });
+      await fs.writeFile(localPath, content);
+      
+      const uploaded = await ftp.uploadFile(localPath, remotePath);
+      if (!uploaded) {
+        throw new Error(`Failed to upload ${filename} to FTP`);
+      }
+      
+      return { message: `${filename} updated successfully on FTP` };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('HTML update error:', error);
+    res.status(500).json({ error: 'Ошибка обновления HTML' });
+  }
+});
+
 // Get media from FTP
 app.get('/admin/api/media', authenticateToken, async (req, res) => {
   try {

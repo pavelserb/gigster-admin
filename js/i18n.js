@@ -37,21 +37,28 @@ function detectBrowserLang(supported) {
 
 // Load translations from translations.json
 async function loadTranslations() {
+  console.log('🌐 i18n.js: Starting to load translations...');
   try {
     const response = await fetch('translations.json');
+    console.log('🌐 i18n.js: Fetch response status:', response.status, response.statusText);
+    
     if (response.ok) {
       TRANSLATIONS = await response.json();
+      console.log('🌐 i18n.js: Translations loaded successfully:', Object.keys(TRANSLATIONS));
       
       // Export to window for main.js to access
       window.TRANSLATIONS = TRANSLATIONS;
+      window.escapeHTML = escapeHTML;
+      window.getByPath = getByPath;
       
       // Apply initial translations for current language
       const currentLang = getLang();
+      console.log('🌐 i18n.js: Current language:', currentLang);
       if (currentLang) {
         applyTranslations(currentLang);
       }
     } else {
-      console.error('🌐 i18n.js: Failed to load translations.json');
+      console.error('🌐 i18n.js: Failed to load translations.json - Status:', response.status, response.statusText);
     }
   } catch (error) {
     console.error('🌐 i18n.js: Error loading translations:', error);
@@ -226,9 +233,15 @@ document.addEventListener('languageChanged', (e) => {
   }
 });
 
-// Auto-initialize when DOM is ready
+// Auto-initialize when DOM is ready, but only if not already loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadTranslations);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.TRANSLATIONS) {
+      loadTranslations();
+    }
+  });
 } else {
-  loadTranslations();
+  if (!window.TRANSLATIONS) {
+    loadTranslations();
+  }
 }

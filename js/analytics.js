@@ -253,17 +253,8 @@ window.EventTracker = EventTracker;
 // Глобальная переменная для доступа к трекеру
 window.eventTracker = null;
 
-// Автоматическая инициализация при загрузке DOM
-// Автоматическая инициализация EventTracker
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM загружен - инициализируем EventTracker');
-    window.eventTracker = new EventTracker();
-  });
-} else {
-  console.log('DOM уже загружен - инициализируем EventTracker');
-  window.eventTracker = new EventTracker();
-}
+// EventTracker will be initialized by main.js to ensure proper order
+// This prevents conflicts and ensures analytics is ready when needed
 
 // Логируем все события Facebook для отладки
 if (window.fbq) {

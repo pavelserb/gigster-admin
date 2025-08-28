@@ -335,26 +335,27 @@ class PixelLoader {
   
   // Глобальная функция для определения языка
   static getLanguage() {
-    // Проверяем localStorage
+    // Use the global function from main.js if available
+    if (window.detectBrowserLanguage) {
+      return window.detectBrowserLanguage();
+    }
+    
+    // Fallback implementation
     const storedLang = localStorage.getItem('site_language');
     if (storedLang) return storedLang;
     
-    // Проверяем URL параметр
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
     if (urlLang) return urlLang;
     
-    // Определяем язык браузера
     const browserLang = navigator.language || navigator.userLanguage;
     if (browserLang) {
       const langCode = browserLang.split('-')[0].toLowerCase();
-      // Поддерживаемые языки
       if (['en', 'cs', 'uk'].includes(langCode)) {
         return langCode;
       }
     }
     
-    // По умолчанию английский
     return 'en';
   }
   
@@ -430,8 +431,8 @@ class PixelLoader {
   }
 }
 
-// Инициализация сразу при загрузке скрипта
-window.pixelLoader = new PixelLoader();
-
-// Экспортируем для использования в других модулях
+// Export for use in other modules
 window.PixelLoader = PixelLoader;
+
+// PixelLoader will be initialized by main.js to ensure proper order
+// This prevents conflicts and ensures pixels are ready when needed

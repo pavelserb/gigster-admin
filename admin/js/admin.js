@@ -3595,6 +3595,88 @@ class AdminPanel {
     }
     
     await response.json();
+    
+    // Auto-update HTML after translations are saved
+    await this.updateHTMLAfterSave();
+  }
+
+  // Auto-update HTML file with new values from config and translations
+  async updateHTMLAfterSave() {
+    try {
+      // Get current HTML content
+      const htmlResponse = await fetch('../index.html');
+      if (!htmlResponse.ok) {
+        console.warn('Could not fetch index.html for update');
+        return;
+      }
+      
+      let htmlContent = await htmlResponse.text();
+      
+      // Update static values in HTML based on current config and translations
+      htmlContent = this.updateHTMLContent(htmlContent);
+      
+      // Save updated HTML back to file
+      const saveResponse = await fetch('/admin/api/html/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({
+          content: htmlContent,
+          filename: 'index.html'
+        })
+      });
+      
+      if (saveResponse.ok) {
+        console.log('HTML updated successfully');
+        this.showSuccess('HTML файл обновлен автоматически');
+      } else {
+        console.warn('HTML update failed');
+      }
+    } catch (error) {
+      console.warn('HTML auto-update failed:', error);
+      // Don't show error to user as this is not critical
+    }
+  }
+
+  // Update HTML content with new values
+  updateHTMLContent(htmlContent) {
+    // Update event name
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.config.event?.name?.en || 'ARTBAT');
+    
+    // Update event date
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventDate', this.config.event?.date || 'September 5, 2025');
+    
+    // Update event time
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventTime', this.config.event?.time || '18:00 – 23:00');
+    
+    // Update city and country
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCity', this.config.event?.city?.en || 'Prague');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.config.event?.country?.en || 'Czech Republic');
+    
+    // Update venue name and address
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.config.event?.venue?.name?.en || 'AREÁL 7');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.config.event?.venue?.address?.en || 'Za Elektrárnou, 170 00 Praha 7 – Holešovice');
+    
+    // Update flag path if different
+    if (this.config.event?.flag) {
+      htmlContent = this.replaceHTMLAttribute(htmlContent, 'eventFlag', 'src', this.config.event.flag);
+    }
+    
+    return htmlContent;
+  }
+
+  // Replace text content in HTML
+  replaceHTMLValue(htmlContent, elementId, newValue) {
+    const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*>)([^<]*)`, 'g');
+    return htmlContent.replace(regex, `$1${newValue}`);
+  }
+
+  // Replace attribute value in HTML
+  replaceHTMLAttribute(htmlContent, elementId, attributeName, newValue) {
+    const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*${attributeName}=")[^"]*(")`, 'g');
+    return htmlContent.replace(regex, `$1${newValue}$2`);
   }
 
   async saveUpdates() {

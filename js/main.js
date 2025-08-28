@@ -3,20 +3,54 @@ let CONFIG = {};
 let CURRENT_LANG = 'en';
 let STATIC_TRANSLATIONS = null;
 const SUPPORTED_LANGS = ['en', 'cs', 'uk'];
-const eventTracker = {};
 
 // Initialize UpdatesManager
 let updatesManager = null;
 
-// Get language from localStorage or default to English
-function getCurrentLang() {
+// Detect browser language and return supported language
+function detectBrowserLanguage() {
+  // Priority 1: Saved language from localStorage
   const saved = localStorage.getItem('site_language');
-  const result = saved && SUPPORTED_LANGS.includes(saved) ? saved : 'en';
-  return result;
+  console.log('🌐 Debug: localStorage language:', saved);
+  if (saved && SUPPORTED_LANGS.includes(saved)) {
+    console.log('🌐 Debug: Using saved language:', saved);
+    return saved;
+  }
+  
+  // Priority 2: HTML lang attribute
+  const htmlLang = document.documentElement.lang;
+  console.log('🌐 Debug: HTML lang attribute:', htmlLang);
+  if (htmlLang && SUPPORTED_LANGS.includes(htmlLang)) {
+    console.log('🌐 Debug: Using HTML lang:', htmlLang);
+    return htmlLang;
+  }
+  
+  // Priority 3: Browser language
+  const browserLang = navigator.language?.split('-')[0];
+  console.log('🌐 Debug: Browser language:', browserLang);
+  if (browserLang && SUPPORTED_LANGS.includes(browserLang)) {
+    console.log('🌐 Debug: Using browser language:', browserLang);
+    return browserLang;
+  }
+  
+  // Priority 4: URL lang parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlLang = urlParams.get('lang');
+  console.log('🌐 Debug: URL lang parameter:', urlLang);
+  if (urlLang && SUPPORTED_LANGS.includes(urlLang)) {
+    console.log('🌐 Debug: Using URL lang:', urlLang);
+    return urlLang;
+  }
+  
+  // Default to English
+  console.log('🌐 Debug: Using default language: en');
+  return 'en';
 }
 
+// Legacy function - removed as it's not used anywhere
+
 // Set current language and apply translations
-function setCurrentLang(lang) {
+function setCurrentLang(lang, skipContentUpdate = false) {
   if (!SUPPORTED_LANGS.includes(lang)) {
     console.warn('🌐 Main.js: Invalid language:', lang);
     return;
@@ -25,11 +59,19 @@ function setCurrentLang(lang) {
     const previousLang = CURRENT_LANG;
     CURRENT_LANG = lang;
   
+  // Save to localStorage for persistence
+    localStorage.setItem('site_language', lang);
+    
   // Update HTML lang attribute
   document.documentElement.lang = lang;
   
-  // Apply new translations
+  // Update language display
+  updateLanguageDisplay();
+  
+  // Apply new translations (skip if data not loaded yet)
+  if (!skipContentUpdate) {
     applyNewTranslations(lang);
+  }
 }
 
 // Get translation for a field (supports both string and object formats)
@@ -57,59 +99,39 @@ async function loadConfig() {
   }
 }
 
-// Load translations.json
+// Wait for i18n.js to load translations
 async function loadTranslations() {
-  try {
-    const response = await fetch('translations.json');
-    if (response.ok) {
-    const translations = await response.json();
-          STATIC_TRANSLATIONS = translations;
-    } else {
-      console.error('🌐 Main.js: Failed to load translations.json');
+  console.log('🌐 Main.js: Waiting for i18n.js to load translations...');
+  // Wait for i18n.js to be ready and load translations
+  let attempts = 0;
+  while (!window.TRANSLATIONS && attempts < 50) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    attempts++;
+    if (attempts % 10 === 0) {
+      console.log('🌐 Main.js: Still waiting for translations, attempt:', attempts);
     }
-  } catch (error) {
-    console.error('🌐 Main.js: Error loading translations.json:', error);
+  }
+  
+  if (window.TRANSLATIONS) {
+    STATIC_TRANSLATIONS = window.TRANSLATIONS;
+    window.STATIC_TRANSLATIONS = window.TRANSLATIONS;
+    console.log('🌐 Main.js: Translations loaded from i18n.js successfully');
+  } else {
+    console.error('🌐 Main.js: Failed to get translations from i18n.js after 50 attempts');
   }
 }
 
 // Initialize new language UI
 function initNewLangUI() {
-  // Set initial language
-  CURRENT_LANG = getCurrentLang();
-  
-  // Load and apply translations
-  loadAndApplyTranslations();
-  
-  // Create language switcher in header
-  const header = document.querySelector('.container.hdr');
-  if (!header) {
-    console.warn('🌐 Main.js: Header not found for language switcher');
+  // Setup existing language switcher
+  const langSwitcher = document.querySelector('.lang-switcher');
+  if (!langSwitcher) {
+    console.warn('🌐 Main.js: Language switcher not found');
     return;
   }
   
-  const langSwitcher = document.createElement('div');
-  langSwitcher.className = 'lang-switcher';
-  langSwitcher.innerHTML = `
-    <div class="lang-current">
-      <span class="lang-flag">${getLangFlag(CURRENT_LANG)}</span>
-      <span class="lang-name">${getLangName(CURRENT_LANG)}</span>
-      <button class="lang-toggle" aria-label="Сменить язык">▼</button>
-    </div>
-    <div class="lang-dropdown">
-      ${SUPPORTED_LANGS.filter(lang => lang !== CURRENT_LANG).map(lang => `
-        <button class="lang-option" 
-                data-lang="${lang}" 
-                onclick="setCurrentLang('${lang}')">
-          <span class="lang-flag">${getLangFlag(lang)}</span>
-          <span class="lang-name">${getLangName(lang)}</span>
-        </button>
-      `).join('')}
-    </div>
-  `;
-  
-  // Insert language switcher into header
-  const headerRight = header.querySelector('.header-right') || header;
-  headerRight.appendChild(langSwitcher);
+  // Update current language display
+  updateLanguageDisplay();
   
   // Add click outside to close dropdown
   document.addEventListener('click', (e) => {
@@ -124,6 +146,29 @@ function initNewLangUI() {
     e.stopPropagation();
     langSwitcher.classList.toggle('open');
   });
+  
+  // Setup language option clicks
+  const langOptions = langSwitcher.querySelectorAll('.lang-option');
+  langOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lang = option.getAttribute('data-lang');
+      setCurrentLang(lang);
+      langSwitcher.classList.remove('open');
+    });
+  });
+}
+
+// Update language display
+function updateLanguageDisplay() {
+  const langSwitcher = document.querySelector('.lang-switcher');
+  if (!langSwitcher) return;
+  
+  const langFlag = langSwitcher.querySelector('.lang-flag');
+  const langName = langSwitcher.querySelector('.lang-name');
+  
+  if (langFlag) langFlag.textContent = getLangFlag(CURRENT_LANG);
+  if (langName) langName.textContent = getLangName(CURRENT_LANG);
 }
 
 // Get language flag emoji
@@ -138,39 +183,54 @@ function getLangName(lang) {
   return names[lang] || 'EN';
 }
 
-// Load and apply translations from translations.json
-async function loadAndApplyTranslations() {
-  // Load translations from translations.json
-  try {
-    const response = await fetch('translations.json', { cache: 'no-store' });
-    if (response.ok) {
-      window.STATIC_TRANSLATIONS = await response.json();
-    } else {
-      console.warn('🌐 Main.js: Failed to load translations.json');
-      return;
-    }
-  } catch (error) {
-    console.error('🌐 Main.js: Error loading translations:', error);
-    return;
+// Skeleton management functions
+function showSkeleton() {
+  document.body.classList.add('skeleton-mode');
+  console.log('🌐 Main.js: Showing skeleton');
+}
+
+function hideSkeleton() {
+  document.body.classList.remove('skeleton-mode');
+  document.body.classList.add('content-loaded');
+  
+  // Track performance metrics
+  const loadTime = performance.now();
+  console.log('🌐 Main.js: Hiding skeleton, content loaded in', Math.round(loadTime), 'ms');
+  
+  // Track performance for analytics
+  if (window.eventTracker) {
+    window.eventTracker.track('page_content_loaded', {
+      load_time_ms: Math.round(loadTime),
+      timestamp: Date.now()
+    });
+  }
+}
+
+function showErrorState() {
+  document.body.classList.remove('skeleton-mode');
+  document.body.classList.add('error-state');
+  console.error('🌐 Main.js: Showing error state');
+  
+  // Track error for analytics
+  if (window.eventTracker) {
+    window.eventTracker.track('page_load_error', {
+      error_type: 'critical_data_failed',
+      timestamp: Date.now()
+    });
   }
   
-  // Wait for i18n.js to be ready
-  let attempts = 0;
-  while (!window.applyTranslations && attempts < 50) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    attempts++;
-  }
-  
-  if (!window.applyTranslations) {
-    console.error('🌐 Main.js: applyTranslations function not available after waiting');
-    return;
-  }
-  
-  // Apply translations for current language
-  try {
-    window.applyTranslations(CURRENT_LANG);
-  } catch (error) {
-    console.error('🌐 Main.js: Error applying translations:', error);
+  // Show error message to user
+  const heroContent = document.querySelector('.hero-content');
+  if (heroContent) {
+    heroContent.innerHTML = `
+      <div class="container hero-layout">
+        <div class="error-message">
+          <h1>⚠️ Loading Error</h1>
+          <p>Failed to load event data. Please refresh the page.</p>
+          <button onclick="location.reload()" class="btn primary">Refresh Page</button>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -191,12 +251,17 @@ function applyNewTranslations(lang) {
     }, 100);
   }
   
-  // Update all translatable content after translations are loaded
+  // Only update content if CONFIG is available
+  if (CONFIG && CONFIG.event) {
+    // Update all translatable content after translations are loaded
   updateEventInfo();
   updateArtists();
   updateFaqs();
   updateTickets();
   updateStaticTranslations();
+  } else {
+    console.log('🌐 Main.js: CONFIG not available, keeping static content');
+  }
   
   // Update updates manager language
   if (window.updatesManager) {
@@ -240,93 +305,114 @@ function applyNewTranslations(lang) {
   }
 }
 
-// Get current language (alias for compatibility)
-function getCurrentLanguage() {
-  return CURRENT_LANG;
-}
+// Функция удалена - дублирование с getCurrentLang
 
-// Detect browser language
-function detectBrowserLanguage() {
-  const browserLang = navigator.language || navigator.userLanguage;
-  const shortLang = browserLang.split('-')[0].toLowerCase();
-  const result = SUPPORTED_LANGS.includes(shortLang) ? shortLang : 'en';
-  return result;
-}
+// Функция удалена - дублирование с detectBrowserLanguage в начале файла
 
-// Apply browser language on first visit
-function applyBrowserLanguage() {
-  const detectedLang = detectBrowserLanguage();
-  const savedLang = getCurrentLang();
-  const finalLang = savedLang || detectedLang;
-  
-  if (finalLang !== CURRENT_LANG) {
-  setCurrentLang(finalLang);
-  }
-}
+// Функция удалена - не используется
 
 // Main initialization function
 async function init() {
-  // Load config and translations
-  await loadConfig();
-  await loadTranslations();
+  // Determine language FIRST (before any content rendering)
+  const detectedLang = detectBrowserLanguage();
+  setCurrentLang(detectedLang, true); // Skip content update until data is loaded
   
-  // Initialize language UI
-  initNewLangUI();
-  applyBrowserLanguage();
-  
-  // Setup header overlay
+  // Start critical UI setup immediately
   setupHeaderOverlay();
-  
-  // Setup mobile menu
   setupMobileMenu();
   
-  // Setup form
-  setupForm();
+  // Show skeleton while loading critical data
+  showSkeleton();
   
-  // Initialize UpdatesManager
-  if (window.UpdatesManager) {
-    updatesManager = new window.UpdatesManager();
-    await updatesManager.init();
-    // Export to window for language switching
-    window.updatesManager = updatesManager;
-  } else {
-    console.warn('🌐 Main.js: UpdatesManager not available');
-  }
+  // Load config and translations in parallel
+  const [configLoaded, translationsLoaded] = await Promise.allSettled([
+    loadConfig(),
+    loadTranslations()
+  ]);
   
-  // Mount basic content
-  mountBasics();
-  
-  // Setup tickets island interactions
-  setupTicketsIslandInteractions();
-  
-  // Setup active navigation
-  setupActiveNav();
-  
-  // Initialize media slider
-  initMediaSlider();
-
-  // Respect prefers-reduced-motion
-  const heroVideo = document.getElementById('heroVideo');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    heroVideo?.removeAttribute('autoplay');
-    heroVideo?.pause();
-  }
-
-  // Scroll correction for anchors and sticky header
-  window.addEventListener('hashchange', () => {
-    if (location.hash) {
-      const el = document.querySelector(location.hash);
-      if (el) {
-        const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
-        const y = el.getBoundingClientRect().top + scrollY - (headerH + 12);
-        const prefersReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        scrollTo({ top: y, behavior: prefersReduce ? 'auto' : 'smooth' });
-      }
+  // Check if both critical files loaded successfully
+  if (configLoaded.status === 'fulfilled' && translationsLoaded.status === 'fulfilled') {
+    // Hide skeleton and show content
+    hideSkeleton();
+    
+    // Now apply translations and update content
+    applyNewTranslations(CURRENT_LANG);
+    
+    // Initialize language UI (now with correct language)
+    initNewLangUI();
+    
+    // Setup form
+    setupForm();
+    
+    // Initialize analytics
+    if (window.EventTracker) {
+      window.eventTracker = new window.EventTracker();
+      console.log('🌐 Main.js: Analytics initialized');
     }
-  });
-  
-  // Reveal tickets island
-  revealTicketsIsland();
+    
+    // Initialize pixels
+    if (window.PixelLoader) {
+      window.pixelLoader = new window.PixelLoader();
+      console.log('🌐 Main.js: Pixels initialized');
+    }
+    
+    // Initialize UpdatesManager (non-blocking)
+    if (window.UpdatesManager) {
+      updatesManager = new window.UpdatesManager();
+      // Start loading updates in background, don't await
+      updatesManager.init().then(() => {
+        console.log('🌐 Main.js: Updates loaded successfully');
+      }).catch(error => {
+        console.warn('🌐 Main.js: Updates failed to load:', error);
+      });
+      // Export to window for language switching
+      window.updatesManager = updatesManager;
+    } else {
+      console.warn('🌐 Main.js: UpdatesManager not available');
+    }
+    
+    // Mount basic content (now with correct language)
+    mountBasics();
+    
+    // Setup tickets island interactions
+    setupTicketsIslandInteractions();
+    
+    // Setup active navigation
+    setupActiveNav();
+    
+    // Initialize media slider
+    initMediaSlider();
+
+    // Respect prefers-reduced-motion
+    const heroVideo = document.getElementById('heroVideo');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      heroVideo?.removeAttribute('autoplay');
+      heroVideo?.pause();
+    }
+
+    // Scroll correction for anchors and sticky header
+    window.addEventListener('hashchange', () => {
+      if (location.hash) {
+        const el = document.querySelector(location.hash);
+        if (el) {
+          const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
+          const y = el.getBoundingClientRect().top + scrollY - (headerH + 12);
+          const prefersReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          scrollTo({ top: y, behavior: prefersReduce ? 'auto' : 'smooth' });
+        }
+      }
+    });
+    
+    // Reveal tickets island
+    revealTicketsIsland();
+  } else {
+    // Handle loading errors
+    console.error('🌐 Main.js: Failed to load critical data:', {
+      config: configLoaded.status,
+      translations: translationsLoaded.status
+    });
+    showErrorState();
+  }
 }
 
 function setupHeaderOverlay() {
@@ -711,7 +797,7 @@ function updateStaticTranslations() {
       const paragraphs = aboutText
         .split('\n')
         .filter(line => line.trim()) // Remove empty lines
-        .map(line => `<p>${escapeHTML(line.trim())}</p>`)
+        .map(line => `<p>${window.escapeHTML ? window.escapeHTML(line.trim()) : line.trim()}</p>`)
         .join('');
       
       aboutDescriptionEl.innerHTML = paragraphs;
@@ -771,58 +857,59 @@ function getTranslationFromFile(key, fallback = '') {
       console.warn('🌐 Main.js: No fallback translations found');
       return fallback;
     }
-    return getNestedValue(fallbackData, key, fallback);
+    return window.getByPath ? window.getByPath(fallbackData, key) || fallback : fallback;
   }
   
-  return getNestedValue(currentLangData, key, fallback);
+  return window.getByPath ? window.getByPath(currentLangData, key) || fallback : fallback;
 }
 
-// Helper function to get nested object values by dot notation
-function getNestedValue(obj, path, fallback = '') {
-  const keys = path.split('.');
-  let current = obj;
-  
-  for (const key of keys) {
-    if (current && typeof current === 'object' && key in current) {
-      current = current[key];
-    } else {
-      console.warn('🌐 Main.js: Key not found in translations:', key, 'at path:', path);
-      return fallback;
-    }
-  }
-  
-  return current || fallback;
-}
+// Функция удалена - дублирование с getByPath в i18n.js
 
 function updateEventInfo() {
   const e = CONFIG.event;
-  
+
   // --- Titles / hero basics
   const siteTitleEl = document.getElementById('siteTitle');
   const eventNameEl = document.getElementById('eventName');
   if (siteTitleEl) siteTitleEl.textContent = getTranslation(e.name, 'Event Name');
   if (eventNameEl) eventNameEl.textContent = getTranslation(e.name, 'Event Name');
-  
+
   // Date & time (supports optional timeEnd -> "18:00 – 23:00")
   const dateEl = document.getElementById('eventDate');
   const timeEl = document.getElementById('eventTime');
   if (dateEl) dateEl.textContent = getTranslation(e.date, '');
   if (timeEl) timeEl.textContent = e.timeEnd ? `${e.time} – ${e.timeEnd}` : e.time;
-  
+
   // City / country / flag
   const cityEl = document.getElementById('eventCity');
   const countryEl = document.getElementById('eventCountry');
   const flagEl = document.getElementById('eventFlag');
   if (cityEl) cityEl.textContent = getTranslation(e.city, '');
   if (countryEl) countryEl.textContent = getTranslation(e.country, '');
-  if (flagEl) flagEl.src = e.flag;
   
+  // Flag - update only if different from static fallback
+  if (flagEl && e.flag && e.flag !== flagEl.src) {
+    // Wait for skeleton to be hidden and content to be loaded
+    const checkSkeletonHidden = () => {
+      if (document.body.classList.contains('content-loaded')) {
+        // Small additional delay to ensure smooth animation
+        setTimeout(() => {
+          flagEl.src = e.flag;
+        }, 50);
+      } else {
+        // Check again in 50ms
+        setTimeout(checkSkeletonHidden, 50);
+      }
+    };
+    checkSkeletonHidden();
+  }
+
   // Venue (hero bottom + Location section)
   const venueNameEl = document.getElementById('venueName');
   const venueAddrHeroEl = document.getElementById('venueAddressHero');
   if (venueNameEl) venueNameEl.textContent = getTranslation(e.venue.name, 'Venue Name');
   if (venueAddrHeroEl) venueAddrHeroEl.textContent = getTranslation(e.venue.address, 'Venue Address');
-  
+
   const locVenueEl = document.getElementById('locVenue');
   const locAddrEl = document.getElementById('locAddr');
   const locSiteEl = document.getElementById('locSite');
@@ -837,7 +924,7 @@ function updateEventInfo() {
       <img src="assets/icons/route.svg" alt="Get route" class="route-icon">
     `;
   }
-  
+
   // Event description
   const eventAboutEl = document.getElementById('eventAbout');
   if (eventAboutEl) {
@@ -930,7 +1017,7 @@ function updateFaqs() {
 
 function updateTickets() {
   const e = CONFIG.event;
-  
+
   // Floating CTA: primary + drop-up with vendors
   const primaryBtn = document.getElementById('ticketsPrimary');
   const toggleBtn  = document.getElementById('ticketsToggle');
@@ -1153,7 +1240,7 @@ function textToParagraphs(text) {
   }
   
   const paragraphs = text.split('\n').filter(p => p.trim());
-  return paragraphs.map(p => `<p>${escapeHTML(p)}</p>`).join('');
+  return paragraphs.map(p => `<p>${window.escapeHTML ? window.escapeHTML(p) : p}</p>`).join('');
 }
 
 // Lightbox functionality
@@ -1220,7 +1307,7 @@ function loadLightboxMedia() {
   // Ensure proper sizing for different aspect ratios
   if (mediaClone.tagName === 'IMG') {
     mediaClone.style.maxWidth = '100%';
-    mediaClone.style.maxHeight = '100%';
+    mediaClone.style.maxHeight = '100vh';
     mediaClone.style.width = 'auto';
     mediaClone.style.height = 'auto';
     mediaClone.style.objectFit = 'contain';
@@ -1378,6 +1465,9 @@ function initMediaSlider() {
   let autoplayInterval = null;
   let isAutoplayActive = false;
 
+  // Setup lazy loading for images
+  setupLazyLoading();
+
   // Create dots
   slides.forEach((_, index) => {
     const dot = document.createElement('button');
@@ -1454,6 +1544,45 @@ function initMediaSlider() {
     }
   };
   
+  // Setup lazy loading for slider images
+  function setupLazyLoading() {
+    // Load first image immediately
+    const firstSlide = slides[0];
+    if (firstSlide) {
+      const img = firstSlide.querySelector('img');
+      if (img && img.dataset.src) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      }
+    }
+
+    // Setup intersection observer for other images
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+            imageObserver.unobserve(img);
+          }
+        }
+      });
+    }, {
+      rootMargin: '50px' // Start loading 50px before image comes into view
+    });
+
+    // Observe all images except the first one
+    slides.forEach((slide, index) => {
+      if (index > 0) {
+        const img = slide.querySelector('img');
+        if (img && img.dataset.src) {
+          imageObserver.observe(img);
+        }
+      }
+    });
+  }
+
   // Add both click and touch events for better mobile support
   prevBtn.addEventListener('click', handlePrevClick);
   nextBtn.addEventListener('click', handleNextClick);
@@ -1526,7 +1655,7 @@ function initMediaSlider() {
         if (isAutoplayActive) {
           stopAutoplay();
         }
-      } else {
+    } else {
         // Swipe right - previous slide
         prevSlide();
         // Stop autoplay when user manually navigates
@@ -1801,10 +1930,10 @@ function setupContactForm() {
       const submitBtn = form.querySelector('button[type="submit"]');
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
-    }
-  });
-}
-
+      }
+    });
+  }
+  
 // Send contact email (placeholder function - replace with your email service)
 async function sendContactEmail(data) {
   // This is a placeholder implementation
@@ -1921,20 +2050,13 @@ function setupMapTouchHandling() {
   }, { passive: true });
 }
 
-function escapeHTML(text) {
-  if (!text) {
-    return '';
-  }
-  
-  const result = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-  
-  return result;
-}
+// Функция удалена - дублирование с escapeHTML в i18n.js
+
+// Export functions globally for other modules
+window.detectBrowserLanguage = detectBrowserLanguage;
+window.getLangName = getLangName;
+window.getLangFlag = getLangFlag;
+window.getTranslation = getTranslation;
 
 // Start initialization when DOM is ready
 if (document.readyState === 'loading') {

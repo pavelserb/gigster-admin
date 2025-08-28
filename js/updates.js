@@ -114,7 +114,7 @@ class UpdatesManager {
     this.render();
   }
 
-  // Load updates data from JSON
+    // Load updates data from JSON
   async loadUpdatesData() {
     try {
       const response = await fetch('updates.json');
@@ -128,18 +128,6 @@ class UpdatesManager {
         (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.ts) - new Date(a.ts)
       );
       
-      // Ensure CONFIG is available for translations
-      if (!window.CONFIG) {
-        try {
-          const configResponse = await fetch('config.json');
-          if (configResponse.ok) {
-            window.CONFIG = await configResponse.json();
-          }
-        } catch (error) {
-          console.warn('🌐 Updates.js: Failed to load config.json:', error);
-        }
-      }
-      
       // Process each update to ensure proper structure
       this.items.forEach((update, index) => {
         if (!update.id) {
@@ -147,9 +135,13 @@ class UpdatesManager {
         }
       });
       
+      // Hide loading placeholder and show content
+      this.hideLoadingPlaceholder();
+      
     } catch (error) {
       console.error('🌐 Updates.js: Error loading updates:', error);
       this.items = [];
+      this.showErrorState();
     }
   }
 
@@ -164,6 +156,9 @@ class UpdatesManager {
       console.warn('🌐 Updates.js: Updates container not found');
       return;
     }
+    
+    // Show loading placeholder
+    this.showLoadingPlaceholder();
     
     // Ensure "Load more" button exists
     if (!this.moreBtn) {
@@ -210,6 +205,67 @@ class UpdatesManager {
         btn.textContent = translatedText;
       }
     });
+  }
+
+  // Show loading placeholder
+  showLoadingPlaceholder() {
+    if (!this.container) return;
+    
+    this.container.innerHTML = `
+      <div class="updates-loading">
+        <div class="loading-placeholder">
+          <div class="placeholder-item skeleton-update">
+            <div class="placeholder-header">
+              <div class="placeholder-badge skeleton-text"></div>
+              <div class="placeholder-date skeleton-text"></div>
+            </div>
+            <div class="placeholder-title skeleton-text"></div>
+            <div class="placeholder-preview skeleton-text"></div>
+          </div>
+          <div class="placeholder-item skeleton-update">
+            <div class="placeholder-header">
+              <div class="placeholder-badge skeleton-text"></div>
+              <div class="placeholder-date skeleton-text"></div>
+            </div>
+            <div class="placeholder-title skeleton-text"></div>
+            <div class="placeholder-preview skeleton-text"></div>
+          </div>
+          <div class="placeholder-item skeleton-update">
+            <div class="placeholder-header">
+              <div class="placeholder-badge skeleton-text"></div>
+              <div class="placeholder-date skeleton-text"></div>
+            </div>
+            <div class="placeholder-title skeleton-text"></div>
+            <div class="placeholder-preview skeleton-text"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Hide loading placeholder
+  hideLoadingPlaceholder() {
+    if (!this.container) return;
+    
+    // Remove loading placeholder
+    const loadingEl = this.container.querySelector('.updates-loading');
+    if (loadingEl) {
+      loadingEl.remove();
+    }
+  }
+
+  // Show error state
+  showErrorState() {
+    if (!this.container) return;
+    
+    this.container.innerHTML = `
+      <div class="updates-error">
+        <div class="error-message">
+          <p>⚠️ Failed to load updates</p>
+          <button onclick="location.reload()" class="btn">Retry</button>
+        </div>
+      </div>
+    `;
   }
 
   // Setup event listeners
@@ -715,11 +771,16 @@ class UpdatesManager {
   }
 
   getTranslation(field, fallback = '') {
+    // Use global function from main.js if available
+    if (window.getTranslation) {
+      return window.getTranslation(field, fallback);
+    }
+    
+    // Fallback implementation
     if (!field) return fallback;
     
     if (typeof field === 'object') {
-      const result = field[this.currentLang] || field.en || fallback;
-      return result;
+      return field[this.currentLang] || field.en || fallback;
     }
     
     return field;
@@ -749,18 +810,24 @@ class UpdatesManager {
     return badgeType;
   }
 
-  // Get language flag emoji
+  // Get language flag emoji - use global function from main.js
   getLangFlag(lang) {
+    if (window.getLangFlag) {
+      return window.getLangFlag(lang);
+    }
+    // Fallback implementation
     const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
-    const result = flags[lang] || '🌐';
-    return result;
+    return flags[lang] || '🌐';
   }
 
-  // Get language name
+  // Get language name - use global function from main.js
   getLangName(lang) {
+    if (window.getLangName) {
+      return window.getLangName(lang);
+    }
+    // Fallback implementation
     const names = { en: 'EN', cs: 'CS', uk: 'UK' };
-    const result = names[lang] || 'EN';
-    return result;
+    return names[lang] || 'EN';
   }
 
   // Helper functions
@@ -853,3 +920,6 @@ class UpdatesManager {
 
 // Export for use in main.js
 window.UpdatesManager = UpdatesManager;
+
+// UpdatesManager will be initialized by main.js to ensure proper order
+// This prevents conflicts and ensures updates are ready when needed

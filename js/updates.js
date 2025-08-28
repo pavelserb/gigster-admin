@@ -811,13 +811,17 @@ class UpdatesManager {
   }
 
   // Get language flag emoji - use global function from main.js
-  getLangFlag(lang) {
-    if (window.getLangFlag) {
-      return window.getLangFlag(lang);
+  getLangFlagPath(lang) {
+    if (window.getLangFlagPath) {
+      return window.getLangFlagPath(lang);
     }
     // Fallback implementation
-    const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
-    return flags[lang] || '🌐';
+    const flags = { 
+      en: 'assets/flags/flag-en.svg', 
+      cs: 'assets/flags/flag-cz.svg', 
+      uk: 'assets/flags/flag-uk.svg' 
+    };
+    return flags[lang] || 'assets/flags/flag-en.svg';
   }
 
   // Get language name - use global function from main.js
@@ -862,8 +866,11 @@ class UpdatesManager {
       if (langCurrent) {
         const langFlag = langCurrent.querySelector('.lang-flag');
         const langName = langCurrent.querySelector('.lang-name');
-        if (langFlag) langFlag.textContent = this.getLangFlag(this.currentLang);
-        if (langName) langName.textContent = this.getLangName(this.currentLang);
+        if (langFlag) {
+        langFlag.src = this.getLangFlagPath(this.currentLang);
+        langFlag.alt = this.getLangName(this.currentLang);
+      }
+        // langName removed - we only use flags now
       }
       
       // Update dropdown options
@@ -875,8 +882,11 @@ class UpdatesManager {
           if (lang) {
             const flag = option.querySelector('.lang-flag');
             const name = option.querySelector('.lang-name');
-            if (flag) flag.textContent = this.getLangFlag(lang);
-            if (name) name.textContent = this.getLangName(lang);
+            if (flag) {
+        flag.src = this.getLangFlagPath(lang);
+        flag.alt = this.getLangName(lang);
+      }
+            // name removed - we only use flags now
           }
         });
       }

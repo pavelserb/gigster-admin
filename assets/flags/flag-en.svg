@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 120 120" style="enable-background:new 0 0 120 120;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_00000077297756838766672200000012126698661892143542_);}
+	.st1{fill:#012169;}
+	.st2{fill:#C8102E;}
+	.st3{fill:#FFFFFF;}
+	
+		.st4{opacity:0.3;clip-path:url(#SVGID_00000077297756838766672200000012126698661892143542_);fill:url(#SVGID_00000177471876334752038370000005184418033022707892_);}
+</style>
+<g>
+	<defs>
+		<circle id="SVGID_1_" cx="60" cy="60" r="50"/>
+	</defs>
+	<clipPath id="SVGID_00000134952642490531410550000002301068564303462020_">
+		<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+	</clipPath>
+	<g style="clip-path:url(#SVGID_00000134952642490531410550000002301068564303462020_);">
+		<polygon class="st1" points="43.2,79.6 43.2,110 -17.3,110 		"/>
+		<polygon class="st2" points="41.2,76.8 -25.1,110 -39.9,110 26.2,76.8 		"/>
+		<polygon class="st1" points="3.8,76.8 -39.9,98.6 -39.9,76.8 		"/>
+		<polygon class="st1" points="159.9,21.1 159.9,43.2 115.8,43.2 		"/>
+		<polygon class="st2" points="159.9,10 93.7,43.2 78.8,43.2 145,10 		"/>
+		<polygon class="st1" points="137.6,10 76.8,40.4 76.8,10 		"/>
+		<polygon class="st1" points="43.2,10 43.2,40.4 -17.6,10 		"/>
+		<polygon class="st2" points="26.3,43.2 11.4,43.2 -39.9,17.5 -39.9,10 		"/>
+		<polygon class="st1" points="4.2,43.2 -39.9,43.2 -39.9,21.1 		"/>
+		<polygon class="st2" points="159.9,50 159.9,70 70,70 70,110 50,110 50,70 -39.9,70 -39.9,50 50,50 50,10 70,10 70,50 		"/>
+		<polygon class="st1" points="159.9,76.8 159.9,98.6 116.2,76.8 		"/>
+		<polygon class="st1" points="137.3,110 76.8,110 76.8,79.6 		"/>
+		<polygon class="st2" points="159.9,102.5 159.9,110 93.6,76.8 108.6,76.8 		"/>
+		<polygon class="st3" points="50,70 50,110 43.2,110 43.2,79.6 -17.3,110 -25.1,110 41.2,76.8 26.2,76.8 -39.9,110 -39.9,98.6 
+			3.8,76.8 -39.9,76.8 -39.9,70 		"/>
+		<polygon class="st3" points="159.9,21.1 115.8,43.2 159.9,43.2 159.9,50 70,50 70,10 76.8,10 76.8,40.4 137.6,10 145,10 
+			78.8,43.2 93.7,43.2 159.9,10 		"/>
+		<polygon class="st3" points="50,10 50,50 -39.9,50 -39.9,43.2 4.2,43.2 -39.9,21.1 -39.9,17.5 11.4,43.2 26.3,43.2 -39.9,10 
+			-17.6,10 43.2,40.4 43.2,10 		"/>
+		<polygon class="st3" points="159.9,76.8 116.2,76.8 159.9,98.6 159.9,102.5 108.6,76.8 93.6,76.8 159.9,110 137.3,110 76.8,79.6 
+			76.8,110 70,110 70,70 159.9,70 		"/>
+	</g>
+	
+		<radialGradient id="SVGID_00000174584382474763905300000005424953674917379761_" cx="60" cy="60" r="49.9535" gradientUnits="userSpaceOnUse">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="0.3561" style="stop-color:#FDFDFD"/>
+		<stop  offset="0.4844" style="stop-color:#F6F6F6"/>
+		<stop  offset="0.5759" style="stop-color:#EBEBEB"/>
+		<stop  offset="0.6499" style="stop-color:#DADADA"/>
+		<stop  offset="0.7132" style="stop-color:#C4C4C4"/>
+		<stop  offset="0.7693" style="stop-color:#A8A8A8"/>
+		<stop  offset="0.8201" style="stop-color:#888888"/>
+		<stop  offset="0.8667" style="stop-color:#626262"/>
+		<stop  offset="0.9101" style="stop-color:#373737"/>
+		<stop  offset="0.9487" style="stop-color:#090909"/>
+		<stop  offset="0.9557" style="stop-color:#000000"/>
+	</radialGradient>
+	
+		<circle style="opacity:0.3;clip-path:url(#SVGID_00000134952642490531410550000002301068564303462020_);fill:url(#SVGID_00000174584382474763905300000005424953674917379761_);" cx="60" cy="60" r="50"/>
+</g>
+</svg>

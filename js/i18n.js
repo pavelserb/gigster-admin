@@ -9,9 +9,18 @@ const getLang = () => localStorage.getItem('site_language') || FALLBACK_LANG;
 function updateLangButton(code){
   const btn = document.getElementById('langBtn');
   if (!btn) return;
-  const codeText = (LANG_CODES[code] || code).toUpperCase();
-  btn.textContent = codeText;
-  btn.setAttribute('aria-label', `Language: ${codeText}`);
+  
+  // Update button content with flag
+  btn.innerHTML = '';
+  const flag = document.createElement('img');
+  flag.className = 'lang-flag';
+  flag.src = getLangFlagPath(code);
+  flag.alt = getLangName(code);
+  flag.width = 24;
+  flag.height = 16;
+  
+  btn.appendChild(flag);
+  btn.setAttribute('aria-label', `Language: ${getLangName(code)}`);
 }
 const setLang = (l) => {
   localStorage.setItem('site_language', l);
@@ -118,8 +127,19 @@ function buildLangMenu(menu, supported, current) {
       item.type = 'button';
       item.setAttribute('role', 'menuitem');
       item.dataset.lang = code;
-      item.className = 'lang-item';
-      item.textContent = LANG_LABELS[code] || code.toUpperCase();
+      item.className = 'lang-option';
+      
+      // Create flag image
+      const flag = document.createElement('img');
+      flag.className = 'lang-flag';
+      flag.src = getLangFlagPath(code);
+      flag.alt = getLangName(code);
+      flag.width = 24;
+      flag.height = 16;
+      
+      item.appendChild(flag);
+      menu.appendChild(item);
+      
       item.addEventListener('click', () => {
         setLang(code);
         applyTranslations(code);
@@ -129,8 +149,23 @@ function buildLangMenu(menu, supported, current) {
         closeMenu(menu);                   // animate close
         document.getElementById('langBtn')?.focus();
       });
-      menu.appendChild(item);
     });
+}
+
+// Get language flag SVG path
+function getLangFlagPath(lang) {
+  const flags = { 
+    en: 'assets/flags/flag-en.svg', 
+    cs: 'assets/flags/flag-cz.svg', 
+    uk: 'assets/flags/flag-uk.svg' 
+  };
+  return flags[lang] || 'assets/flags/flag-en.svg';
+}
+
+// Get language name
+function getLangName(lang) {
+  const names = { en: 'English', cs: 'Čeština', uk: 'Українська' };
+  return names[lang] || 'English';
 }
 
 // Open/close helpers (use class .open, no display:none)

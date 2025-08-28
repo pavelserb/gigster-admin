@@ -164,23 +164,71 @@ function updateLanguageDisplay() {
   const langSwitcher = document.querySelector('.lang-switcher');
   if (!langSwitcher) return;
   
-  const langFlag = langSwitcher.querySelector('.lang-flag');
-  const langName = langSwitcher.querySelector('.lang-name');
+  // Update current language flag
+  const langFlag = langSwitcher.querySelector('.lang-current .lang-flag');
+  if (langFlag) {
+    langFlag.src = getLangFlagPath(CURRENT_LANG);
+    langFlag.alt = getLangName(CURRENT_LANG);
+  }
   
-  if (langFlag) langFlag.textContent = getLangFlag(CURRENT_LANG);
-  if (langName) langName.textContent = getLangName(CURRENT_LANG);
+  // Update dropdown language options
+  const langOptions = langSwitcher.querySelectorAll('.lang-option');
+  langOptions.forEach(option => {
+    const lang = option.getAttribute('data-lang');
+    const flag = option.querySelector('.lang-flag');
+    if (flag && lang) {
+      flag.src = getLangFlagPath(lang);
+      flag.alt = getLangName(lang);
+    }
+  });
+  
+  // Auto-detect dropdown layout based on number of languages
+  updateDropdownLayout(langSwitcher);
 }
 
-// Get language flag emoji
-function getLangFlag(lang) {
-  const flags = { en: '🇬🇧', cs: '🇨🇿', uk: '🇺🇦' };
-  return flags[lang] || '🌐';
+// Get language flag SVG path
+function getLangFlagPath(lang) {
+  const flags = { 
+    en: 'assets/flags/flag-en.svg', 
+    cs: 'assets/flags/flag-cz.svg', 
+    uk: 'assets/flags/flag-uk.svg' 
+  };
+  return flags[lang] || 'assets/flags/flag-en.svg';
 }
 
 // Get language name
 function getLangName(lang) {
-  const names = { en: 'EN', cs: 'CS', uk: 'UK' };
-  return names[lang] || 'EN';
+  const names = { en: 'English', cs: 'Čeština', uk: 'Українська' };
+  return names[lang] || 'English';
+}
+
+// Auto-detect and update dropdown layout
+function updateDropdownLayout(langSwitcher) {
+  const dropdown = langSwitcher.querySelector('.lang-dropdown');
+  if (!dropdown) return;
+  
+  const languageCount = dropdown.querySelectorAll('.lang-option').length;
+  
+  // Remove existing layout classes
+  dropdown.classList.remove('horizontal', 'vertical');
+  
+  // Apply appropriate layout
+  if (languageCount <= 3) {
+    dropdown.classList.add('horizontal');
+    console.log('🌐 Main.js: Applied horizontal layout for', languageCount, 'languages');
+  } else {
+    dropdown.classList.add('vertical');
+    console.log('🌐 Main.js: Applied vertical layout for', languageCount, 'languages');
+  }
+  
+  // Reset animation state for smooth transitions
+  const langOptions = dropdown.querySelectorAll('.lang-option');
+  langOptions.forEach((option, index) => {
+    option.style.transitionDelay = `${(index + 1) * 0.1}s`;
+  });
+  
+  // Debug: log current classes
+  console.log('🌐 Main.js: Dropdown classes:', dropdown.className);
 }
 
 // Skeleton management functions
@@ -281,23 +329,20 @@ function applyNewTranslations(lang) {
     // Update current language display
     const langCurrent = langSwitcher.querySelector('.lang-current');
     if (langCurrent) {
-      langCurrent.innerHTML = `
-        <span class="lang-flag">${getLangFlag(lang)}</span>
-        <span class="lang-name">${getLangName(lang)}</span>
-        <button class="lang-toggle" aria-label="Сменить язык">▼</button>
-      `;
+              langCurrent.innerHTML = `
+          <img class="lang-flag" src="${getLangFlagPath(lang)}" alt="${getLangName(lang)}" width="24" height="16">
+        `;
     }
     
     // Update dropdown options
     const langDropdown = langSwitcher.querySelector('.lang-dropdown');
     if (langDropdown) {
       langDropdown.innerHTML = SUPPORTED_LANGS.filter(l => l !== lang).map(l => `
-        <button class="lang-option" 
-                data-lang="${l}" 
-                onclick="setCurrentLang('${l}')">
-          <span class="lang-flag">${getLangFlag(l)}</span>
-          <span class="lang-name">${getLangName(l)}</span>
-        </button>
+                  <button class="lang-option" 
+                  data-lang="${l}" 
+                  onclick="setCurrentLang('${l}')">
+            <img class="lang-flag" src="${getLangFlagPath(l)}" alt="${getLangName(l)}" width="24" height="16">
+          </button>
       `).join('');
     }
   } else {
@@ -2053,10 +2098,10 @@ function setupMapTouchHandling() {
 // Функция удалена - дублирование с escapeHTML в i18n.js
 
 // Export functions globally for other modules
-window.detectBrowserLanguage = detectBrowserLanguage;
-window.getLangName = getLangName;
-window.getLangFlag = getLangFlag;
-window.getTranslation = getTranslation;
+  window.detectBrowserLanguage = detectBrowserLanguage;
+  window.getLangName = getLangName;
+  window.getLangFlagPath = getLangFlagPath;
+  window.getTranslation = getTranslation;
 
 // Start initialization when DOM is ready
 if (document.readyState === 'loading') {

@@ -3603,6 +3603,19 @@ class AdminPanel {
   // Auto-update HTML file with new values from config and translations
   async updateHTMLAfterSave() {
     try {
+      console.log('🔄 Starting HTML auto-update...');
+      console.log('📋 Current config state:', {
+        hasConfig: !!this.config,
+        configKeys: this.config ? Object.keys(this.config) : [],
+        hasEvent: !!this.config?.event
+      });
+      
+      // Check if config is loaded
+      if (!this.config || !this.config.event) {
+        console.warn('⚠️ Config not loaded, skipping HTML update');
+        return;
+      }
+      
       // Get current HTML content from our server (which has FTP access)
       const htmlResponse = await fetch('/admin/api/html/current', {
         headers: {
@@ -3622,28 +3635,46 @@ class AdminPanel {
       }
       
       let htmlContent = htmlData.content;
+      console.log('📄 HTML content fetched, length:', htmlContent.length);
       
       // Update static values in HTML based on current config and translations
       htmlContent = this.updateHTMLContent(htmlContent);
       
       // Save updated HTML back to file
+      const requestBody = {
+        content: htmlContent,
+        filename: 'index.html'
+      };
+      
+      console.log('🔄 Sending HTML update request:', {
+        contentLength: htmlContent.length,
+        filename: 'index.html',
+        hasContent: !!htmlContent
+      });
+      
       const saveResponse = await fetch('/admin/api/html/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         },
-        body: JSON.stringify({
-          content: htmlContent,
-          filename: 'index.html'
-        })
+        body: JSON.stringify(requestBody)
       });
       
       if (saveResponse.ok) {
-        console.log('HTML updated successfully');
+        console.log('✅ HTML updated successfully');
         this.showSuccess('HTML файл обновлен автоматически');
       } else {
-        console.warn('HTML update failed');
+        const errorText = await saveResponse.text();
+        console.error('❌ HTML update failed:', saveResponse.status, errorText);
+        
+        // Try to parse error response
+        try {
+          const errorData = JSON.parse(errorText);
+          console.error('❌ Error details:', errorData);
+        } catch (e) {
+          console.error('❌ Raw error response:', errorText);
+        }
       }
     } catch (error) {
       console.warn('HTML auto-update failed:', error);
@@ -3671,31 +3702,38 @@ class AdminPanel {
 
   // Update HTML content with new values
   updateHTMLContent(htmlContent) {
+    console.log('🔄 Updating HTML content with config:', {
+      hasConfig: !!this.config,
+      hasEvent: !!this.config?.event,
+      configKeys: this.config ? Object.keys(this.config) : []
+    });
+    
     // Update event name
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.getTranslationValue(this.config.event?.name, 'ARTBAT'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.getTranslationValue(this.config?.event?.name, 'ARTBAT'));
     
     // Update event date
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventDate', this.getTranslationValue(this.config.event?.date, 'September 5, 2025'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventDate', this.getTranslationValue(this.config?.event?.date, 'September 5, 2025'));
     
     // Update event time (with proper timeEnd logic)
-    const eventTime = this.config.event?.timeEnd ? 
+    const eventTime = this.config?.event?.timeEnd ? 
       `${this.config.event.time} – ${this.config.event.timeEnd}` : 
-      (this.config.event?.time || '18:00 – 23:00');
+      (this.config?.event?.time || '18:00 – 23:00');
     htmlContent = this.replaceHTMLValue(htmlContent, 'eventTime', eventTime);
     
     // Update city and country
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCity', this.getTranslationValue(this.config.event?.city, 'Prague'));
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.getTranslationValue(this.config.event?.country, 'Czech Republic'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCity', this.getTranslationValue(this.config?.event?.city, 'Prague'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.getTranslationValue(this.config?.event?.country, 'Czech Republic'));
     
     // Update venue name and address
-    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.getTranslationValue(this.config.event?.venue?.name, 'AREÁL 7'));
-    htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.getTranslationValue(this.config.event?.venue?.address, 'Za Elektrárnou, 170 00 Praha 7 – Holešovice'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.getTranslationValue(this.config?.event?.venue?.name, 'AREÁL 7'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.getTranslationValue(this.config?.event?.venue?.address, 'Za Elektrárnou, 170 00 Praha 7 – Holešovice'));
     
     // Update flag path if different
-    if (this.config.event?.flag) {
+    if (this.config?.event?.flag) {
       htmlContent = this.replaceHTMLAttribute(htmlContent, 'eventFlag', 'src', this.config.event.flag);
     }
     
+    console.log('✅ HTML content updated, new length:', htmlContent.length);
     return htmlContent;
   }
 

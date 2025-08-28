@@ -514,30 +514,54 @@ app.get('/admin/api/html/current', authenticateToken, async (req, res) => {
 // Auto-update HTML endpoint
 app.post('/admin/api/html/update', authenticateToken, async (req, res) => {
   try {
+    console.log('🔄 HTML update request received:', {
+      hasBody: !!req.body,
+      bodyKeys: Object.keys(req.body || {}),
+      contentType: req.headers['content-type']
+    });
+    
     const { content, filename } = req.body;
     
+    console.log('📝 HTML update data:', {
+      hasContent: !!content,
+      contentLength: content ? content.length : 0,
+      filename: filename,
+      contentPreview: content ? content.substring(0, 100) + '...' : 'none'
+    });
+    
     if (!content || !filename) {
-      return res.status(400).json({ error: 'Missing content or filename' });
+      console.error('❌ Missing required fields:', { hasContent: !!content, hasFilename: !!filename });
+      return res.status(400).json({ 
+        error: 'Missing content or filename',
+        received: {
+          hasContent: !!content,
+          hasFilename: !!filename,
+          bodyKeys: Object.keys(req.body || {})
+        }
+      });
     }
     
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', filename);
       const remotePath = `${FTP_CONFIG.remotePath}/${filename}`;
       
+      console.log('💾 Saving HTML locally:', localPath);
       await fs.mkdir(path.dirname(localPath), { recursive: true });
       await fs.writeFile(localPath, content);
       
+      console.log('📤 Uploading HTML to FTP:', remotePath);
       const uploaded = await ftp.uploadFile(localPath, remotePath);
       if (!uploaded) {
         throw new Error(`Failed to upload ${filename} to FTP`);
       }
       
+      console.log('✅ HTML uploaded successfully');
       return { message: `${filename} updated successfully on FTP` };
     });
     
     res.json(result);
   } catch (error) {
-    console.error('HTML update error:', error);
+    console.error('❌ HTML update error:', error);
     res.status(500).json({ error: 'Ошибка обновления HTML' });
   }
 });

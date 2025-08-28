@@ -311,6 +311,11 @@ function applyNewTranslations(lang) {
     console.log('🌐 Main.js: CONFIG not available, keeping static content');
   }
   
+  // Update countdown timer translations
+  if (window.countdownTimer) {
+    window.countdownTimer.updateTranslations();
+  }
+  
   // Update updates manager language
   if (window.updatesManager) {
     window.updatesManager.setLanguage(lang);
@@ -338,11 +343,11 @@ function applyNewTranslations(lang) {
     const langDropdown = langSwitcher.querySelector('.lang-dropdown');
     if (langDropdown) {
       langDropdown.innerHTML = SUPPORTED_LANGS.filter(l => l !== lang).map(l => `
-                  <button class="lang-option" 
-                  data-lang="${l}" 
-                  onclick="setCurrentLang('${l}')">
+        <button class="lang-option" 
+                data-lang="${l}" 
+                onclick="setCurrentLang('${l}')">
             <img class="lang-flag" src="${getLangFlagPath(l)}" alt="${getLangName(l)}" width="24" height="16">
-          </button>
+        </button>
       `).join('');
     }
   } else {
@@ -384,7 +389,7 @@ async function init() {
     applyNewTranslations(CURRENT_LANG);
     
     // Initialize language UI (now with correct language)
-    initNewLangUI();
+  initNewLangUI();
     
     // Setup form
     setupForm();
@@ -417,36 +422,48 @@ async function init() {
     }
     
     // Mount basic content (now with correct language)
-    mountBasics();
+  mountBasics();
+    
+    // Initialize countdown timer (after CONFIG is loaded)
+    try {
+      if (window.CountdownTimer) {
+        window.countdownTimer = new CountdownTimer();
+        window.countdownTimer.init();
+      } else {
+        console.warn('🌐 Main.js: CountdownTimer not available');
+      }
+    } catch (error) {
+      console.error('🌐 Main.js: Countdown timer initialization failed:', error);
+    }
     
     // Setup tickets island interactions
-    setupTicketsIslandInteractions();
-    
+  setupTicketsIslandInteractions();
+
     // Setup active navigation
-    setupActiveNav();
+  setupActiveNav();
     
     // Initialize media slider
     initMediaSlider();
 
-    // Respect prefers-reduced-motion
-    const heroVideo = document.getElementById('heroVideo');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      heroVideo?.removeAttribute('autoplay');
-      heroVideo?.pause();
-    }
+  // Respect prefers-reduced-motion
+  const heroVideo = document.getElementById('heroVideo');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    heroVideo?.removeAttribute('autoplay');
+    heroVideo?.pause();
+  }
 
-    // Scroll correction for anchors and sticky header
-    window.addEventListener('hashchange', () => {
-      if (location.hash) {
-        const el = document.querySelector(location.hash);
-        if (el) {
-          const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
-          const y = el.getBoundingClientRect().top + scrollY - (headerH + 12);
-          const prefersReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-          scrollTo({ top: y, behavior: prefersReduce ? 'auto' : 'smooth' });
-        }
+  // Scroll correction for anchors and sticky header
+  window.addEventListener('hashchange', () => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h')) || 64;
+        const y = el.getBoundingClientRect().top + scrollY - (headerH + 12);
+        const prefersReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        scrollTo({ top: y, behavior: prefersReduce ? 'auto' : 'smooth' });
       }
-    });
+    }
+  });
     
     // Reveal tickets island
     revealTicketsIsland();

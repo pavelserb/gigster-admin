@@ -8,9 +8,15 @@
   <meta name="theme-color" content="#0b0b0e">
   
   <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+  <!-- Local Roboto Flex font -->
+  <link rel="preload" href="../fonts/roboto-flex.woff" as="font" type="font/woff" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Roboto Flex';
+      src: url('../fonts/roboto-flex.woff') format('woff');
+      font-display: block;
+    }
+  </style>
   
   <!-- Styles -->
       <link rel="stylesheet" href="css/admin.css?v=19">

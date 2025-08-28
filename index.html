@@ -10,9 +10,15 @@
   <link rel="canonical" href="https://gigster.pro/artbat-prague/">
 
   <!-- Fonts (plain stylesheet links; CSP-safe) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=block" rel="stylesheet">
+  <!-- Local Roboto Flex font -->
+  <link rel="preload" href="fonts/roboto-flex.woff" as="font" type="font/woff" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Roboto Flex';
+      src: url('fonts/roboto-flex.woff') format('woff');
+      font-display: block;
+    }
+  </style>
 
   <!-- Styles (plain, no onload tricks) -->
   <link rel="stylesheet" href="css/styles.css">
@@ -385,7 +391,8 @@
   <script src="js/i18n.js" defer></script>
   <script src="js/analytics.js" defer></script>
   <script src="js/updates.js" defer></script>
-      <script src="js/main.js?v=55" defer></script>
+  <script src="js/countdown.js" defer></script>
+  <script src="js/main.js?v=56" defer></script>
 </body>
 </html>
 

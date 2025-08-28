@@ -40,6 +40,14 @@
       "hero": {
         "tagline": "ARTBAT is returning to Prague at a whole new level"
       },
+      "countdown": {
+        "title": "Until the event starts",
+        "days": "days",
+        "hours": "hours",
+        "minutes": "minutes",
+        "seconds": "seconds",
+        "started": "Event has started!"
+      },
       "about": {
         "title": "About the event",
         "updates": "Latest updates",
@@ -94,6 +102,14 @@
       "hero": {
         "tagline": "ARTBAT se vrací do Prahy na zcela nové úrovni"
       },
+      "countdown": {
+        "title": "Do začátku události",
+        "days": "dní",
+        "hours": "hodin",
+        "minutes": "minut",
+        "seconds": "sekund",
+        "started": "Událost začala!"
+      },
       "about": {
         "title": "O události",
         "updates": "Nejnovější aktualizace",
@@ -147,6 +163,14 @@
       },
       "hero": {
         "tagline": "ARTBAT повертається до Праги на зовсім новому рівні"
+      },
+      "countdown": {
+        "title": "До початку події",
+        "days": "днів",
+        "hours": "годин",
+        "minutes": "хвилин",
+        "seconds": "секунд",
+        "started": "Подія почалася!"
       },
       "about": {
         "title": "Про подію",

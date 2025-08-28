@@ -640,7 +640,7 @@ nav.primary a.active {
   width: min(60vw, 864px);
   margin-inline: auto;
   pointer-events: none;
-  padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem);
+  /* padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem); */
 
   /* мягкое проявление (только opacity здесь) */
   opacity: 0;
@@ -732,7 +732,8 @@ nav.primary a.active {
   justify-content: center;
   gap: 10px;
   /* padding: 16px 18px; */
-  padding: 16px 18px 16px 46px;
+  /* padding: 16px 18px 16px 46px;*/
+  padding: 16px 0 16px 56px;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -883,7 +884,7 @@ nav.primary a.active {
   }
   .cta-main {
     /* padding: 14px 16px; */
-    /* font-size: 15px; */
+    font-size: 1.375rem;
     border-radius: 0;
   }
   /* .cta-bar { */
@@ -1065,6 +1066,9 @@ nav.primary a.active {
   /* padding: var(--hdr-h) calc(var(--container-padding) + 8px) 32px calc(var(--container-padding) + 8px); */
   padding-inline: calc(var(--container-padding) + 8px);
   align-items: start;
+  display: flex;
+  flex-direction: column; 
+
 }
 
 /* Адаптивный верхний отступ: минимальный при 900px, максимальный при 1024px */
@@ -1121,7 +1125,7 @@ nav.primary a.active {
 
 /* низ: локация и venue */
 .hero-bottom {
-  align-self: end;
+  /* align-self: end; */
   margin-top: 48px;
 }
 .hero-loc {
@@ -2257,7 +2261,7 @@ p {
     padding: 12px 12px;
   }
   .artist .content {
-    padding: 16px 0;
+    padding: 16px 0 0;
     gap: 12px;
     height: auto; /* Адаптивная высота на мобильных */
   }
@@ -3259,5 +3263,146 @@ footer .container {
   
   .lang-current {
     padding: 6px 8px;
+  }
+}
+
+/* Countdown Timer Styles */
+.countdown-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* margin-top: 40px; */
+  /* margin-bottom: 20px; */
+  margin-top: auto;
+  margin-bottom: 0;
+  margin-inline: auto;
+  width: min(60vw, 864px);
+  padding: 24px;
+  /* background: rgba(255, 255, 255, 0.1); */
+  backdrop-filter: blur(10px);
+  /* border: 1px solid rgba(255, 255, 255, 0.2); */
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.countdown-timer:hover {
+  /* background: rgba(255, 255, 255, 0.15); */
+  border-color: rgba(255, 255, 255, 0.3);
+  /* transform: translateY(-2px); */
+}
+
+.countdown-label {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--fg);
+  opacity: 0.8;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.countdown-grid {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.countdown-value {
+  font-size: 2.5em;
+  font-weight: 700;
+  /* color: var(--brand);*/
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: "Roboto Flex", monospace;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.countdown-item .countdown-label {
+  font-size: 0.75em;
+  font-weight: 400;
+  margin-bottom: 0;
+  opacity: 0.7;
+  text-transform: lowercase;
+}
+
+/* Event started state */
+.countdown-started {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.countdown-started-icon {
+  font-size: 3em;
+  animation: bounce 1s infinite;
+}
+
+.countdown-started-text {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Responsive countdown */
+@media (max-width: 768px) {
+  .countdown-timer {
+    /* margin-top: 30px; */
+    /* margin-bottom: 15px; */
+    padding: 20px;
+  }
+  
+  .countdown-grid {
+    gap: 12px;
+  }
+  
+  .countdown-item {
+    min-width: 50px;
+  }
+  
+  .countdown-value {
+    font-size: 2em;
+  }
+  
+  .countdown-item .countdown-label {
+    font-size: 0.7em;
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown-grid {
+    gap: 8px;
+  }
+  
+  .countdown-item {
+    min-width: 45px;
+  }
+  
+  .countdown-value {
+    font-size: 1.8em;
   }
 }

@@ -3672,21 +3672,24 @@ class AdminPanel {
   // Update HTML content with new values
   updateHTMLContent(htmlContent) {
     // Update event name
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.config.event?.name?.en || 'ARTBAT');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.getTranslationValue(this.config.event?.name, 'ARTBAT'));
     
     // Update event date
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventDate', this.config.event?.date || 'September 5, 2025');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventDate', this.getTranslationValue(this.config.event?.date, 'September 5, 2025'));
     
-    // Update event time
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventTime', this.config.event?.time || '18:00 – 23:00');
+    // Update event time (with proper timeEnd logic)
+    const eventTime = this.config.event?.timeEnd ? 
+      `${this.config.event.time} – ${this.config.event.timeEnd}` : 
+      (this.config.event?.time || '18:00 – 23:00');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventTime', eventTime);
     
     // Update city and country
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCity', this.config.event?.city?.en || 'Prague');
-    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.config.event?.country?.en || 'Czech Republic');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCity', this.getTranslationValue(this.config.event?.city, 'Prague'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.getTranslationValue(this.config.event?.country, 'Czech Republic'));
     
     // Update venue name and address
-    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.config.event?.venue?.name?.en || 'AREÁL 7');
-    htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.config.event?.venue?.address?.en || 'Za Elektrárnou, 170 00 Praha 7 – Holešovice');
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.getTranslationValue(this.config.event?.venue?.name, 'AREÁL 7'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.getTranslationValue(this.config.event?.venue?.address, 'Za Elektrárnou, 170 00 Praha 7 – Holešovice'));
     
     // Update flag path if different
     if (this.config.event?.flag) {
@@ -3706,6 +3709,19 @@ class AdminPanel {
   replaceHTMLAttribute(htmlContent, elementId, attributeName, newValue) {
     const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*${attributeName}=")[^"]*(")`, 'g');
     return htmlContent.replace(regex, `$1${newValue}$2`);
+  }
+
+  // Get translation value (handles both string and object formats)
+  getTranslationValue(field, fallback = '') {
+    if (!field) return fallback;
+    
+    if (typeof field === 'object') {
+      // If it's an object, try to get English value first, then fallback
+      return field.en || fallback;
+    }
+    
+    // If it's a string, return as is
+    return field;
   }
 
   async saveUpdates() {

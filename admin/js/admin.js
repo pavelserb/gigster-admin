@@ -3603,17 +3603,25 @@ class AdminPanel {
   // Auto-update HTML file with new values from config and translations
   async updateHTMLAfterSave() {
     try {
-      // Get current HTML content from the main site
-      // Use configurable URL to avoid relative path issues
-      const mainSiteUrl = this.getMainSiteUrl();
-      const htmlResponse = await fetch(`${mainSiteUrl}/index.html`);
+      // Get current HTML content from our server (which has FTP access)
+      const htmlResponse = await fetch('/admin/api/html/current', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      });
       
       if (!htmlResponse.ok) {
         console.warn('Could not fetch index.html for update');
         return;
       }
       
-      let htmlContent = await htmlResponse.text();
+      const htmlData = await htmlResponse.json();
+      if (htmlData.error) {
+        console.warn('HTML fetch error:', htmlData.error);
+        return;
+      }
+      
+      let htmlContent = htmlData.content;
       
       // Update static values in HTML based on current config and translations
       htmlContent = this.updateHTMLContent(htmlContent);
@@ -3643,7 +3651,7 @@ class AdminPanel {
     }
   }
 
-  // Get main site URL based on current environment
+  // Get main site URL based on current environment (kept for future use)
   getMainSiteUrl() {
     const currentOrigin = window.location.origin;
     

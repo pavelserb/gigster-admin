@@ -488,6 +488,29 @@ app.post('/admin/api/html/save', authenticateToken, async (req, res) => {
   }
 });
 
+// Get current HTML content from FTP (for auto-update)
+app.get('/admin/api/html/current', authenticateToken, async (req, res) => {
+  try {
+    const result = await withFTP(async (ftp) => {
+      const remotePath = `${FTP_CONFIG.remotePath}/index.html`;
+      const localPath = path.join(__dirname, 'temp', 'index.html');
+      
+      const downloaded = await ftp.downloadFile(remotePath, localPath);
+      if (!downloaded) {
+        return { error: 'HTML file not found on FTP' };
+      }
+      
+      const content = await fs.readFile(localPath, 'utf8');
+      return { content };
+    });
+    
+    res.json(result);
+  } catch (error) {
+    console.error('HTML current error:', error);
+    res.status(500).json({ error: 'Ошибка чтения HTML' });
+  }
+});
+
 // Auto-update HTML endpoint
 app.post('/admin/api/html/update', authenticateToken, async (req, res) => {
   try {

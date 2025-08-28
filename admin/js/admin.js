@@ -3603,8 +3603,11 @@ class AdminPanel {
   // Auto-update HTML file with new values from config and translations
   async updateHTMLAfterSave() {
     try {
-      // Get current HTML content
-      const htmlResponse = await fetch('../index.html');
+      // Get current HTML content from the main site
+      // Use configurable URL to avoid relative path issues
+      const mainSiteUrl = this.getMainSiteUrl();
+      const htmlResponse = await fetch(`${mainSiteUrl}/index.html`);
+      
       if (!htmlResponse.ok) {
         console.warn('Could not fetch index.html for update');
         return;
@@ -3638,6 +3641,24 @@ class AdminPanel {
       console.warn('HTML auto-update failed:', error);
       // Don't show error to user as this is not critical
     }
+  }
+
+  // Get main site URL based on current environment
+  getMainSiteUrl() {
+    const currentOrigin = window.location.origin;
+    
+    // Development environment
+    if (currentOrigin.includes('localhost') || currentOrigin.includes('127.0.0.1')) {
+      return 'http://localhost:3000';
+    }
+    
+    // Production environment - admin panel
+    if (currentOrigin.includes('gigster-admin.onrender.com')) {
+      return 'https://gigster.pro/artbat-prague';
+    }
+    
+    // Fallback - try to construct from current origin
+    return currentOrigin.replace('/admin', '');
   }
 
   // Update HTML content with new values

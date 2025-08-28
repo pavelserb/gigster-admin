@@ -541,9 +541,34 @@ app.post('/admin/api/html/update', authenticateToken, async (req, res) => {
       });
     }
     
+    // CRITICAL: Prevent empty content from overwriting files
+    if (typeof content !== 'string' || content.trim().length < 100) {
+      console.error('❌ Content too short or invalid:', {
+        type: typeof content,
+        length: content ? content.length : 0,
+        preview: content ? content.substring(0, 200) : 'none'
+      });
+      return res.status(400).json({ 
+        error: 'Content too short or invalid - refusing to overwrite file',
+        contentLength: content ? content.length : 0,
+        contentType: typeof content
+      });
+    }
+    
     const result = await withFTP(async (ftp) => {
       const localPath = path.join(__dirname, 'temp', filename);
       const remotePath = `${FTP_CONFIG.remotePath}/${filename}`;
+      const backupPath = `${FTP_CONFIG.remotePath}/${filename}.backup`;
+      
+      // Create backup of current file
+      console.log('💾 Creating backup of current file...');
+      const backupCreated = await ftp.downloadFile(remotePath, path.join(__dirname, 'temp', `${filename}.backup`));
+      if (backupCreated) {
+        await ftp.uploadFile(path.join(__dirname, 'temp', `${filename}.backup`), backupPath);
+        console.log('✅ Backup created successfully');
+      } else {
+        console.warn('⚠️ Could not create backup - file might not exist');
+      }
       
       console.log('💾 Saving HTML locally:', localPath);
       await fs.mkdir(path.dirname(localPath), { recursive: true });

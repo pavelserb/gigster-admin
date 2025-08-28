@@ -3640,6 +3640,16 @@ class AdminPanel {
       // Update static values in HTML based on current config and translations
       htmlContent = this.updateHTMLContent(htmlContent);
       
+      // CRITICAL: Validate content before sending
+      if (!htmlContent || htmlContent.trim().length < 100) {
+        console.error('❌ HTML content is too short or empty after update:', {
+          length: htmlContent ? htmlContent.length : 0,
+          preview: htmlContent ? htmlContent.substring(0, 200) : 'none'
+        });
+        console.warn('⚠️ Skipping HTML update to prevent file corruption');
+        return;
+      }
+      
       // Save updated HTML back to file
       const requestBody = {
         content: htmlContent,
@@ -3649,7 +3659,8 @@ class AdminPanel {
       console.log('🔄 Sending HTML update request:', {
         contentLength: htmlContent.length,
         filename: 'index.html',
-        hasContent: !!htmlContent
+        hasContent: !!htmlContent,
+        contentPreview: htmlContent.substring(0, 100) + '...'
       });
       
       const saveResponse = await fetch('/admin/api/html/update', {
@@ -3708,6 +3719,15 @@ class AdminPanel {
       configKeys: this.config ? Object.keys(this.config) : []
     });
     
+    // Validate input
+    if (!htmlContent || typeof htmlContent !== 'string') {
+      console.error('❌ updateHTMLContent: Invalid input:', typeof htmlContent);
+      return htmlContent || '';
+    }
+    
+    const originalLength = htmlContent.length;
+    console.log('📄 Original HTML length:', originalLength);
+    
     // Update event name
     htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.getTranslationValue(this.config?.event?.name, 'ARTBAT'));
     
@@ -3733,20 +3753,63 @@ class AdminPanel {
       htmlContent = this.replaceHTMLAttribute(htmlContent, 'eventFlag', 'src', this.config.event.flag);
     }
     
-    console.log('✅ HTML content updated, new length:', htmlContent.length);
+    const finalLength = htmlContent.length;
+    console.log('✅ HTML content updated, length change:', originalLength, '→', finalLength);
+    
+    // Final validation
+    if (finalLength < originalLength * 0.9) {
+      console.error('❌ HTML content significantly shortened - possible corruption!');
+      console.error('Original length:', originalLength, 'Final length:', finalLength);
+      return ''; // Return empty to trigger protection
+    }
+    
     return htmlContent;
   }
 
   // Replace text content in HTML
   replaceHTMLValue(htmlContent, elementId, newValue) {
+    if (!htmlContent || typeof htmlContent !== 'string') {
+      console.error('❌ replaceHTMLValue: Invalid htmlContent:', typeof htmlContent);
+      return htmlContent || '';
+    }
+    
+    if (!elementId || !newValue) {
+      console.warn('⚠️ replaceHTMLValue: Missing parameters:', { elementId, newValue });
+      return htmlContent;
+    }
+    
     const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*>)([^<]*)`, 'g');
-    return htmlContent.replace(regex, `$1${newValue}`);
+    const result = htmlContent.replace(regex, `$1${newValue}`);
+    
+    // Check if replacement actually happened
+    if (result === htmlContent) {
+      console.warn('⚠️ replaceHTMLValue: No replacement made for elementId:', elementId);
+    }
+    
+    return result;
   }
 
   // Replace attribute value in HTML
   replaceHTMLAttribute(htmlContent, elementId, attributeName, newValue) {
+    if (!htmlContent || typeof htmlContent !== 'string') {
+      console.error('❌ replaceHTMLAttribute: Invalid htmlContent:', typeof htmlContent);
+      return htmlContent || '';
+    }
+    
+    if (!elementId || !attributeName || !newValue) {
+      console.warn('⚠️ replaceHTMLAttribute: Missing parameters:', { elementId, attributeName, newValue });
+      return htmlContent;
+    }
+    
     const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*${attributeName}=")[^"]*(")`, 'g');
-    return htmlContent.replace(regex, `$1${newValue}$2`);
+    const result = htmlContent.replace(regex, `$1${newValue}$2`);
+    
+    // Check if replacement actually happened
+    if (result === htmlContent) {
+      console.warn('⚠️ replaceHTMLAttribute: No replacement made for elementId:', elementId, 'attribute:', attributeName);
+    }
+    
+    return result;
   }
 
   // Get translation value (handles both string and object formats)

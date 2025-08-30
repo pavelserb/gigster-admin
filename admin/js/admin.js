@@ -1797,6 +1797,9 @@ class AdminPanel {
     const title = this.getTranslationDisplay(update.title, 'Без заголовка');
     const body = this.getTranslationDisplay(update.body, 'Без содержания');
 
+    // Get total updates count for button state
+    const totalUpdates = this.updates ? this.updates.length : 0;
+
     item.innerHTML = `
       <div class="order-controls">
         <button class="btn btn-xs btn-secondary order-btn" 

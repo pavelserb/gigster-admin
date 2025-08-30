@@ -211,7 +211,6 @@ class AdminPanel {
     this.debouncedSaveTranslations();
   }
   
-  // Debounced save translations to avoid too many requests
   debouncedSaveTranslations() {
     if (this.saveTranslationsTimeout) {
       clearTimeout(this.saveTranslationsTimeout);
@@ -219,10 +218,9 @@ class AdminPanel {
     
     this.saveTranslationsTimeout = setTimeout(() => {
       this.saveTranslations().catch(error => {
-  
         this.showError('Ошибка сохранения переводов');
       });
-    }, 1000); // Save after 1 second of inactivity
+    }, 1000);
   }
 
   // Initialize translation counters for all fields
@@ -2726,34 +2724,23 @@ class AdminPanel {
     this._elements.modalBody.innerHTML = content;
     this._elements.modalOverlay.style.display = 'flex';
     
-    // Bind form submission after a short delay to ensure DOM is ready
     setTimeout(() => {
-      // Look for forms in the modal body
       const modalBody = document.getElementById('modalBody');
       const form = modalBody.querySelector('form');
       
       if (form) {
-        // Remove existing listeners to avoid duplicates
         const newForm = form.cloneNode(true);
         
-        // Ensure the new form has the same ID
         if (form.id) {
           newForm.id = form.id;
         }
         
         form.parentNode.replaceChild(newForm, form);
         
-        // Add new listener
         newForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
         
-        // Initialize translation counters for modal fields with multiple attempts
         this.initializeModalTranslationCountersWithRetry();
-        
-        // Initialize auto-resize for modal textareas
         this.initializeModalAutoResize();
-        
-      } else {
-    
       }
     }, 100);
   }
@@ -2766,18 +2753,13 @@ class AdminPanel {
   }
 
   initializeModalTranslationCounters() {
-    // Find all compact translation fields in the modal
     const modalBody = document.getElementById('modalBody');
     const translationFields = modalBody.querySelectorAll('.compact-translation-field');
-    
-
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-field');
       if (fieldName) {
-        // Update the counter for this field
         this.updateTranslationCounter(fieldName);
-
       }
     });
   }
@@ -2788,13 +2770,11 @@ class AdminPanel {
     
     const tryInitialize = () => {
       attempts++;
-
       
       const modalBody = document.getElementById('modalBody');
       const translationFields = modalBody.querySelectorAll('.compact-translation-field');
       
       if (translationFields.length > 0) {
-        // Check if fields have values
         let hasValues = false;
         translationFields.forEach(field => {
           const fieldName = field.getAttribute('data-field');
@@ -2810,26 +2790,22 @@ class AdminPanel {
         });
         
         if (hasValues || attempts >= maxAttempts) {
-          // Initialize counters
           this.initializeModalTranslationCounters();
           return;
         }
       }
       
-      // Retry after a short delay
       if (attempts < maxAttempts) {
         setTimeout(tryInitialize, 100);
       }
     };
     
-    // Start the retry process
     setTimeout(tryInitialize, 50);
   }
 
   async handleFormSubmit(e) {
     e.preventDefault();
     
-    // Get the form ID correctly - e.target is the form element
     const formId = e.target.id || e.target.getAttribute('id');
     
     const formData = new FormData(e.target);
@@ -2874,10 +2850,8 @@ class AdminPanel {
   }
 
   async _handleUpdateForm(data) {
-    // Process translation fields for updates
     const processedData = { ...data };
     
-    // Handle title translations
     if (data.title_en || data.title_cs || data.title_uk) {
       processedData.title = {
         en: data.title_en || '',
@@ -2889,7 +2863,6 @@ class AdminPanel {
       delete processedData.title_uk;
     }
     
-    // Handle body translations
     if (data.body_en || data.body_cs || data.body_uk) {
       processedData.body = {
         en: data.body_en || '',
@@ -2908,10 +2881,8 @@ class AdminPanel {
     if (data.title && data.type && data.body) {
       await this.saveUpdate(data);
     } else if (data.title_en && data.type && data.body_en) {
-      // Process translation fields for updates
       const processedData = { ...data };
       
-      // Handle title translations
       if (data.title_en || data.title_cs || data.title_uk) {
         processedData.title = {
           en: data.title_en || '',
@@ -2923,7 +2894,6 @@ class AdminPanel {
         delete processedData.title_uk;
       }
       
-      // Handle body translations
       if (data.body_en || data.body_cs || data.body_uk) {
         processedData.body = {
           en: this.processBodyText(data.body_en || ''),
@@ -2948,10 +2918,8 @@ class AdminPanel {
   processTranslationFields(data) {
     const processedData = { ...data };
     
-    // Define all translation fields to process
     const translationFields = ['name', 'bio', 'q', 'a', 'desc', 'note', 'title', 'body'];
     
-    // Process each translation field
     translationFields.forEach(field => {
       this._processTranslationField(processedData, field);
     });
@@ -2971,7 +2939,6 @@ class AdminPanel {
         uk: processedData[ukKey] || ''
       };
       
-      // Remove individual language fields
       delete processedData[enKey];
       delete processedData[csKey];
       delete processedData[ukKey];
@@ -2987,23 +2954,18 @@ class AdminPanel {
   }
 
   _determineItemType(data) {
-    // Check for FAQ first (most specific)
     if ((data.q_en || data.q) && (data.a_en || data.a)) {
       return 'faq';
     }
-    // Check for seller (has name and url)
     if ((data.name_en || data.name) && data.url && !data.desc && !data.price) {
       return 'seller';
     }
-    // Check for tier (has name, desc, and price)
     if ((data.name_en || data.name) && (data.desc_en || data.desc) && data.price) {
       return 'tier';
     }
-    // Check for artist (has name and bio, but not q/a)
     if ((data.name_en || data.name) && (data.bio_en || data.bio) && !data.q && !data.a) {
       return 'artist';
     }
-    // Check for contact (has type and url)
     if (data.type && data.url) {
       return 'contact';
     }
@@ -3014,15 +2976,12 @@ class AdminPanel {
   _processItemData(data, type) {
     let processedData = { ...data };
     
-    // Process translation fields for all types
     processedData = this.processTranslationFields(processedData);
     
-    // Handle special cases for each type
     this._processArtistLinks(processedData, data);
     this._processSellerCheckboxes(processedData, data);
     this._processTierCheckboxes(processedData, data);
     
-    // Process bio field for artists to preserve paragraph structure
     if (type === 'artist' && processedData.bio && typeof processedData.bio === 'object') {
       Object.keys(processedData.bio).forEach(lang => {
         if (processedData.bio[lang]) {
@@ -3031,7 +2990,6 @@ class AdminPanel {
       });
     }
     
-    // Process FAQ answers to preserve paragraph structure
     if (type === 'faq' && processedData.a && typeof processedData.a === 'object') {
       Object.keys(processedData.a).forEach(lang => {
         if (processedData.a[lang]) {
@@ -3048,7 +3006,6 @@ class AdminPanel {
       const links = [];
       const linkIndices = new Set();
       
-      // Collect all link indices from form data
       Object.keys(data).forEach(key => {
         if (key.startsWith('linkType_')) {
           const linkIndex = key.replace('linkType_', '');
@@ -3056,7 +3013,6 @@ class AdminPanel {
         }
       });
       
-      // Build links array
       linkIndices.forEach(linkIndex => {
         const type = data[`linkType_${linkIndex}`];
         const url = data[`linkUrl_${linkIndex}`];
@@ -3114,7 +3070,6 @@ class AdminPanel {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // Use DocumentFragment for better performance
     const fragment = document.createDocumentFragment();
     
     items.forEach((item, index) => {
@@ -3125,10 +3080,8 @@ class AdminPanel {
     container.innerHTML = '';
     container.appendChild(fragment);
     
-    // Update order buttons state after rendering
     this.updateOrderButtonsState(containerId, items.length);
     
-    // Initialize auto-resize for textareas in the rendered list
     setTimeout(() => {
       const textareas = container.querySelectorAll('textarea');
       textareas.forEach(textarea => {
@@ -3173,7 +3126,6 @@ class AdminPanel {
       await operation();
       this.showSuccess(successMessage);
     } catch (error) {
-      // Error handling
       this.showError(errorMessage);
     }
   }
@@ -3181,19 +3133,14 @@ class AdminPanel {
   async updateDynamicItem(data) {
     const { type, index } = this.editingItem;
     
-    // Process data based on type
     let processedData = { ...data };
     
-    // Process translation fields for all types
     processedData = this.processTranslationFields(processedData);
     
-    // Handle special cases for artist
     if (type === 'artist') {
-      // Process links from form fields
       const links = [];
       const linkIndices = new Set();
       
-      // Collect all link indices from form data
       Object.keys(data).forEach(key => {
         if (key.startsWith('linkType_')) {
           const linkIndex = key.replace('linkType_', '');
@@ -3201,7 +3148,6 @@ class AdminPanel {
         }
       });
       
-      // Build links array
       linkIndices.forEach(linkIndex => {
         const type = data[`linkType_${linkIndex}`];
         const url = data[`linkUrl_${linkIndex}`];
@@ -3213,21 +3159,16 @@ class AdminPanel {
       processedData.links = links;
     }
 
-    // Handle special cases for seller
     if (type === 'seller') {
-      // Process checkboxes
       processedData.showInTicketsMenu = data.showInTicketsMenu === 'on' || data.showInTicketsMenu === true;
-      processedData.showInTicketsSection = data.showInTicketsSection === 'on' || data.showInTicketsSection === true;
+      processedData.showInTicketsSection = data.showInTicketsSection === 'on' || data.showInTicketsMenu === true;
     }
 
-    // Handle special cases for tier
     if (type === 'tier') {
-      // Process checkboxes
       processedData.useIndividualLink = data.useIndividualLink === 'on' || data.useIndividualLink === true;
       processedData.individualLink = processedData.useIndividualLink ? data.individualLink : '';
     }
     
-    // Update the item in the appropriate array
     switch (type) {
       case 'seller':
         this.config.authorizedSellers[index] = processedData;
@@ -3251,10 +3192,8 @@ class AdminPanel {
         break;
     }
     
-    // Clear editing context
     this.editingItem = null;
     
-    // Auto-save config after updating item
     try {
       await this.saveConfig();
       this.showSuccess('Элемент обновлен и сохранен');
@@ -3448,17 +3387,14 @@ class AdminPanel {
         processedBody = { en: [], cs: [], uk: [] };
       }
       
-      // Handle title processing - keep title as object for translations
       let processedTitle;
       if (typeof data.title === 'string') {
-        // If title is a string, convert to translation object
         processedTitle = {
           en: data.title,
           cs: data.title,
           uk: data.title
         };
       } else if (data.title && typeof data.title === 'object') {
-        // If title is already an object with translations, use as is
         processedTitle = data.title;
       } else {
         processedTitle = { en: '', cs: '', uk: '' };
@@ -3469,7 +3405,7 @@ class AdminPanel {
         ts: ts,
         type: data.type,
         title: processedTitle,
-        body: processedBody, // Translation object for admin panel and site
+        body: processedBody,
         important: data.important === 'on' || data.important === true,
         pinned: data.pinned === 'on' || data.pinned === true
       };
@@ -3481,42 +3417,33 @@ class AdminPanel {
         update.media = data.media;
       }
 
-      // Check if this is an edit (existing index) or new update
       if (this.editingUpdateIndex !== undefined && this.editingUpdateIndex >= 0) {
-        // Update existing
-        // Preserve original body structure if it was an object with translations
         const originalUpdate = this.updates[this.editingUpdateIndex];
         if (originalUpdate && originalUpdate.body && typeof originalUpdate.body === 'object' && !Array.isArray(originalUpdate.body)) {
-          // Update the content while preserving the translation structure
           if (update.body && typeof update.body === 'object' && update.body.en) {
-            // Update each language with new content
             if (Array.isArray(update.body.en)) {
               originalUpdate.body.en = update.body.en;
               originalUpdate.body.cs = update.body.cs;
               originalUpdate.body.uk = update.body.uk;
             } else {
-              // If update.body is not in array format, convert it
               originalUpdate.body.en = this.processBodyText(update.body.en || '');
               originalUpdate.body.cs = this.processBodyText(update.body.cs || '');
               originalUpdate.body.uk = this.processBodyText(update.body.uk || '');
             }
             update.body = originalUpdate.body;
           } else {
-            // If new body is not in translation format, preserve original
             update.body = originalUpdate.body;
           }
         }
         
         this.updates[this.editingUpdateIndex] = update;
-        this.editingUpdateIndex = undefined; // Reset editing index
+        this.editingUpdateIndex = undefined;
       } else {
-        // Add new
         this.updates.unshift(update);
       }
       
       this.renderUpdates();
       
-      // Auto-save updates
       await this.saveUpdates();
       this.showSuccess('Обновление сохранено');
       
@@ -3525,22 +3452,13 @@ class AdminPanel {
     }
   }
 
-  // Global Actions
   async saveAll() {
     try {
-      // Update config from form data
       this.updateConfigFromForm();
-      
-      // Update translations from form data
       this.updateTranslationsFromForm();
       
-      // Save config
       await this.saveConfig();
-      
-      // Save translations
       await this.saveTranslations();
-      
-      // Save updates
       await this.saveUpdates();
       
       this.showSuccess('Все изменения сохранены');
@@ -3550,7 +3468,6 @@ class AdminPanel {
   }
 
   updateConfigFromForm() {
-    // Update event info
     if (!this.config.event) this.config.event = {};
     this.config.event.name = this.collectTranslationField('eventName');
     this.config.event.date = this.collectTranslationField('eventDate');
@@ -3561,7 +3478,7 @@ class AdminPanel {
     this.config.event.flag = document.getElementById('eventFlag')?.value || '';
     this.config.event.heroBackground = document.getElementById('heroBackground')?.value || '';
     this.config.event.showCountdown = document.getElementById('showCountdown')?.checked || false;
-    // Process about field to preserve paragraph structure
+    
     const aboutField = this.collectTranslationField('eventAbout');
     if (aboutField && typeof aboutField === 'object') {
       Object.keys(aboutField).forEach(lang => {
@@ -3572,14 +3489,12 @@ class AdminPanel {
     }
     this.config.event.about = aboutField;
 
-    // Update venue info
     if (!this.config.event.venue) this.config.event.venue = {};
     this.config.event.venue.name = this.collectTranslationField('venueName');
     this.config.event.venue.address = this.collectTranslationField('venueAddress');
     this.config.event.venue.website = document.getElementById('venueWebsite')?.value || '';
     this.config.event.venue.route = document.getElementById('venueRoute')?.value || '';
 
-    // Update tickets
     this.config.ticketsURL = document.getElementById('ticketsURL')?.value || '';
   }
 
@@ -3588,17 +3503,14 @@ class AdminPanel {
     const csValue = document.getElementById(`${fieldName}_cs`)?.value || '';
     const ukValue = document.getElementById(`${fieldName}_uk`)?.value || '';
 
-    // If all values are empty, return empty string
     if (!enValue && !csValue && !ukValue) {
       return '';
     }
 
-    // If only English has value, return string (backward compatibility)
     if (enValue && !csValue && !ukValue) {
       return enValue;
     }
 
-    // Return translation object
     return {
       en: enValue,
       cs: csValue,
@@ -3606,39 +3518,31 @@ class AdminPanel {
     };
   }
   
-  // Update translations object from form fields
   updateTranslationsFromForm() {
-    // Get all translation fields from the translations tab
     const translationFields = document.querySelectorAll('#translationsTab input[data-key]');
     
     translationFields.forEach(field => {
       const fieldName = field.getAttribute('data-key');
       if (!fieldName) return;
       
-      // For single-language fields, we need to get the value directly
       const fieldValue = field.value.trim();
       
-      // Parse field name to determine the path in translations object
       let section, key;
       
-      // Try dot notation first (translations tab)
       if (fieldName.includes('.')) {
         const pathParts = fieldName.split('.');
         section = pathParts[0];
         key = pathParts.slice(1).join('.');
       }
-      // Try underscore notation (updates tab)
       else if (fieldName.includes('_')) {
         const pathParts = fieldName.split('_');
         section = pathParts[0];
         key = pathParts.slice(1).join('_');
       }
-      // Single word - skip
       else {
         return;
       }
       
-      // Initialize section if it doesn't exist
       if (!this.translations.sections) {
         this.translations.sections = {};
       }
@@ -3661,12 +3565,10 @@ class AdminPanel {
         this.translations.sections.uk[section] = {};
       }
       
-      // Update the translation value for the current language
       const currentLang = this.currentLanguage || 'en';
       this.translations.sections[currentLang][section][key] = fieldValue;
     });
     
-    // Trigger auto-save after updating translations
     this.debouncedSaveTranslations();
   }
 
@@ -3676,7 +3578,6 @@ class AdminPanel {
     if (typeof fieldData === 'object') {
       const value = fieldData[lang] || '';
       
-      // Special handling for body field to restore line breaks
       if (Array.isArray(value)) {
         return value.join('\n');
       }
@@ -3684,32 +3585,26 @@ class AdminPanel {
       return value;
     }
     
-    // If it's a string, return it only for English
     return lang === 'en' ? fieldData : '';
   }
 
-  // Process body text to preserve paragraph structure
   processBodyText(text) {
     if (!text || typeof text !== 'string') return [];
     
-    // Split by newlines and preserve empty lines for paragraphs
     const lines = text.split('\n');
     const processedLines = [];
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      // If line is empty and next line is also empty, it's a paragraph break
       if (line === '' && (i + 1 < lines.length && lines[i + 1].trim() === '')) {
-        processedLines.push(''); // Keep paragraph break
-        i++; // Skip next empty line
+        processedLines.push('');
+        i++;
       } else if (line !== '') {
-        // Non-empty line
         processedLines.push(line);
       }
     }
     
-    // Filter out consecutive empty lines at the end
     while (processedLines.length > 0 && processedLines[processedLines.length - 1] === '') {
       processedLines.pop();
     }
@@ -3721,11 +3616,9 @@ class AdminPanel {
     if (!fieldData) return fallback;
     
     if (typeof fieldData === 'object') {
-      // Return the first available translation, prioritizing English
       return fieldData.en || fieldData.cs || fieldData.uk || fallback;
     }
     
-    // If it's a string, return it directly
     return fieldData;
   }
 
@@ -3745,13 +3638,11 @@ class AdminPanel {
     
     const trimmedKey = key.trim().toLowerCase();
     
-    // Check if category already exists
     if (this.config.updateCategories?.[trimmedKey]) {
       alert('Тип с таким ключом уже существует!');
       return;
     }
     
-    // Add new category
     if (!this.config.updateCategories) this.config.updateCategories = {};
     this.config.updateCategories[trimmedKey] = {
       en: '',
@@ -3759,10 +3650,9 @@ class AdminPanel {
       uk: ''
     };
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateCategories();
-      this.renderUpdates(); // Re-render updates to show new category
+      this.renderUpdates();
     });
   }
 
@@ -3778,27 +3668,23 @@ class AdminPanel {
       uk: ukValue
     };
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateCategories();
-      this.renderUpdates(); // Re-render updates to show updated category
+      this.renderUpdates();
     });
   }
 
   deleteCategory(key) {
     if (!confirm(`Удалить тип "${key}"? Это может повлиять на существующие апдейты.`)) return;
     
-    // Check if category is used in updates
     const isUsed = this.updates.some(update => update.type === key);
     if (isUsed) {
       alert('Нельзя удалить тип, который используется в апдейтах! Сначала измените тип у всех апдейтов.');
       return;
     }
     
-    // Delete category
     delete this.config.updateCategories[key];
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateCategories();
     });
@@ -3810,13 +3696,11 @@ class AdminPanel {
     
     const trimmedKey = key.trim().toLowerCase();
     
-    // Check if badge already exists
     if (this.config.updateBadges?.[trimmedKey]) {
       alert('Бейдж с таким ключом уже существует!');
       return;
     }
     
-    // Add new badge
     if (!this.config.updateBadges) this.config.updateBadges = {};
     this.config.updateBadges[trimmedKey] = {
       en: '',
@@ -3824,10 +3708,9 @@ class AdminPanel {
       uk: ''
     };
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateBadges();
-      this.renderUpdates(); // Re-render updates to show new badge
+      this.renderUpdates();
     });
   }
 
@@ -3843,27 +3726,23 @@ class AdminPanel {
       uk: ukValue
     };
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateBadges();
-      this.renderUpdates(); // Re-render updates to show updated badge
+      this.renderUpdates();
     });
   }
 
   deleteBadge(key) {
     if (!confirm(`Удалить бейдж "${key}"? Это может повлиять на существующие апдейты.`)) return;
     
-    // Check if badge is used in updates
     const isUsed = this.updates.some(update => update[key] === true);
     if (isUsed) {
       alert('Нельзя удалить бейдж, который используется в апдейтах! Сначала уберите бейдж у всех апдейтов.');
       return;
     }
     
-    // Delete badge
     delete this.config.updateBadges[key];
     
-    // Save and re-render
     this.saveConfig().then(() => {
       this.renderUpdateBadges();
     });
@@ -3908,16 +3787,8 @@ class AdminPanel {
   // Auto-update HTML file with new values from config and translations
   async updateHTMLAfterSave() {
     try {
-      console.log('🔄 Starting HTML auto-update...');
-      console.log('📋 Current config state:', {
-        hasConfig: !!this.config,
-        configKeys: this.config ? Object.keys(this.config) : [],
-        hasEvent: !!this.config?.event
-      });
-      
       // Check if config is loaded
       if (!this.config || !this.config.event) {
-        console.warn('⚠️ Config not loaded, skipping HTML update');
         return;
       }
       
@@ -3929,29 +3800,22 @@ class AdminPanel {
       });
       
       if (!htmlResponse.ok) {
-        console.warn('Could not fetch index.html for update');
         return;
       }
       
       const htmlData = await htmlResponse.json();
       if (htmlData.error) {
-        console.warn('HTML fetch error:', htmlData.error);
         return;
       }
       
       let htmlContent = htmlData.content;
-      console.log('📄 HTML content fetched, length:', htmlContent.length);
       
       // Update static values in HTML based on current config and translations
       htmlContent = this.updateHTMLContent(htmlContent);
       
       // CRITICAL: Validate content before sending
       if (!htmlContent || htmlContent.trim().length < 100) {
-        console.error('❌ HTML content is too short or empty after update:', {
-          length: htmlContent ? htmlContent.length : 0,
-          preview: htmlContent ? htmlContent.substring(0, 200) : 'none'
-        });
-        console.warn('⚠️ Skipping HTML update to prevent file corruption');
+        console.error('❌ HTML content is too short or empty after update');
         return;
       }
       
@@ -3960,13 +3824,6 @@ class AdminPanel {
         content: htmlContent,
         filename: 'index.html'
       };
-      
-      console.log('🔄 Sending HTML update request:', {
-        contentLength: htmlContent.length,
-        filename: 'index.html',
-        hasContent: !!htmlContent,
-        contentPreview: htmlContent.substring(0, 100) + '...'
-      });
       
       const saveResponse = await fetch('/admin/api/html/update', {
         method: 'POST',
@@ -3978,23 +3835,13 @@ class AdminPanel {
       });
       
       if (saveResponse.ok) {
-        console.log('✅ HTML updated successfully');
         this.showSuccess('HTML файл обновлен автоматически');
       } else {
         const errorText = await saveResponse.text();
         console.error('❌ HTML update failed:', saveResponse.status, errorText);
-        
-        // Try to parse error response
-        try {
-          const errorData = JSON.parse(errorText);
-          console.error('❌ Error details:', errorData);
-        } catch (e) {
-          console.error('❌ Raw error response:', errorText);
-        }
       }
     } catch (error) {
-      console.warn('HTML auto-update failed:', error);
-      // Don't show error to user as this is not critical
+      // Silent fail - not critical for user experience
     }
   }
 
@@ -4018,20 +3865,13 @@ class AdminPanel {
 
   // Update HTML content with new values
   updateHTMLContent(htmlContent) {
-    console.log('🔄 Updating HTML content with config:', {
-      hasConfig: !!this.config,
-      hasEvent: !!this.config?.event,
-      configKeys: this.config ? Object.keys(this.config) : []
-    });
-    
     // Validate input
     if (!htmlContent || typeof htmlContent !== 'string') {
-      console.error('❌ updateHTMLContent: Invalid input:', typeof htmlContent);
+      console.error('❌ updateHTMLContent: Invalid input');
       return htmlContent || '';
     }
     
     const originalLength = htmlContent.length;
-    console.log('📄 Original HTML length:', originalLength);
     
     // Update event name
     htmlContent = this.replaceHTMLValue(htmlContent, 'eventName', this.getTranslationValue(this.config?.event?.name, 'ARTBAT'));
@@ -4050,7 +3890,7 @@ class AdminPanel {
     htmlContent = this.replaceHTMLValue(htmlContent, 'eventCountry', this.getTranslationValue(this.config?.event?.country, 'Czech Republic'));
     
     // Update venue name and address
-    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.getTranslationValue(this.config?.event?.venue?.name, 'AREÁL 7'));
+    htmlContent = this.replaceHTMLValue(htmlContent, 'venueName', this.getTranslationValue(this.config?.event?.venue?.name, 'AREÁЛ 7'));
     htmlContent = this.replaceHTMLValue(htmlContent, 'venueAddressHero', this.getTranslationValue(this.config?.event?.venue?.address, 'Za Elektrárnou, 170 00 Praha 7 – Holešovice'));
     
     // Update flag path if different
@@ -4058,13 +3898,9 @@ class AdminPanel {
       htmlContent = this.replaceHTMLAttribute(htmlContent, 'eventFlag', 'src', this.config.event.flag);
     }
     
-    const finalLength = htmlContent.length;
-    console.log('✅ HTML content updated, length change:', originalLength, '→', finalLength);
-    
     // Final validation
-    if (finalLength < originalLength * 0.9) {
+    if (htmlContent.length < originalLength * 0.9) {
       console.error('❌ HTML content significantly shortened - possible corruption!');
-      console.error('Original length:', originalLength, 'Final length:', finalLength);
       return ''; // Return empty to trigger protection
     }
     
@@ -4074,22 +3910,15 @@ class AdminPanel {
   // Replace text content in HTML
   replaceHTMLValue(htmlContent, elementId, newValue) {
     if (!htmlContent || typeof htmlContent !== 'string') {
-      console.error('❌ replaceHTMLValue: Invalid htmlContent:', typeof htmlContent);
       return htmlContent || '';
     }
     
     if (!elementId || !newValue) {
-      console.warn('⚠️ replaceHTMLValue: Missing parameters:', { elementId, newValue });
       return htmlContent;
     }
     
     const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*>)([^<]*)`, 'g');
     const result = htmlContent.replace(regex, `$1${newValue}`);
-    
-    // Check if replacement actually happened
-    if (result === htmlContent) {
-      console.warn('⚠️ replaceHTMLValue: No replacement made for elementId:', elementId);
-    }
     
     return result;
   }
@@ -4097,22 +3926,15 @@ class AdminPanel {
   // Replace attribute value in HTML
   replaceHTMLAttribute(htmlContent, elementId, attributeName, newValue) {
     if (!htmlContent || typeof htmlContent !== 'string') {
-      console.error('❌ replaceHTMLAttribute: Invalid htmlContent:', typeof htmlContent);
       return htmlContent || '';
     }
     
     if (!elementId || !attributeName || !newValue) {
-      console.warn('⚠️ replaceHTMLAttribute: Missing parameters:', { elementId, attributeName, newValue });
       return htmlContent;
     }
     
     const regex = new RegExp(`(<[^>]*id="${elementId}"[^>]*${attributeName}=")[^"]*(")`, 'g');
     const result = htmlContent.replace(regex, `$1${newValue}$2`);
-    
-    // Check if replacement actually happened
-    if (result === htmlContent) {
-      console.warn('⚠️ replaceHTMLAttribute: No replacement made for elementId:', elementId, 'attribute:', attributeName);
-    }
     
     return result;
   }

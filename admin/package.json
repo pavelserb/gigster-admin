@@ -5,7 +5,8 @@
   "main": "server-ftp.js",
   "scripts": {
     "start": "node server-ftp.js",
-    "dev": "nodemon server-ftp.js"
+    "dev": "nodemon server-ftp.js",
+    "test": "node test-server.js"
   },
   "keywords": [
     "admin",
@@ -27,6 +28,6 @@
     "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18.0.0"
   }
 }

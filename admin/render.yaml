@@ -3,9 +3,8 @@ services:
     name: gigster-admin
     env: node
     plan: free
-    rootDir: render-admin
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node test-server.js
     envVars:
       - key: NODE_ENV
         value: production

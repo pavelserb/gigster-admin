@@ -917,6 +917,27 @@ app.get('/admin/api/status', (req, res) => {
   });
 });
 
+// Main admin route - serve index.html
+app.get('/admin', async (req, res) => {
+  try {
+    const indexPath = path.join(__dirname, 'index.html');
+    await fs.access(indexPath);
+    res.sendFile(indexPath);
+  } catch (error) {
+    console.error('❌ index.html not found:', error);
+    res.status(500).json({ 
+      error: 'Admin panel not found',
+      message: 'index.html file is missing',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Root route redirect to admin
+app.get('/', (req, res) => {
+  res.redirect('/admin');
+});
+
 // Create temp directory
 app.use('/admin/temp', express.static(path.join(__dirname, 'temp')));
 
@@ -970,12 +991,39 @@ app.use('/assets', async (req, res, next) => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('❌ Server error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  console.log(`❌ 404 Not Found: ${req.method} ${req.url}`);
+  res.status(404).json({ 
+    error: 'Not found',
+    path: req.url,
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.listen(PORT, async () => {
   console.log(`🚀 ARTBAT Prague Admin Server с FTP-интеграцией запущен на Render`);
   console.log(`📊 Статус: http://localhost:${PORT}/admin/api/status`);
   console.log(`🔐 Админка: http://localhost:${PORT}/admin`);
   console.log(`🌐 FTP: ${FTP_CONFIG.host}:${FTP_CONFIG.port}${FTP_CONFIG.remotePath}`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📁 Working directory: ${__dirname}`);
   
-  // Загружаем пользователей с FTP при запуске
-  await loadUsersFromFTP();
+  try {
+    // Загружаем пользователей с FTP при запуске
+    await loadUsersFromFTP();
+    console.log('✅ Server initialization completed successfully');
+  } catch (error) {
+    console.error('❌ Server initialization failed:', error);
+  }
 });

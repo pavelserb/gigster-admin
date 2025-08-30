@@ -47,6 +47,7 @@ class UpdatesManager {
 
   // Set current language and update translations
   setLanguage(lang) {
+    console.log('🌐 Updates.js: setLanguage called with:', lang);
     this.currentLang = lang;
     this.L = this.getTranslations(lang);
     

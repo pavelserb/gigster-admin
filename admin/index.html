@@ -8,10 +8,15 @@
   <meta name="theme-color" content="#0b0b0e">
   
   <!-- Fonts -->
-      <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+  <!-- Local Roboto Flex font -->
+  <link rel="preload" href="../fonts/roboto-flex.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Roboto Flex';
+      src: url('../fonts/roboto-flex.woff2') format('woff2');
+      font-display: block;
+    }
+  </style>
   
   <!-- Styles -->
       <link rel="stylesheet" href="css/admin.css?v=22">
@@ -430,10 +435,7 @@
           <!-- Artists -->
           <div class="config-section">
             <h3>Артисты</h3>
-            <div class="reorder-toolbar">
-              <span class="reorder-status">💡 Перетаскивайте элементы за любую область (кроме полей ввода) или за иконку ⋮⋮ в правом верхнем углу</span>
-            </div>
-            <div id="artistsContainer" class="dynamic-list" data-reorderable="true">
+            <div id="artistsContainer" class="dynamic-list">
               <!-- Artists will be added here dynamically -->
             </div>
             <button type="button" id="addArtistBtn" class="btn btn-secondary">Добавить артиста</button>
@@ -448,19 +450,13 @@
             </div>
             
             <h4>Авторизованные продавцы</h4>
-            <div class="reorder-toolbar">
-              <span class="reorder-status">💡 Перетаскивайте элементы за любую область (кроме полей ввода) или за иконку ⋮⋮ в правом верхнем углу</span>
-            </div>
-            <div id="sellersContainer" class="dynamic-list" data-reorderable="true">
+            <div id="sellersContainer" class="dynamic-list">
               <!-- Sellers will be added here dynamically -->
             </div>
             <button type="button" id="addSellerBtn" class="btn btn-secondary">Добавить продавца</button>
 
             <h4>Категории билетов</h4>
-            <div class="reorder-toolbar">
-              <span class="reorder-status">💡 Перетаскивайте элементы за любую область (кроме полей ввода) или за иконку ⋮⋮ в правом верхнем углу</span>
-            </div>
-            <div id="tiersContainer" class="dynamic-list" data-reorderable="true">
+            <div id="tiersContainer" class="dynamic-list">
               <!-- Tiers will be added here dynamically -->
             </div>
             <button type="button" id="addTierBtn" class="btn btn-secondary">Добавить категорию</button>
@@ -469,10 +465,7 @@
           <!-- FAQs -->
           <div class="config-section">
             <h3>Часто задаваемые вопросы</h3>
-            <div class="reorder-toolbar">
-              <span class="reorder-status">💡 Перетаскивайте элементы за любую область (кроме полей ввода) или за иконку ⋮⋮ в правом верхнем углу</span>
-            </div>
-            <div id="faqsContainer" class="dynamic-list" data-reorderable="true">
+            <div id="faqsContainer" class="dynamic-list">
               <!-- FAQs will be added here dynamically -->
             </div>
             <button type="button" id="addFaqBtn" class="btn btn-secondary">Добавить вопрос</button>
@@ -481,10 +474,7 @@
           <!-- Contacts -->
           <div class="config-section">
             <h3>Контакты</h3>
-            <div class="reorder-toolbar">
-              <span class="reorder-status">💡 Перетаскивайте элементы за любую область (кроме полей ввода) или за иконку ⋮⋮ в правом верхнем углу</span>
-            </div>
-            <div id="contactsContainer" class="dynamic-list" data-reorderable="true">
+            <div id="contactsContainer" class="dynamic-list">
               <!-- Contacts will be added here dynamically -->
             </div>
             <button type="button" id="addContactBtn" class="btn btn-secondary">Добавить контакт</button>
@@ -840,7 +830,7 @@
   <!-- Scripts -->
   <script src="js/fileManager.js?v=2"></script>
   <script src="js/pixelManager.js?v=1"></script>
-  <script src="js/admin.js?v=68"></script>
+  <script src="js/admin.js?v=73"></script>
   <script src="js/performance.js"></script>
 </body>
 </html>

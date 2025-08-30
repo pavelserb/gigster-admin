@@ -3367,6 +3367,16 @@ textarea:focus {
     gap: 6px;
   }
   
+  /* Link item mobile adjustments */
+  .link-item {
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .link-content {
+    gap: 6px;
+  }
+  
   .dynamic-item-actions {
     gap: 4px;
   }
@@ -3760,6 +3770,25 @@ select:focus {
 .venue-photo-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+/* Link item layout in artist form - now order controls are at the same level as content */
+.link-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+
+.link-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
 }
 
 /* File Manager Modal Footer */

@@ -1210,23 +1210,39 @@ class AdminPanel {
     const links = artist?.links || [];
     const linksHtml = links.map((link, index) => `
       <div class="link-item" data-index="${index}">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Тип ссылки</label>
-            <select name="linkType_${index}" required>
-              <option value="">Выберите тип...</option>
-              <option value="Website" ${link.t === 'Website' ? 'selected' : ''}>Website</option>
-              <option value="Facebook" ${link.t === 'Facebook' ? 'selected' : ''}>Facebook</option>
-              <option value="Instagram" ${link.t === 'Instagram' ? 'selected' : ''}>Instagram</option>
-              <option value="TikTok" ${link.t === 'TikTok' ? 'selected' : ''}>TikTok</option>
-              <option value="YouTube" ${link.t === 'YouTube' ? 'selected' : ''}>YouTube</option>
-            </select>
+        <div class="order-controls">
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveLink(${index}, 'up')" 
+                  ${index === 0 ? 'disabled' : ''} 
+                  title="Переместить вверх">
+            ↑
+          </button>
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveLink(${index}, 'down')" 
+                  ${index === links.length - 1 ? 'disabled' : ''} 
+                  title="Переместить вниз">
+            ↓
+          </button>
+        </div>
+        <div class="link-content">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Тип ссылки</label>
+              <select name="linkType_${index}" required>
+                <option value="">Выберите тип...</option>
+                <option value="Website" ${link.t === 'Website' ? 'selected' : ''}>Website</option>
+                <option value="Facebook" ${link.t === 'Facebook' ? 'selected' : ''}>Facebook</option>
+                <option value="Instagram" ${link.t === 'Instagram' ? 'selected' : ''}>Instagram</option>
+                <option value="TikTok" ${link.t === 'TikTok' ? 'selected' : ''}>TikTok</option>
+                <option value="YouTube" ${link.t === 'YouTube' ? 'selected' : ''}>YouTube</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>URL</label>
+              <input type="url" name="linkUrl_${index}" value="${link.u || ''}" placeholder="https://example.com" required>
+            </div>
+            <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${index})">Удалить</button>
           </div>
-          <div class="form-group">
-            <label>URL</label>
-            <input type="url" name="linkUrl_${index}" value="${link.u || ''}" placeholder="https://example.com" required>
-          </div>
-          <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${index})">Удалить</button>
         </div>
       </div>
     `).join('');
@@ -3253,28 +3269,47 @@ class AdminPanel {
     
     const linkHtml = `
       <div class="link-item" data-index="${linkIndex}">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Тип ссылки</label>
-            <select name="linkType_${linkIndex}" required>
-              <option value="">Выберите тип...</option>
-              <option value="Website">Website</option>
-              <option value="Facebook">Facebook</option>
-              <option value="Instagram">Instagram</option>
-              <option value="TikTok">TikTok</option>
-              <option value="YouTube">YouTube</option>
-            </select>
+        <div class="order-controls">
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveLink(${linkIndex}, 'up')" 
+                  ${linkIndex === 0 ? 'disabled' : ''} 
+                  title="Переместить вверх">
+            ↑
+          </button>
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveLink(${linkIndex}, 'down')" 
+                  ${linkIndex === linkIndex ? 'disabled' : ''} 
+                  title="Переместить вниз">
+            ↓
+          </button>
+        </div>
+        <div class="link-content">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Тип ссылки</label>
+              <select name="linkType_${linkIndex}" required>
+                <option value="">Выберите тип...</option>
+                <option value="Website">Website</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Instagram">Instagram</option>
+                <option value="TikTok">TikTok</option>
+                <option value="YouTube">YouTube</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>URL</label>
+              <input type="url" name="linkUrl_${linkIndex}" placeholder="https://example.com" required>
+            </div>
+            <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${linkIndex})">Удалить</button>
           </div>
-          <div class="form-group">
-            <label>URL</label>
-            <input type="url" name="linkUrl_${linkIndex}" placeholder="https://example.com" required>
-          </div>
-          <button type="button" class="btn btn-danger btn-small" onclick="admin.removeLink(${linkIndex})">Удалить</button>
         </div>
       </div>
     `;
     
     container.insertAdjacentHTML('beforeend', linkHtml);
+    
+    // Update order buttons state after adding
+    this.updateLinkOrderButtons();
   }
 
   removeLink(index) {
@@ -3293,7 +3328,70 @@ class AdminPanel {
         if (urlInput) urlInput.name = `linkUrl_${newIndex}`;
         if (removeBtn) removeBtn.onclick = () => admin.removeLink(newIndex);
       });
+      
+      // Update order buttons state after removal
+      this.updateLinkOrderButtons();
     }
+  }
+
+  moveLink(index, direction) {
+    const container = document.getElementById('linksContainer');
+    if (!container) return;
+
+    const linkItems = container.querySelectorAll('.link-item');
+    if (index < 0 || index >= linkItems.length) {
+      this.showError('Ошибка: ссылка не найдена');
+      return;
+    }
+
+    let newIndex;
+    if (direction === 'up' && index > 0) {
+      newIndex = index - 1;
+    } else if (direction === 'down' && index < linkItems.length - 1) {
+      newIndex = index + 1;
+    } else {
+      return; // Invalid move
+    }
+
+    // Get the items to swap
+    const currentItem = linkItems[index];
+    const targetItem = linkItems[newIndex];
+
+    // Swap the items in DOM
+    if (direction === 'up') {
+      targetItem.parentNode.insertBefore(currentItem, targetItem);
+    } else {
+      targetItem.parentNode.insertBefore(currentItem, targetItem.nextSibling);
+    }
+
+    // Update order buttons state
+    this.updateLinkOrderButtons();
+    
+    // Show success message
+    this.showSuccess(`Ссылка перемещена ${direction === 'up' ? 'вверх' : 'вниз'}`);
+  }
+
+  updateLinkOrderButtons() {
+    const container = document.getElementById('linksContainer');
+    if (!container) return;
+
+    const linkItems = container.querySelectorAll('.link-item');
+    linkItems.forEach((item, index) => {
+      const upBtn = item.querySelector('.order-btn[onclick*="up"]');
+      const downBtn = item.querySelector('.order-btn[onclick*="down"]');
+      
+      if (upBtn) {
+        upBtn.disabled = index === 0;
+        upBtn.onclick = () => this.moveLink(index, 'up');
+      }
+      if (downBtn) {
+        downBtn.disabled = index === linkItems.length - 1;
+        downBtn.onclick = () => this.moveLink(index, 'down');
+      }
+      
+      // Update data-index
+      item.dataset.index = index;
+    });
   }
 
   // Special method for selecting media files for updates

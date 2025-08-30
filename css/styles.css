@@ -640,7 +640,7 @@ nav.primary a.active {
   width: min(60vw, 864px);
   margin-inline: auto;
   pointer-events: none;
-  /* padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem); */
+  padding-inline: clamp(0.625rem, -1.25rem + 4.688vw, 2.5rem);
 
   /* мягкое проявление (только opacity здесь) */
   opacity: 0;
@@ -1323,7 +1323,8 @@ p {
 .slider-slide video {
   width: 100%;
   /* height: 300px; */
-  aspect-ratio: 16/9;
+  /* aspect-ratio: 16/9; */
+  aspect-ratio: 4/3;
   object-fit: cover;
   display: block;
 }
@@ -1362,6 +1363,10 @@ p {
   .slider-slide video {
     aspect-ratio: 1;
   }
+}
+
+.about-gallery .card h3 {
+  display: none;
 }
 
 @media (max-width: 480px) {
@@ -2051,7 +2056,8 @@ p {
 
 .artist img {
   width: 320px;
-  height: 280px;
+  /* height: 280px; */
+  aspect-ratio: 5/4;
   object-fit: cover;
   object-position: center;
   flex-shrink: 0;
@@ -2267,7 +2273,8 @@ p {
   }
   
   .artist img {
-    height: 180px;
+    /* height: 180px; */
+    aspect-ratio: 5/4;
   }
 }
 
@@ -2360,26 +2367,33 @@ p {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--accent);
+  /* background: var(--accent); */
   border: none;
   color: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  /* box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); */
+  /* transition: all 0.3s ease; */
   text-decoration: none;
 }
 
 .route-btn:hover {
-  background: var(--brand);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  /* background: var(--brand); */
+  border: 1px solid var(--accent);
+  /* transform: translateY(-2px); */
+  /* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); */
 }
 
 .route-icon {
   width: 28px;
   height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.website-icon {
+  width: 24px;
+  height: 24px;
   filter: brightness(0) invert(1);
 }
 
@@ -2513,11 +2527,11 @@ p {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  /* transition: all 0.3s ease; */
 }
 
 .map-container:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -3103,6 +3117,7 @@ footer .container {
 .cta-menu-text {
   font-weight: 500;
   color: inherit;
+  font-size: 1rem;
   text-decoration: none;
   transition: opacity 0.2s ease;
 }
@@ -3195,7 +3210,8 @@ footer .container {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  /* padding: 8px; */
+  padding: 6px 8px;
   background: none;
   border: none;
   cursor: pointer;

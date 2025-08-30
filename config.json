@@ -34,7 +34,7 @@
       "uk": "5 вересня 2025"
     },
     "time": "18:00",
-    "timeEnd": "23:00",
+    "timeEnd": "22:00",
     "city": {
       "en": "Prague",
       "cs": "Praha",
@@ -46,8 +46,8 @@
       "uk": "Чехія"
     },
     "flag": "assets/flags/cz.png",
-    "heroBackground": "assets/video/hero.mp4",
-    "showCountdown": false,
+    "heroBackground": "assets/video/hero.webm",
+    "showCountdown": true,
     "about": {
       "en": "After three years, ARTBAT is finally returning to Prague at a whole new level.\nKnown for their outstanding live performances and unforgettable tracks, ARTBAT have become one of the world's most in-demand electronic music acts, headlining major festivals and topping charts around the globe.\nNow they're bringing their evolved sound, unique atmosphere, and spectacular visuals to Areál7.\nDon't miss your chance to experience their latest show live in Prague – it's going to be legendary.",
       "cs": "Po třech letech se ARTBAT konečně vrací do Prahy na zcela nové úrovni.\nZnámí svými vynikajícími živými vystoupeními a nezapomenutelnými skladbami se ARTBAT stali jedním z nejžádanějších elektronických hudebních aktů na světě, vystupují na hlavních festivalech a obsazují první místa v žebříčcích po celém světě.\nNyní přinášejí svůj vyvinutý zvuk, jedinečnou atmosféru a spektakulární vizuální efekty do Areál7.\nNezmeškejte šanci zažít jejich nejnovější show živě v Praze – bude to legendární.",
@@ -60,15 +60,15 @@
         "uk": "Areál7"
       },
       "address": {
-        "en": "Jankovcova 1595/14, Praha 7",
-        "cs": "Jankovcova 1595/14, Praha 7",
-        "uk": "Jankovcova 1595/14, Praha 7"
+        "en": "Za Elektrárnou 20, 17000 Hlavní město",
+        "cs": "Za Elektrárnou 20, 17000 Hlavní město",
+        "uk": "Za Elektrárnou 20, 17000 Hlavní město"
       },
       "website": "https://areal7.cz",
       "route": "https://maps.google.com/?q=Areál7",
       "photos": [
-        "assets/images/location/1.jpg",
-        "assets/images/location/2.jpg"
+        "assets/images/location/1.webp",
+        "assets/images/location/2.webp"
       ]
     }
   },
@@ -115,19 +115,19 @@
   "contacts": [
     {
       "type": "Facebook",
-      "url": "https://facebook.com/yourpage"
+      "url": "https://facebook.com/WeAreGigster"
     },
     {
       "type": "Instagram",
-      "url": "https://instagram.com/yourpage"
+      "url": "https://instagram.com/WeAreGigster"
     },
     {
       "type": "TikTok",
-      "url": "https://tiktok.com/@yourpage"
+      "url": "https://tiktok.com/@WeAreGigster"
     },
     {
       "type": "Website",
-      "url": "https://yourcompany.com"
+      "url": "https://gigster.pro/artbat-prague/"
     }
   ],
   "authorizedSellers": [
@@ -209,7 +209,7 @@
   ],
   "artists": [
     {
-      "img": "assets/images/artists/artbat.jpg",
+      "img": "assets/images/artists/artbat.webp",
       "linkType_0": "Website",
       "linkUrl_0": "https://artbatmusic.com",
       "name": {
@@ -219,55 +219,67 @@
       },
       "bio": {
         "en": "Artur and Batish, the talented duo from Kyiv, have become an unparalleled force in electronic music, earning accolades as Mixmag Stars of the Year and Beatport's top-selling artists.\n\nTheir chart-topping hits like 'Age of Love' and collaborations with artists such as David Guetta and Idris Elba have solidified their position as industry powerhouses. As sought-after DJs, they have captivated crowds at prestigious festivals like Tomorrowland and EDC, while their UPPERGROUND label has quickly risen to prominence, championing visionary artists in the electronic music scene.\n\nARTBAT's music has also transcended other realms, featuring in fashion campaigns with brands like Emporio Armani and Grand Seiko and on platforms like TikTok and Roblox.,With their music being adored by millions of fans around the world, ARTBAT's meteoric rise from underground to global stardom has left an indelible mark on the hearts of electronic music enthusiasts worldwide.",
-        "cs": "Artur a Batish, talentovaný duo z Kyjeva, se stali bezkonkurenční silou v elektronické hudbě a získali ocenění jako Mixmag Stars of the Year a Beatport's top-selling artists.\n\nJejich hity na vrcholu žebříčků jako 'Age of Love' a spolupráce s umělci jako David Guetta a Idris Elba upevnily jejich pozici jako průmyslové síly. Jako žádaní DJové okouzlili davy na prestižních festivalech jako Tomorrowland a EDC, zatímco jejich label UPPERGROUND rychle stoupal na významu a podporoval vizionářské umělce v elektronické hudební scéně.\n\nARTBAT hudba také překročila jiné sféry, objevila se v módních kampaních s značkami jako Emporio Armani a Grand Seiko a na platformách jako TikTok a Roblox. S jejich hudbou, kterou milují miliony fanoušků po celém světě, vzestup ARTBAT z undergroundu na globální hvězdu zanechal nesmazatelnou stopu v srdcích milovníků elektronické hudby po celém světě.",
-        "uk": "Артур та Батіш, талановитий дует з Києва, стали безпрецедентною силою в електронній музиці, отримавши визнання як Mixmag Stars of the Year та Beatport's top-selling artists.\n\nЇхні хіти на вершині чартів як 'Age of Love' та співпраця з артистами такими як David Guetta та Idris Elba закріпили їхню позицію як індустріальних гігантів. Як затребувані DJ'ї вони зачарували натовпи на престижних фестивалях як Tomorrowland та EDC, тоді як їхній лейбл UPPERGROUND швидко зростав у значенні, підтримуючи візіонерських артистів в електронній музичній сцені.\n\nМузика ARTBAT також переступила інші сфери, з'являючись у модних кампаніях з брендами як Emporio Armani та Grand Seiko та на платформах як TikTok та Roblox. З їхньою музикою, яку обожнюю мільйони фанатів по всьому світу, метеоричний підйом ARTBAT з андеграунду до глобальної зірки залишив незабутню слід у серцях любителів електронної музики по всьому світу."
-      },
-      "links": [
-        {
-          "t": "Website",
-          "u": "https://artbatmusic.com"
-        }
-      ]
-    },
-    {
-      "img": "assets/images/artists/nora.jpg",
-      "linkType_0": "Instagram",
-      "linkUrl_0": "https://www.instagram.com/vintageculture",
-      "name": {
-        "en": "Nora",
-        "cs": "Nora",
-        "uk": "Nora"
-      },
-      "bio": {
-        "en": "Artur and Batish, the talented duo from Kyiv, have become an unparalleled force in electronic music, earning accolades as Mixmag Stars of the Year and Beatport's top-selling artists.\n\nTheir chart-topping hits like 'Age of Love' and collaborations with artists such as David Guetta and Idris Elba have solidified their position as industry powerhouses. As sought-after DJs, they have captivated crowds at prestigious festivals like Tomorrowland and EDC, while their UPPERGROUND label has quickly risen to prominence, championing visionary artists in the electronic music scene.\n\nARTBAT's music has also transcended other realms, featuring in fashion campaigns with brands like Emporio Armani and Grand Seiko and on platforms like TikTok and Roblox.,With their music being adored by millions of fans around the world, ARTBAT's meteoric rise from underground to global stardom has left an indelible mark on the hearts of electronic music enthusiasts worldwide.",
         "cs": "Artur and Batish, the talented duo from Kyiv, have become an unparalleled force in electronic music, earning accolades as Mixmag Stars of the Year and Beatport's top-selling artists.\n\nTheir chart-topping hits like 'Age of Love' and collaborations with artists such as David Guetta and Idris Elba have solidified their position as industry powerhouses. As sought-after DJs, they have captivated crowds at prestigious festivals like Tomorrowland and EDC, while their UPPERGROUND label has quickly risen to prominence, championing visionary artists in the electronic music scene.\n\nARTBAT's music has also transcended other realms, featuring in fashion campaigns with brands like Emporio Armani and Grand Seiko and on platforms like TikTok and Roblox.,With their music being adored by millions of fans around the world, ARTBAT's meteoric rise from underground to global stardom has left an indelible mark on the hearts of electronic music enthusiasts worldwide.",
         "uk": "Artur and Batish, the talented duo from Kyiv, have become an unparalleled force in electronic music, earning accolades as Mixmag Stars of the Year and Beatport's top-selling artists.\n\nTheir chart-topping hits like 'Age of Love' and collaborations with artists such as David Guetta and Idris Elba have solidified their position as industry powerhouses. As sought-after DJs, they have captivated crowds at prestigious festivals like Tomorrowland and EDC, while their UPPERGROUND label has quickly risen to prominence, championing visionary artists in the electronic music scene.\n\nARTBAT's music has also transcended other realms, featuring in fashion campaigns with brands like Emporio Armani and Grand Seiko and on platforms like TikTok and Roblox.,With their music being adored by millions of fans around the world, ARTBAT's meteoric rise from underground to global stardom has left an indelible mark on the hearts of electronic music enthusiasts worldwide."
       },
       "links": [
         {
-          "t": "Instagram",
-          "u": "https://www.instagram.com/vintageculture"
+          "t": "Website",
+          "u": "https://artbatmusic.com"
         }
       ]
     },
     {
-      "img": "assets/images/artists/artbat.png",
-      "linkType_0": "Website",
-      "linkUrl_0": "https://artbatmusic.com",
+      "img": "assets/images/artists/krismi3.webp",
+      "linkType_0": "Instagram",
+      "linkUrl_0": "https://www.instagram.com/krismi.music/",
+      "linkType_1": "YouTube",
+      "linkUrl_1": "https://www.youtube.com/watch?v=NjsQuBZ--w0",
       "name": {
-        "en": "Argy",
-        "cs": "Argy",
-        "uk": "Argy"
+        "en": "KRISMI",
+        "cs": "KRISMI",
+        "uk": "KRISMI"
       },
       "bio": {
-        "en": "Bio",
-        "cs": "Bio",
-        "uk": "Bio"
+        "en": "KRISMI is a techno music producer and singer. Her success in the music industry is the result of a combination of talent, hard work, and effective promotional strategies, making her a shining example.",
+        "cs": "KRISMI is a techno music producer and singer. Her success in the music industry is the result of a combination of talent, hard work, and effective promotional strategies, making her a shining example.",
+        "uk": "KRISMI is a techno music producer and singer. Her success in the music industry is the result of a combination of talent, hard work, and effective promotional strategies, making her a shining example."
       },
       "links": [
         {
-          "t": "Website",
-          "u": "https://artbatmusic.com"
+          "t": "Instagram",
+          "u": "https://www.instagram.com/krismi.music/"
+        },
+        {
+          "t": "YouTube",
+          "u": "https://www.youtube.com/watch?v=NjsQuBZ--w0"
+        }
+      ]
+    },
+    {
+      "img": "assets/images/artists/dominik2.webp",
+      "linkType_0": "Instagram",
+      "linkUrl_0": "https://www.instagram.com/dominikgehringer/",
+      "linkType_1": "Facebook",
+      "linkUrl_1": "https://www.facebook.com/dominikgehringermusic/",
+      "name": {
+        "en": "DOMINIK GEHRINGER",
+        "cs": "DOMINIK GEHRINGER",
+        "uk": "DOMINIK GEHRINGER"
+      },
+      "bio": {
+        "en": "Dominik Gehringer (23y/o) is a name rapidly rising across the global melodic techno and house landscape. With a sound that\nmerges emotional depth with high-end club energy, he has quickly become one of the most promising young talents to watch\nin the electronic music scene.\nDominik began producing music at just 16. By the age of 20, he had already secured a position on Nora En Pure’s Purified\nRecords, establishing himself alongside some of the scene’s most respected names. His debut release “Strange World”\nbecame a breakout hit, reaching the Top 15 on Beatport’s Melodic House & Techno chart and claiming the #1 best-selling spot\non Purified Records.\nDominik’s music has been supported and played by global icons including Tiesto, Martin Garrix, ARTBAT, Tinlicker, Agents Of\nTime, Sultan + Shepard, and Einmusik, with regular rotation on the world’s biggest stages. His tracks have resonated across\nfestivals such as Tomorrowland, Ultra, EDC, Zamna Tulum, ASOT, Lollapalooza, DayTrip LA, and throughout Ibiza.",
+        "cs": "Dominik Gehringer (23y/o) is a name rapidly rising across the global melodic techno and house landscape. With a sound that\nmerges emotional depth with high-end club energy, he has quickly become one of the most promising young talents to watch\nin the electronic music scene.\nDominik began producing music at just 16. By the age of 20, he had already secured a position on Nora En Pure’s Purified\nRecords, establishing himself alongside some of the scene’s most respected names. His debut release “Strange World”\nbecame a breakout hit, reaching the Top 15 on Beatport’s Melodic House & Techno chart and claiming the #1 best-selling spot\non Purified Records.\nDominik’s music has been supported and played by global icons including Tiesto, Martin Garrix, ARTBAT, Tinlicker, Agents Of\nTime, Sultan + Shepard, and Einmusik, with regular rotation on the world’s biggest stages. His tracks have resonated across\nfestivals such as Tomorrowland, Ultra, EDC, Zamna Tulum, ASOT, Lollapalooza, DayTrip LA, and throughout Ibiza.",
+        "uk": "Dominik Gehringer (23y/o) is a name rapidly rising across the global melodic techno and house landscape. With a sound that\nmerges emotional depth with high-end club energy, he has quickly become one of the most promising young talents to watch\nin the electronic music scene.\nDominik began producing music at just 16. By the age of 20, he had already secured a position on Nora En Pure’s Purified\nRecords, establishing himself alongside some of the scene’s most respected names. His debut release “Strange World”\nbecame a breakout hit, reaching the Top 15 on Beatport’s Melodic House & Techno chart and claiming the #1 best-selling spot\non Purified Records.\nDominik’s music has been supported and played by global icons including Tiesto, Martin Garrix, ARTBAT, Tinlicker, Agents Of\nTime, Sultan + Shepard, and Einmusik, with regular rotation on the world’s biggest stages. His tracks have resonated across\nfestivals such as Tomorrowland, Ultra, EDC, Zamna Tulum, ASOT, Lollapalooza, DayTrip LA, and throughout Ibiza."
+      },
+      "links": [
+        {
+          "t": "Instagram",
+          "u": "https://www.instagram.com/dominikgehringer/"
+        },
+        {
+          "t": "Facebook",
+          "u": "https://www.facebook.com/dominikgehringermusic/"
         }
       ]
     }

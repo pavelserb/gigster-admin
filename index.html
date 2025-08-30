@@ -11,11 +11,11 @@
 
   <!-- Fonts (plain stylesheet links; CSP-safe) -->
   <!-- Local Roboto Flex font -->
-  <link rel="preload" href="fonts/roboto-flex.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="fonts/roboto-flex.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     @font-face {
       font-family: 'Roboto Flex';
-      src: url('fonts/roboto-flex.woff') format('woff');
+      src: url('fonts/roboto-flex.woff2') format('woff2');
       font-display: block;
     }
   </style>
@@ -276,11 +276,13 @@
               <div class="venue-info">
                 <div class="venue-name" id="locVenue">Areál7</div>
                 <div class="venue-address" id="locAddr">Jankovcova 1595/14, Praha 7</div>
-                <a class="btn primary" id="locSite" href="#" target="_blank" rel="noopener noreferrer" data-i18n="location.website">Venue website</a>
+                <a class="btn primary" id="locSite" href="#" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="location.website" aria-label="Venue website">
+                  <img src="assets/icons/website-white.png" data-i18n-alt="location.website" alt="Venue website" class="website-icon" loading="lazy">
+                </a>
               </div>
               <div class="venue-actions">
-                <a class="btn route-btn" id="locRoute" href="#" target="_blank" rel="noopener noreferrer" data-i18n="location.route">
-                  <img src="assets/icons/route.svg" alt="Get route" class="route-icon" loading="lazy">
+                <a class="btn route-btn" id="locRoute" href="#" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="location.route" aria-label="Get route">
+                  <img src="assets/icons/route.svg" data-i18n-alt="location.route" alt="Get route" class="route-icon" loading="lazy">
                 </a>
               </div>
             </div>

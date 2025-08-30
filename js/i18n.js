@@ -108,6 +108,30 @@ function applyTranslations(lang) {
       }
     }
   });
+
+  // Handle aria-label translations
+  const ariaElements = document.querySelectorAll('[data-i18n-aria-label]');
+  ariaElements.forEach((element) => {
+    const path = element.getAttribute('data-i18n-aria-label');
+    if (!path) return;
+    
+    const val = getByPath(dict, path);
+    if (val) {
+      element.setAttribute('aria-label', val);
+    }
+  });
+
+  // Handle alt attribute translations for images
+  const altElements = document.querySelectorAll('[data-i18n-alt]');
+  altElements.forEach((element) => {
+    const path = element.getAttribute('data-i18n-alt');
+    if (!path) return;
+    
+    const val = getByPath(dict, path);
+    if (val) {
+      element.setAttribute('alt', val);
+    }
+  });
 }
 
 

@@ -738,24 +738,26 @@ class AdminPanel {
     
     item.innerHTML = `
       <div class="dynamic-item-header">
-        <div class="dynamic-item-title">${title}</div>
-        <div class="dynamic-item-actions">
-          <div class="order-controls">
-            <button class="btn btn-xs btn-secondary order-btn" 
-                    onclick="admin.moveDynamicItem('${type}', ${index}, 'up')" 
-                    ${index === 0 ? 'disabled' : ''} 
-                    title="Переместить вверх">
-              ↑
-            </button>
-            <button class="btn btn-xs btn-secondary order-btn" 
-                    onclick="admin.moveDynamicItem('${type}', ${index}, 'down')" 
-                    ${index === totalItems - 1 ? 'disabled' : ''} 
-                    title="Переместить вниз">
-              ↓
-            </button>
+        <div class="order-controls">
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveDynamicItem('${type}', ${index}, 'up')" 
+                  ${index === 0 ? 'disabled' : ''} 
+                  title="Переместить вверх">
+            ↑
+          </button>
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveDynamicItem('${type}', ${index}, 'down')" 
+                  ${index === totalItems - 1 ? 'disabled' : ''} 
+                  title="Переместить вниз">
+            ↓
+          </button>
+        </div>
+        <div class="dynamic-item-content">
+          <div class="dynamic-item-title">${title}</div>
+          <div class="dynamic-item-actions">
+            <button class="btn btn-small btn-secondary" onclick="admin.editDynamicItem('${type}', ${index})">Редактировать</button>
+            <button class="btn btn-small btn-danger" onclick="admin.deleteDynamicItem('${type}', ${index})">Удалить</button>
           </div>
-          <button class="btn btn-small btn-secondary" onclick="admin.editDynamicItem('${type}', ${index})">Редактировать</button>
-          <button class="btn btn-small btn-danger" onclick="admin.deleteDynamicItem('${type}', ${index})">Удалить</button>
         </div>
       </div>
       <div class="dynamic-item-preview">
@@ -1668,32 +1670,34 @@ class AdminPanel {
 
     item.innerHTML = `
       <div class="update-item-header">
-        <div class="update-item-info">
-          <div class="update-item-title">${title}</div>
-          <div class="update-item-meta">
-            <span class="update-item-type">${typeLabel}</span>
-            <span class="update-item-date">${date}</span>
-            ${update.important ? '<span class="update-item-badge important">Важное</span>' : ''}
-            ${update.pinned ? '<span class="update-item-badge pinned">Закреплено</span>' : ''}
-          </div>
+        <div class="order-controls">
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'up')" 
+                  ${index === 0 ? 'disabled' : ''} 
+                  title="Переместить вверх">
+            ↑
+          </button>
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'down')" 
+                  ${index === totalUpdates - 1 ? 'disabled' : ''} 
+                  title="Переместить вниз">
+            ↓
+          </button>
         </div>
-        <div class="update-item-actions">
-          <div class="order-controls">
-            <button class="btn btn-xs btn-secondary order-btn" 
-                    onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'up')" 
-                    ${index === 0 ? 'disabled' : ''} 
-                    title="Переместить вверх">
-              ↑
-            </button>
-            <button class="btn btn-xs btn-secondary order-btn" 
-                    onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'down')" 
-                    ${index === totalUpdates - 1 ? 'disabled' : ''} 
-                    title="Переместить вниз">
-              ↓
-            </button>
+        <div class="update-item-content">
+          <div class="update-item-info">
+            <div class="update-item-title">${title}</div>
+            <div class="update-item-meta">
+              <span class="update-item-type">${typeLabel}</span>
+              <span class="update-item-date">${date}</span>
+              ${update.important ? '<span class="update-item-badge important">Важное</span>' : ''}
+              ${update.pinned ? '<span class="update-item-badge pinned">Закреплено</span>' : ''}
+            </div>
           </div>
-          <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); admin.editUpdate(${index})">✏️ Редактировать</button>
-          <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); admin.deleteUpdate(${index})">🗑️ Удалить</button>
+          <div class="update-item-actions">
+            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); admin.editUpdate(${index})">✏️ Редактировать</button>
+            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); admin.deleteUpdate(${index})">🗑️ Удалить</button>
+          </div>
         </div>
       </div>
       <div class="update-item-body">

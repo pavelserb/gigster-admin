@@ -47,14 +47,8 @@ class UpdatesManager {
 
   // Set current language and update translations
   setLanguage(lang) {
-    console.log('🌐 Updates.js: setLanguage called with:', lang);
-    console.log('🌐 Updates.js: Previous currentLang:', this.currentLang);
-    
     this.currentLang = lang;
     this.L = this.getTranslations(lang);
-    
-    console.log('🌐 Updates.js: New currentLang:', this.currentLang);
-    console.log('🌐 Updates.js: New translations L:', this.L);
     
     // Save to localStorage for persistence
     localStorage.setItem('site_language', lang);
@@ -112,6 +106,11 @@ class UpdatesManager {
     // Load updates data
     await this.loadUpdatesData();
     
+    // Create filter buttons after a short delay to ensure CONFIG is loaded
+    setTimeout(() => {
+      this.createDynamicFilterButtons();
+    }, 500);
+    
     // Setup social meta
     this.setupSocialMeta();
     
@@ -145,9 +144,6 @@ class UpdatesManager {
       
       // Hide loading placeholder and show content
       this.hideLoadingPlaceholder();
-      
-      // Create dynamic filter buttons after DOM is ready
-      this.createDynamicFilterButtons();
       
     } catch (error) {
       console.error('🌐 Updates.js: Error loading updates:', error);
@@ -205,24 +201,21 @@ class UpdatesManager {
 
   // Create dynamic filter buttons based on existing update types
   createDynamicFilterButtons() {
+    console.log('🌐 Updates.js: createDynamicFilterButtons called');
+    
     if (!this.toolbar) {
-      console.warn('🌐 Updates.js: Toolbar not found, skipping filter button creation');
+      console.warn('🌐 Updates.js: Toolbar not found');
       return;
     }
     
-    // Wait for CONFIG to be loaded if not available
     if (!window.CONFIG || !window.CONFIG.updateCategories) {
-      console.log('🌐 Updates.js: CONFIG not loaded yet, waiting...');
-      setTimeout(() => {
-        this.createDynamicFilterButtons();
-      }, 100);
+      console.warn('🌐 Updates.js: CONFIG not available');
       return;
     }
-    
-    console.log('🌐 Updates.js: CONFIG is available, proceeding with button creation');
     
     // Get unique update types from loaded data
     const existingTypes = this.getExistingUpdateTypes();
+    console.log('🌐 Updates.js: Found types:', existingTypes);
     
     // Clear existing buttons
     this.toolbar.innerHTML = '';
@@ -236,9 +229,8 @@ class UpdatesManager {
     
     // Add buttons only for existing types
     existingTypes.forEach(type => {
-      console.log('🌐 Updates.js: Creating button for type:', type);
       const translatedText = this.getUpdateTypeTranslation(type);
-      console.log('🌐 Updates.js: Translated text for', type, ':', translatedText);
+      console.log('🌐 Updates.js: Creating button for', type, 'with text:', translatedText);
       const button = this.createFilterButton(type, translatedText);
       if (this.currentFilter === type) {
         button.classList.add('is-active');
@@ -246,17 +238,9 @@ class UpdatesManager {
       this.toolbar.appendChild(button);
     });
     
-    // Always show toolbar if we have any buttons
+    // Show toolbar
     this.toolbar.style.display = 'flex';
-    console.log('🌐 Updates.js: Created', this.toolbar.children.length, 'filter buttons for types:', existingTypes);
-    
-    // Fallback: if no buttons were created, show at least "All" button
-    if (this.toolbar.children.length === 0) {
-      console.warn('🌐 Updates.js: No buttons created, adding fallback "All" button');
-      const fallbackButton = this.createFilterButton('all', this.L.all);
-      fallbackButton.classList.add('is-active');
-      this.toolbar.appendChild(fallbackButton);
-    }
+    console.log('🌐 Updates.js: Created', this.toolbar.children.length, 'buttons');
   }
   
     // Get unique update types from loaded data
@@ -287,28 +271,11 @@ class UpdatesManager {
     return button;
   }
 
-  // Update filter buttons text (for language changes)
+  // Update filter buttons text (for language changes) - DEPRECATED
+  // This function is no longer used, buttons are recreated instead
   updateFilterButtons() {
-    if (!this.toolbar) return;
-    
-    const filterButtons = this.toolbar.querySelectorAll('.chip.sm');
-    filterButtons.forEach(btn => {
-      const filterType = btn.dataset.filter;
-      if (!filterType) return;
-      
-      let translatedText = '';
-      
-      if (filterType === 'all') {
-        translatedText = this.L.all;
-      } else {
-        // Get translation from CONFIG.updateCategories
-        translatedText = this.getUpdateTypeTranslation(filterType);
-      }
-      
-      if (translatedText && btn.textContent !== translatedText) {
-        btn.textContent = translatedText;
-      }
-    });
+    // This function is deprecated - buttons are now recreated on language change
+    return;
   }
 
   // Show loading placeholder
@@ -423,9 +390,6 @@ class UpdatesManager {
   // Render updates
   render() {
     if (!this.container) return;
-    
-    // Ensure filter buttons are created
-    this.createDynamicFilterButtons();
     
     // Filter updates based on current filter
     const filtered = this.currentFilter === 'all' ? 
@@ -878,48 +842,29 @@ class UpdatesManager {
   }
 
   getTranslation(field, fallback = '') {
-    console.log('🌐 Updates.js: getTranslation called with field:', field, 'fallback:', fallback);
-    console.log('🌐 Updates.js: currentLang in getTranslation:', this.currentLang);
-    
     // Use global function from main.js if available
     if (window.getTranslation) {
-      console.log('🌐 Updates.js: Using global getTranslation function');
       return window.getTranslation(field, fallback);
     }
     
     // Fallback implementation
-    if (!field) {
-      console.log('🌐 Updates.js: No field provided, returning fallback');
-      return fallback;
-    }
+    if (!field) return fallback;
     
     if (typeof field === 'object') {
-      console.log('🌐 Updates.js: Field is object, keys:', Object.keys(field));
-      const result = field[this.currentLang] || field.en || fallback;
-      console.log('🌐 Updates.js: Translation result:', result);
-      return result;
+      return field[this.currentLang] || field.en || fallback;
     }
     
-    console.log('🌐 Updates.js: Field is not object, returning as-is:', field);
     return field;
   }
 
   getUpdateTypeTranslation(type) {
     if (!type) return '';
     
-    console.log('🌐 Updates.js: getUpdateTypeTranslation called for type:', type);
-    console.log('🌐 Updates.js: window.CONFIG available:', !!window.CONFIG);
-    console.log('🌐 Updates.js: currentLang:', this.currentLang);
-    
     if (window.CONFIG && window.CONFIG.updateCategories && window.CONFIG.updateCategories[type]) {
-      console.log('🌐 Updates.js: Found translation config for type:', type);
-      console.log('🌐 Updates.js: Translation config:', window.CONFIG.updateCategories[type]);
       const translation = this.getTranslation(window.CONFIG.updateCategories[type], type);
-      console.log('🌐 Updates.js: Final translation:', translation);
       return translation;
     }
     
-    console.log('🌐 Updates.js: No translation config found, using fallback:', type);
     // Fallback to original type
     return type;
   }

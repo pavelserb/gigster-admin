@@ -883,6 +883,7 @@ function updateStaticTranslations() {
       if (s.showInTicketsMenu !== false) {
         const button = document.createElement('button');
         button.className = 'cta-menu-item';
+        button.setAttribute('role', 'menuitem');
         
         let logoHtml = '';
         if (s.logo) {

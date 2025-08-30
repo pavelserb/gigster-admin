@@ -1582,8 +1582,9 @@ p {
 } */
 
 .slider-dots {
-  display: flex;
+  /* display: flex; */
   gap: 8px;
+  display: none;
 }
 
 .slider-dot {
@@ -2445,6 +2446,7 @@ p {
   display: flex;
   gap: 8px;
   z-index: 10;
+  display: none;
 }
 
 .venue-dot {

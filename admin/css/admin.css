@@ -576,9 +576,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  /* margin-bottom: 18px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0; */
 }
 
 .dynamic-item-title {
@@ -3208,10 +3208,10 @@ textarea:focus {
     padding: 12px;
   }
   
-  .dynamic-item-header {
+  /* .dynamic-item-header {
     margin-bottom: 12px;
     padding-bottom: 12px;
-  }
+  } */
   
   /* Button adjustments */
   .btn {

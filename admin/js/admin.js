@@ -318,19 +318,23 @@ class AdminPanel {
   
   // Preload critical resources
   preloadCriticalResources() {
-    // Preload critical CSS and JS files
-    const criticalResources = [
-      'css/admin.css',
-      'js/admin.js'
-    ];
+    // Note: CSS and JS files are already loaded via standard tags
+    // This function is kept for potential future use with other resources
+    // like images, fonts, or other assets that might need preloading
     
-    criticalResources.forEach(resource => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = resource;
-      link.as = resource.endsWith('.css') ? 'style' : 'script';
-      document.head.appendChild(link);
-    });
+    // Example: Preload critical images if needed
+    // const criticalImages = [
+    //   'assets/images/hero-bg.jpg',
+    //   'assets/icons/logo.svg'
+    // ];
+    // 
+    // criticalImages.forEach(imageUrl => {
+    //   const link = document.createElement('link');
+    //   link.rel = 'preload';
+    //   link.href = imageUrl;
+    //   link.as = 'image';
+    //   document.head.appendChild(link);
+    // });
   }
   
   // Handle form changes with performance optimization

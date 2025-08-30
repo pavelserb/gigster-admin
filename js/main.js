@@ -408,6 +408,7 @@ async function init() {
     
     // Initialize UpdatesManager (non-blocking)
     if (window.UpdatesManager) {
+      console.log('🌐 Main.js: Creating UpdatesManager instance');
       updatesManager = new window.UpdatesManager();
       // Start loading updates in background, don't await
       updatesManager.init().then(() => {
@@ -417,6 +418,7 @@ async function init() {
       });
       // Export to window for language switching
       window.updatesManager = updatesManager;
+      console.log('🌐 Main.js: UpdatesManager exported to window');
     } else {
       console.warn('🌐 Main.js: UpdatesManager not available');
     }

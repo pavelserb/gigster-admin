@@ -181,16 +181,42 @@ class AutoReorderManager {
     item.dataset.originalIndex = index;
     
     item.addEventListener('dragstart', (e) => {
+      // Don't start drag if clicking on form elements
+      if (e.target.tagName === 'INPUT' || 
+          e.target.tagName === 'TEXTAREA' || 
+          e.target.tagName === 'SELECT' ||
+          e.target.tagName === 'BUTTON' ||
+          e.target.closest('.btn') ||
+          e.target.closest('.order-btn')) {
+        e.preventDefault();
+        return;
+      }
+      
       this.draggedElement = item;
       item.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/html', item.outerHTML);
+      
+      // Add visual feedback
+      item.style.transform = 'rotate(2deg) scale(1.02)';
+      item.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.3)';
     });
     
     item.addEventListener('dragend', () => {
       item.classList.remove('dragging');
+      item.style.transform = '';
+      item.style.boxShadow = '';
       this.draggedElement = null;
     });
+    
+    // Add click handler for drag handle specifically
+    const dragHandle = item.querySelector('.drag-handle');
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        // This will trigger the dragstart event on the item
+      });
+    }
   }
 
   addDropZones(container) {

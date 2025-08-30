@@ -3682,22 +3682,25 @@ select:focus {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 24px;
-  height: 24px;
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
   transition: all 0.3s ease;
   z-index: 10;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .drag-handle:hover {
-  background: rgba(102, 126, 234, 0.2);
-  border-color: rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  border-color: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .drag-handle:active {
@@ -3706,9 +3709,47 @@ select:focus {
 }
 
 .drag-handle svg {
-  width: 14px;
-  height: 14px;
-  fill: #667eea;
+  width: 16px;
+  height: 16px;
+  fill: white;
+}
+
+/* Make entire item draggable with visual feedback */
+.dynamic-item {
+  position: relative;
+  cursor: grab;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.dynamic-item:hover {
+  border-color: rgba(102, 126, 234, 0.2);
+  background: rgba(102, 126, 234, 0.02);
+}
+
+.dynamic-item:active {
+  cursor: grabbing;
+}
+
+/* Visual indicator for draggable area */
+.dynamic-item::after {
+  content: 'Перетащите для изменения порядка';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 10px;
+  color: #667eea;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.dynamic-item:hover::after {
+  opacity: 1;
 }
 
 /* Order controls */

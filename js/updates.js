@@ -55,7 +55,6 @@ class UpdatesManager {
     
     // Update UI elements
     this.updateMoreButtonText();
-    this.updateFilterButtons();
     
     // Re-create filter buttons with new language
     this.createDynamicFilterButtons();
@@ -100,12 +99,12 @@ class UpdatesManager {
       this.setLanguage(window.CURRENT_LANG);
     }
     
-    // Load updates data
-    await this.loadUpdatesData();
-    
-    // Setup DOM and event listeners
+    // Setup DOM and event listeners first
     this.setupDOM();
     this.setupEventListeners();
+    
+    // Load updates data
+    await this.loadUpdatesData();
     
     // Setup social meta
     this.setupSocialMeta();
@@ -138,11 +137,11 @@ class UpdatesManager {
         }
       });
       
-      // Create dynamic filter buttons based on loaded data
-      this.createDynamicFilterButtons();
-      
       // Hide loading placeholder and show content
       this.hideLoadingPlaceholder();
+      
+      // Create dynamic filter buttons after DOM is ready
+      this.createDynamicFilterButtons();
       
     } catch (error) {
       console.error('🌐 Updates.js: Error loading updates:', error);
@@ -157,6 +156,10 @@ class UpdatesManager {
     this.container = document.getElementById('updatesList');
     this.toolbar = document.querySelector('.upd-toolbar');
     this.moreBtn = document.querySelector('.more-btn') || document.getElementById('updatesMoreBtn');
+    
+    console.log('🌐 Updates.js: setupDOM - container:', this.container);
+    console.log('🌐 Updates.js: setupDOM - toolbar:', this.toolbar);
+    console.log('🌐 Updates.js: setupDOM - moreBtn:', this.moreBtn);
     
     if (!this.container) {
       console.warn('🌐 Updates.js: Updates container not found');
@@ -191,7 +194,10 @@ class UpdatesManager {
 
   // Create dynamic filter buttons based on existing update types
   createDynamicFilterButtons() {
-    if (!this.toolbar) return;
+    if (!this.toolbar) {
+      console.warn('🌐 Updates.js: Toolbar not found, skipping filter button creation');
+      return;
+    }
     
     // Get unique update types from loaded data
     const existingTypes = this.getExistingUpdateTypes();
@@ -201,31 +207,41 @@ class UpdatesManager {
     
     // Always add "All" button first
     const allButton = this.createFilterButton('all', this.L.all);
-    allButton.classList.add('is-active');
+    if (this.currentFilter === 'all') {
+      allButton.classList.add('is-active');
+    }
     this.toolbar.appendChild(allButton);
     
     // Add buttons only for existing types
     existingTypes.forEach(type => {
       const translatedText = this.getUpdateTypeTranslation(type);
       const button = this.createFilterButton(type, translatedText);
+      if (this.currentFilter === type) {
+        button.classList.add('is-active');
+      }
       this.toolbar.appendChild(button);
     });
     
-    // If no specific types exist or only one type, hide the toolbar
-    if (existingTypes.length === 0 || existingTypes.length === 1) {
-      this.toolbar.style.display = 'none';
-    } else {
-      this.toolbar.style.display = 'flex';
+    // Always show toolbar if we have any buttons
+    this.toolbar.style.display = 'flex';
+    console.log('🌐 Updates.js: Showing toolbar with', existingTypes.length + 1, 'buttons');
+    
+    // Fallback: if no buttons were created, show at least "All" button
+    if (this.toolbar.children.length === 0) {
+      console.warn('🌐 Updates.js: No buttons created, adding fallback "All" button');
+      const fallbackButton = this.createFilterButton('all', this.L.all);
+      fallbackButton.classList.add('is-active');
+      this.toolbar.appendChild(fallbackButton);
     }
     
     console.log('🌐 Updates.js: Created dynamic filter buttons for types:', existingTypes);
   }
   
-  // Get unique update types from loaded data
+    // Get unique update types from loaded data
   getExistingUpdateTypes() {
     const types = new Set();
     
-    this.items.forEach(update => {
+    this.items.forEach((update, index) => {
       if (update.type && update.type !== 'all') {
         types.add(update.type);
       }
@@ -385,6 +401,9 @@ class UpdatesManager {
   // Render updates
   render() {
     if (!this.container) return;
+    
+    // Ensure filter buttons are created
+    this.createDynamicFilterButtons();
     
     // Filter updates based on current filter
     const filtered = this.currentFilter === 'all' ? 

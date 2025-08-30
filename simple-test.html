@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test</title>
+    <style>
+        .upd-toolbar {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+            padding: 10px;
+            background: #f0f0f0;
+        }
+        .chip.sm {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+        }
+        .chip.sm.is-active {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Updates Filter Test</h1>
+    
+    <div class="upd-toolbar">
+        <!-- Filter buttons will be created here -->
+    </div>
+    
+    <div id="updatesList">
+        <!-- Updates will be shown here -->
+    </div>
+
+    <script>
+        // Mock data
+        const mockUpdates = [
+            { id: '1', type: 'tickets', title: 'Tickets update' },
+            { id: '2', type: 'announcement', title: 'Announcement update' },
+            { id: '3', type: 'logistics', title: 'Logistics update' },
+            { id: '4', type: 'tickets', title: 'Another tickets update' }
+        ];
+
+        // Mock CONFIG
+        window.CONFIG = {
+            updateCategories: {
+                tickets: { en: 'Tickets', cs: 'Vstupenky', uk: 'Квитки' },
+                announcement: { en: 'News', cs: 'Novinky', uk: 'Новини' },
+                logistics: { en: 'Logistics', cs: 'Logistika', uk: 'Логістика' }
+            }
+        };
+
+        class SimpleUpdatesManager {
+            constructor() {
+                this.items = mockUpdates;
+                this.toolbar = document.querySelector('.upd-toolbar');
+                this.L = { all: 'All' };
+                this.currentLang = 'en';
+            }
+
+            getExistingUpdateTypes() {
+                const types = new Set();
+                this.items.forEach(update => {
+                    if (update.type && update.type !== 'all') {
+                        types.add(update.type);
+                    }
+                });
+                return Array.from(types).sort();
+            }
+
+            getUpdateTypeTranslation(type) {
+                if (window.CONFIG && window.CONFIG.updateCategories && window.CONFIG.updateCategories[type]) {
+                    return window.CONFIG.updateCategories[type][this.currentLang] || type;
+                }
+                return type;
+            }
+
+            createFilterButton(filterType, text) {
+                const button = document.createElement('button');
+                button.className = 'chip sm';
+                button.setAttribute('data-filter', filterType);
+                button.textContent = text;
+                button.addEventListener('click', () => {
+                    this.filterUpdates(filterType);
+                });
+                return button;
+            }
+
+            createDynamicFilterButtons() {
+                console.log('Creating dynamic filter buttons');
+                console.log('Toolbar element:', this.toolbar);
+                console.log('Items count:', this.items.length);
+                
+                if (!this.toolbar) {
+                    console.warn('Toolbar not found');
+                    return;
+                }
+                
+                const existingTypes = this.getExistingUpdateTypes();
+                console.log('Found types:', existingTypes);
+                
+                this.toolbar.innerHTML = '';
+                
+                const allButton = this.createFilterButton('all', this.L.all);
+                allButton.classList.add('is-active');
+                this.toolbar.appendChild(allButton);
+                
+                existingTypes.forEach(type => {
+                    const translatedText = this.getUpdateTypeTranslation(type);
+                    const button = this.createFilterButton(type, translatedText);
+                    this.toolbar.appendChild(button);
+                });
+                
+                this.toolbar.style.display = 'flex';
+                console.log('Created buttons for types:', existingTypes);
+            }
+
+            filterUpdates(filterType) {
+                this.toolbar.querySelectorAll('.chip.sm').forEach(btn => {
+                    btn.classList.toggle('is-active', btn.dataset.filter === filterType);
+                });
+                console.log('Filtered to:', filterType);
+            }
+        }
+
+        // Test the functionality
+        const testManager = new SimpleUpdatesManager();
+        testManager.createDynamicFilterButtons();
+        
+        console.log('Test completed!');
+    </script>
+</body>
+</html>

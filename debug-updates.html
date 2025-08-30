@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Updates</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .warning { background: #fff3e0; color: #ef6c00; }
+    </style>
+</head>
+<body>
+    <h1>Debug Updates Manager</h1>
+    
+    <div id="debugOutput" class="debug-info">
+        <h3>Debug Information:</h3>
+        <div id="debugContent">Loading...</div>
+    </div>
+
+    <script>
+        // Override console.log to capture debug info
+        const debugContent = document.getElementById('debugContent');
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        function addDebugMessage(type, message) {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugContent.appendChild(div);
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args[0] && args[0].includes('Updates.js')) {
+                addDebugMessage('success', args.join(' '));
+            }
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            if (args[0] && args[0].includes('Updates.js')) {
+                addDebugMessage('warning', args.join(' '));
+            }
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            if (args[0] && args[0].includes('Updates.js')) {
+                addDebugMessage('error', args.join(' '));
+            }
+        };
+
+        // Load the main site in an iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = 'index.html';
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = '1px solid #ccc';
+        document.body.appendChild(iframe);
+
+        // Check if UpdatesManager is available
+        setTimeout(() => {
+            try {
+                const iframeWindow = iframe.contentWindow;
+                if (iframeWindow && iframeWindow.UpdatesManager) {
+                    addDebugMessage('success', 'UpdatesManager found in iframe');
+                    
+                    // Create instance and test
+                    const testManager = new iframeWindow.UpdatesManager();
+                    addDebugMessage('success', 'UpdatesManager instance created');
+                    
+                    // Test the methods
+                    if (testManager.getExistingUpdateTypes) {
+                        addDebugMessage('success', 'getExistingUpdateTypes method exists');
+                    }
+                    
+                    if (testManager.createDynamicFilterButtons) {
+                        addDebugMessage('success', 'createDynamicFilterButtons method exists');
+                    }
+                    
+                } else {
+                    addDebugMessage('error', 'UpdatesManager not found in iframe');
+                }
+            } catch (error) {
+                addDebugMessage('error', 'Error testing UpdatesManager: ' + error.message);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

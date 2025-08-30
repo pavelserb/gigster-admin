@@ -3329,12 +3329,18 @@ textarea:focus {
   .order-controls {
     gap: 1px;
     margin-right: 8px;
+    margin-top: 6px;
   }
   
   .order-btn {
     width: 20px;
     height: 18px;
     font-size: 9px;
+  }
+  
+  .dynamic-item,
+  .update-item {
+    gap: 8px;
   }
   
   .dynamic-item-header,
@@ -3344,7 +3350,7 @@ textarea:focus {
   
   .dynamic-item-content,
   .update-item-content {
-    gap: 8px;
+    gap: 6px;
   }
   
   .dynamic-item-actions {
@@ -3616,6 +3622,8 @@ select:focus {
   gap: 2px;
   margin-right: 12px;
   flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 8px;
 }
 
 .order-btn {
@@ -3653,8 +3661,8 @@ select:focus {
   transform: translateY(0);
 }
 
-/* Updated dynamic item header layout */
-.dynamic-item-header {
+/* Updated dynamic item layout - now order controls are at the same level as content */
+.dynamic-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -3662,7 +3670,13 @@ select:focus {
 
 .dynamic-item-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
+  gap: 8px;
+}
+
+.dynamic-item-header {
+  display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
@@ -3676,8 +3690,8 @@ select:focus {
   flex-shrink: 0;
 }
 
-/* Update item header layout */
-.update-item-header {
+/* Update item layout - now order controls are at the same level as content */
+.update-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -3685,7 +3699,13 @@ select:focus {
 
 .update-item-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
+  gap: 8px;
+}
+
+.update-item-header {
+  display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;

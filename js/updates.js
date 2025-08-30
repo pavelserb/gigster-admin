@@ -90,15 +90,6 @@ class UpdatesManager {
 
   // Initialize the updates manager
   async init() {
-    // Detect and set initial language
-    const detectedLang = this.detectCurrentLanguage();
-    this.setLanguage(detectedLang);
-    
-    // Synchronize with main.js language if available
-    if (window.CURRENT_LANG && window.CURRENT_LANG !== this.currentLang) {
-      this.setLanguage(window.CURRENT_LANG);
-    }
-    
     // Setup DOM and event listeners first
     this.setupDOM();
     this.setupEventListeners();
@@ -106,10 +97,14 @@ class UpdatesManager {
     // Load updates data
     await this.loadUpdatesData();
     
-    // Create filter buttons after a short delay to ensure CONFIG is loaded
-    setTimeout(() => {
-      this.createDynamicFilterButtons();
-    }, 500);
+    // Detect and set initial language (after DOM and data are ready)
+    const detectedLang = this.detectCurrentLanguage();
+    this.setLanguage(detectedLang);
+    
+    // Synchronize with main.js language if available
+    if (window.CURRENT_LANG && window.CURRENT_LANG !== this.currentLang) {
+      this.setLanguage(window.CURRENT_LANG);
+    }
     
     // Setup social meta
     this.setupSocialMeta();
@@ -158,10 +153,6 @@ class UpdatesManager {
     this.container = document.getElementById('updatesList');
     this.toolbar = document.querySelector('.upd-toolbar');
     this.moreBtn = document.querySelector('.more-btn') || document.getElementById('updatesMoreBtn');
-    
-    console.log('🌐 Updates.js: setupDOM - container:', this.container);
-    console.log('🌐 Updates.js: setupDOM - toolbar:', this.toolbar);
-    console.log('🌐 Updates.js: setupDOM - moreBtn:', this.moreBtn);
     
     if (!this.container) {
       console.warn('🌐 Updates.js: Updates container not found');

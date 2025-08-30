@@ -47,7 +47,6 @@ class UpdatesManager {
 
   // Set current language and update translations
   setLanguage(lang) {
-    console.log('🌐 Updates.js: setLanguage called with:', lang);
     this.currentLang = lang;
     this.L = this.getTranslations(lang);
     
@@ -205,14 +204,6 @@ class UpdatesManager {
       return;
     }
     
-    // Check if CONFIG is available
-    if (!window.CONFIG || !window.CONFIG.updateCategories) {
-      console.warn('🌐 Updates.js: CONFIG not available, waiting...');
-      // Wait a bit and try again
-      setTimeout(() => this.createDynamicFilterButtons(), 100);
-      return;
-    }
-    
     // Get unique update types from loaded data
     const existingTypes = this.getExistingUpdateTypes();
     
@@ -228,9 +219,7 @@ class UpdatesManager {
     
     // Add buttons only for existing types
     existingTypes.forEach(type => {
-      console.log('🌐 Updates.js: Creating button for type:', type);
       const translatedText = this.getUpdateTypeTranslation(type);
-      console.log('🌐 Updates.js: Button text for', type, ':', translatedText);
       const button = this.createFilterButton(type, translatedText);
       if (this.currentFilter === type) {
         button.classList.add('is-active');
@@ -888,18 +877,11 @@ class UpdatesManager {
   getUpdateTypeTranslation(type) {
     if (!type) return '';
     
-    console.log('🌐 Updates.js: getUpdateTypeTranslation called for type:', type);
-    console.log('🌐 Updates.js: window.CONFIG available:', !!window.CONFIG);
-    console.log('🌐 Updates.js: window.CONFIG.updateCategories available:', !!(window.CONFIG && window.CONFIG.updateCategories));
-    
     if (window.CONFIG && window.CONFIG.updateCategories && window.CONFIG.updateCategories[type]) {
-      console.log('🌐 Updates.js: Found translation config for type:', type, window.CONFIG.updateCategories[type]);
       const translation = this.getTranslation(window.CONFIG.updateCategories[type], type);
-      console.log('🌐 Updates.js: Translation result:', translation);
       return translation;
     }
     
-    console.log('🌐 Updates.js: No translation config found, using fallback:', type);
     // Fallback to original type
     return type;
   }

@@ -3,6 +3,7 @@ services:
     name: gigster-admin
     env: node
     plan: free
+    rootDir: render-admin
     buildCommand: npm install
     startCommand: npm start
     envVars:

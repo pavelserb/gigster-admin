@@ -3325,6 +3325,22 @@ textarea:focus {
     flex-wrap: wrap;
   }
   
+  /* Order controls mobile adjustments */
+  .order-controls {
+    gap: 2px;
+    margin-right: 4px;
+  }
+  
+  .order-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+  
+  .dynamic-item-actions {
+    gap: 4px;
+  }
+  
   /* Translations adjustments */
   .translations-container {
     gap: 16px;
@@ -3583,6 +3599,55 @@ select:focus {
   display: none;
 }
 
+/* Order controls for dynamic items */
+.order-controls {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.order-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.order-btn:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.order-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  border-color: #ddd;
+  color: #999;
+}
+
+.order-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Update dynamic item actions layout */
+.dynamic-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* File Manager Modal Footer */
 .file-manager-footer {
   display: flex;
@@ -3623,244 +3688,4 @@ select:focus {
 
 .file-manager-modal .media-main {
   max-height: 400px;
-}
-
-/* Drag & Drop Functionality */
-.dynamic-list {
-  position: relative;
-}
-
-.dynamic-item {
-  position: relative;
-  cursor: move;
-  transition: all 0.3s ease;
-}
-
-.dynamic-item.dragging {
-  opacity: 0.5;
-  transform: rotate(2deg);
-  z-index: 1000;
-}
-
-.dynamic-item.drag-over {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
-}
-
-.dynamic-item.drag-over::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #667eea;
-  border-radius: 2px;
-}
-
-/* Order indicators */
-.item-order {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-/* Drag handle */
-.drag-handle {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  transition: all 0.3s ease;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.drag-handle:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-  border-color: rgba(255, 255, 255, 1);
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-  transform: scale(0.95);
-}
-
-.drag-handle svg {
-  width: 16px;
-  height: 16px;
-  fill: white;
-}
-
-/* Make entire item draggable with visual feedback */
-.dynamic-item {
-  position: relative;
-  cursor: grab;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.dynamic-item:hover {
-  border-color: rgba(102, 126, 234, 0.2);
-  background: rgba(102, 126, 234, 0.02);
-}
-
-.dynamic-item:active {
-  cursor: grabbing;
-}
-
-/* Visual indicator for draggable area */
-.dynamic-item::after {
-  content: 'Перетащите для изменения порядка';
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  font-size: 10px;
-  color: #667eea;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-}
-
-.dynamic-item:hover::after {
-  opacity: 1;
-}
-
-/* Order controls */
-.order-controls {
-  position: absolute;
-  top: 12px;
-  right: 50px;
-  display: flex;
-  gap: 4px;
-  z-index: 10;
-}
-
-.order-btn {
-  width: 24px;
-  height: 24px;
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 12px;
-  color: #667eea;
-}
-
-.order-btn:hover {
-  background: rgba(102, 126, 234, 0.2);
-  border-color: rgba(102, 126, 234, 0.4);
-}
-
-.order-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.order-btn svg {
-  width: 12px;
-  height: 12px;
-  fill: currentColor;
-}
-
-/* Drop zones */
-.drop-zone {
-  height: 4px;
-  background: transparent;
-  transition: all 0.3s ease;
-  margin: 2px 0;
-}
-
-.drop-zone.active {
-  height: 8px;
-  background: #667eea;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-/* Reorder toolbar */
-.reorder-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  background: rgba(102, 126, 234, 0.05);
-  border: 1px solid rgba(102, 126, 234, 0.1);
-  border-radius: 8px;
-}
-
-.reorder-toolbar .btn {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-.reorder-status {
-  font-size: 12px;
-  color: #666;
-  font-style: italic;
-}
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .item-order {
-    top: 8px;
-    left: 8px;
-    width: 20px;
-    height: 20px;
-    font-size: 11px;
-  }
-  
-  .drag-handle {
-    top: 8px;
-    right: 8px;
-    width: 20px;
-    height: 20px;
-  }
-  
-  .order-controls {
-    top: 8px;
-    right: 40px;
-  }
-  
-  .order-btn {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .reorder-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
 }

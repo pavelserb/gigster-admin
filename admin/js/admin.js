@@ -750,16 +750,37 @@ class AdminPanel {
 
     const title = this.getDynamicItemTitle(type, data);
     
+    // Get the total number of items to determine if up/down buttons should be enabled
+    const containerId = this.getContainerIdByType(type);
+    const container = document.getElementById(containerId);
+    const totalItems = container ? container.children.length : 0;
+    
     item.innerHTML = `
-      <div class="dynamic-item-header">
-        <div class="dynamic-item-title">${title}</div>
-        <div class="dynamic-item-actions">
-          <button class="btn btn-small btn-secondary" onclick="admin.editDynamicItem('${type}', ${index})">Редактировать</button>
-          <button class="btn btn-small btn-danger" onclick="admin.deleteDynamicItem('${type}', ${index})">Удалить</button>
-        </div>
+      <div class="order-controls">
+        <button class="btn btn-xs btn-secondary order-btn" 
+                onclick="admin.moveDynamicItem('${type}', ${index}, 'up')" 
+                ${index === 0 ? 'disabled' : ''} 
+                title="Переместить вверх">
+          ↑
+        </button>
+        <button class="btn btn-xs btn-secondary order-btn" 
+                onclick="admin.moveDynamicItem('${type}', ${index}, 'down')" 
+                ${index === totalItems - 1 ? 'disabled' : ''} 
+                title="Переместить вниз">
+          ↓
+        </button>
       </div>
-      <div class="dynamic-item-preview">
-        ${this.getDynamicItemPreview(type, data)}
+      <div class="dynamic-item-content">
+        <div class="dynamic-item-header">
+          <div class="dynamic-item-title">${title}</div>
+          <div class="dynamic-item-actions">
+            <button class="btn btn-small btn-secondary" onclick="admin.editDynamicItem('${type}', ${index})">Редактировать</button>
+            <button class="btn btn-small btn-danger" onclick="admin.deleteDynamicItem('${type}', ${index})">Удалить</button>
+          </div>
+        </div>
+        <div class="dynamic-item-preview">
+          ${this.getDynamicItemPreview(type, data)}
+        </div>
       </div>
     `;
 
@@ -791,6 +812,17 @@ class AdminPanel {
         return `<div>URL: ${data.url || 'Не указан'}</div>`;
       default:
         return '';
+    }
+  }
+
+  getContainerIdByType(type) {
+    switch (type) {
+      case 'seller': return 'sellersContainer';
+      case 'tier': return 'tiersContainer';
+      case 'artist': return 'artistsContainer';
+      case 'faq': return 'faqsContainer';
+      case 'contact': return 'contactsContainer';
+      default: return '';
     }
   }
 
@@ -864,6 +896,90 @@ class AdminPanel {
     
     // Show success message
     this.showSuccess(`Фото площадки перемещено ${direction === 'up' ? 'вверх' : 'вниз'}`);
+  }
+
+  moveDynamicItem(type, index, direction) {
+    let array, renderFunction;
+    
+    switch (type) {
+      case 'seller':
+        array = this.config.authorizedSellers;
+        renderFunction = () => this.renderSellers();
+        break;
+      case 'tier':
+        array = this.config.tiers;
+        renderFunction = () => this.renderTiers();
+        break;
+      case 'artist':
+        array = this.config.artists;
+        renderFunction = () => this.renderArtists();
+        break;
+      case 'faq':
+        array = this.config.faqs;
+        renderFunction = () => this.renderFaqs();
+        break;
+      case 'contact':
+        array = this.config.contacts;
+        renderFunction = () => this.renderContacts();
+        break;
+      default:
+        this.showError('Неизвестный тип элемента');
+        return;
+    }
+    
+    if (!array || index < 0 || index >= array.length) {
+      this.showError('Ошибка: элемент не найден');
+      return;
+    }
+
+    let newIndex;
+    if (direction === 'up' && index > 0) {
+      newIndex = index - 1;
+    } else if (direction === 'down' && index < array.length - 1) {
+      newIndex = index + 1;
+    } else {
+      return; // Invalid move
+    }
+
+    // Swap elements
+    [array[index], array[newIndex]] = [array[newIndex], array[index]];
+
+    // Re-render the list
+    renderFunction();
+    
+    // Save changes
+    this.saveConfig();
+    
+    // Show success message
+    this.showSuccess(`Элемент перемещен ${direction === 'up' ? 'вверх' : 'вниз'}`);
+  }
+
+  moveUpdate(index, direction) {
+    if (!this.updates || index < 0 || index >= this.updates.length) {
+      this.showError('Ошибка: обновление не найдено');
+      return;
+    }
+
+    let newIndex;
+    if (direction === 'up' && index > 0) {
+      newIndex = index - 1;
+    } else if (direction === 'down' && index < this.updates.length - 1) {
+      newIndex = index + 1;
+    } else {
+      return; // Invalid move
+    }
+
+    // Swap elements
+    [this.updates[index], this.updates[newIndex]] = [this.updates[newIndex], this.updates[index]];
+
+    // Re-render the updates list
+    this.renderUpdates();
+    
+    // Save updates
+    this.saveUpdates();
+    
+    // Show success message
+    this.showSuccess(`Обновление перемещено ${direction === 'up' ? 'вверх' : 'вниз'}`);
   }
 
   async updateVenuePhoto(data) {
@@ -1682,30 +1798,45 @@ class AdminPanel {
     const body = this.getTranslationDisplay(update.body, 'Без содержания');
 
     item.innerHTML = `
-      <div class="update-item-header">
-        <div class="update-item-info">
-          <div class="update-item-title">${title}</div>
-          <div class="update-item-meta">
-            <span class="update-item-type">${typeLabel}</span>
-            <span class="update-item-date">${date}</span>
-            ${update.important ? '<span class="update-item-badge important">Важное</span>' : ''}
-            ${update.pinned ? '<span class="update-item-badge pinned">Закреплено</span>' : ''}
+      <div class="order-controls">
+        <button class="btn btn-xs btn-secondary order-btn" 
+                onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'up')" 
+                ${index === 0 ? 'disabled' : ''} 
+                title="Переместить вверх">
+          ↑
+        </button>
+        <button class="btn btn-xs btn-secondary order-btn" 
+                onclick="event.stopPropagation(); admin.moveUpdate(${index}, 'down')" 
+                ${index === totalUpdates - 1 ? 'disabled' : ''} 
+                title="Переместить вниз">
+          ↓
+        </button>
+      </div>
+      <div class="update-item-content">
+        <div class="update-item-header">
+          <div class="update-item-info">
+            <div class="update-item-title">${title}</div>
+            <div class="update-item-meta">
+              <span class="update-item-date">${date}</span>
+              ${update.important ? '<span class="update-item-badge important">Важное</span>' : ''}
+              ${update.pinned ? '<span class="update-item-badge pinned">Закреплено</span>' : ''}
+            </div>
+          </div>
+          <div class="update-item-actions">
+            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); admin.editUpdate(${index})">✏️ Редактировать</button>
+            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); admin.deleteUpdate(${index})">🗑️ Удалить</button>
           </div>
         </div>
-        <div class="update-item-actions">
-          <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); admin.editUpdate(${index})">✏️ Редактировать</button>
-          <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); admin.deleteUpdate(${index})">🗑️ Удалить</button>
+        <div class="update-item-body">
+          ${body}
         </div>
+        ${(update.thumb || update.media) ? `
+          <div class="update-item-media">
+            ${update.thumb ? `<div class="update-thumb">📷 Миниатюра: ${update.thumb}</div>` : ''}
+            ${update.media ? `<div class="update-media">🎬 Медиа: ${update.media}</div>` : ''}
+          </div>
+        ` : ''}
       </div>
-      <div class="update-item-body">
-        ${body}
-      </div>
-      ${(update.thumb || update.media) ? `
-        <div class="update-item-media">
-          ${update.thumb ? `<div class="update-thumb">📷 Миниатюра: ${update.thumb}</div>` : ''}
-          ${update.media ? `<div class="update-media">🎬 Медиа: ${update.media}</div>` : ''}
-        </div>
-      ` : ''}
     `;
 
     return item;
@@ -2971,6 +3102,9 @@ class AdminPanel {
     container.innerHTML = '';
     container.appendChild(fragment);
     
+    // Update order buttons state after rendering
+    this.updateOrderButtonsState(containerId, items.length);
+    
     // Initialize auto-resize for textareas in the rendered list
     setTimeout(() => {
       const textareas = container.querySelectorAll('textarea');
@@ -2983,6 +3117,24 @@ class AdminPanel {
         });
       });
     }, 0);
+  }
+
+  updateOrderButtonsState(containerId, totalItems) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const items = container.querySelectorAll('.dynamic-item');
+    items.forEach((item, index) => {
+      const upBtn = item.querySelector('.order-btn[onclick*="up"]');
+      const downBtn = item.querySelector('.order-btn[onclick*="down"]');
+      
+      if (upBtn) {
+        upBtn.disabled = index === 0;
+      }
+      if (downBtn) {
+        downBtn.disabled = index === totalItems - 1;
+      }
+    });
   }
 
   async _saveAndShowSuccess() {

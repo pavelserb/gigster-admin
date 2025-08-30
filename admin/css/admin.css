@@ -3339,19 +3339,30 @@ textarea:focus {
   }
   
   .dynamic-item,
-  .update-item,
-  .venue-photo-item {
+  .update-item {
     gap: 8px;
   }
   
   .dynamic-item-header,
-  .update-item-header,
-  .venue-photo-header {
+  .update-item-header {
     gap: 8px;
   }
   
   .dynamic-item-content,
-  .update-item-content,
+  .update-item-content {
+    gap: 6px;
+  }
+  
+  /* Venue photo mobile adjustments */
+  .venue-photo-item {
+    gap: 8px;
+    padding: 0.75rem;
+  }
+  
+  .venue-photo-header {
+    gap: 8px;
+  }
+  
   .venue-photo-content {
     gap: 6px;
   }
@@ -3719,6 +3730,11 @@ select:focus {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .venue-photo-content {
@@ -3733,6 +3749,17 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+.venue-photo-path {
+  font-family: monospace;
+  color: #666;
+  word-break: break-all;
+}
+
+.venue-photo-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* File Manager Modal Footer */

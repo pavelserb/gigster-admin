@@ -57,6 +57,9 @@ class UpdatesManager {
     this.updateMoreButtonText();
     this.updateFilterButtons();
     
+    // Re-create filter buttons with new language
+    this.createDynamicFilterButtons();
+    
     // Re-render updates with new language
     this.render();
   }
@@ -135,6 +138,9 @@ class UpdatesManager {
         }
       });
       
+      // Create dynamic filter buttons based on loaded data
+      this.createDynamicFilterButtons();
+      
       // Hide loading placeholder and show content
       this.hideLoadingPlaceholder();
       
@@ -172,8 +178,8 @@ class UpdatesManager {
     // Update more button text
     this.updateMoreButtonText();
     
-    // Update filter buttons
-    this.updateFilterButtons();
+    // Create dynamic filter buttons (will be called after data is loaded)
+    // this.createDynamicFilterButtons();
   }
 
   // Update more button text
@@ -183,7 +189,67 @@ class UpdatesManager {
     }
   }
 
-  // Update filter buttons text
+  // Create dynamic filter buttons based on existing update types
+  createDynamicFilterButtons() {
+    if (!this.toolbar) return;
+    
+    // Get unique update types from loaded data
+    const existingTypes = this.getExistingUpdateTypes();
+    
+    // Clear existing buttons
+    this.toolbar.innerHTML = '';
+    
+    // Always add "All" button first
+    const allButton = this.createFilterButton('all', this.L.all);
+    allButton.classList.add('is-active');
+    this.toolbar.appendChild(allButton);
+    
+    // Add buttons only for existing types
+    existingTypes.forEach(type => {
+      const translatedText = this.getUpdateTypeTranslation(type);
+      const button = this.createFilterButton(type, translatedText);
+      this.toolbar.appendChild(button);
+    });
+    
+    // If no specific types exist or only one type, hide the toolbar
+    if (existingTypes.length === 0 || existingTypes.length === 1) {
+      this.toolbar.style.display = 'none';
+    } else {
+      this.toolbar.style.display = 'flex';
+    }
+    
+    console.log('🌐 Updates.js: Created dynamic filter buttons for types:', existingTypes);
+  }
+  
+  // Get unique update types from loaded data
+  getExistingUpdateTypes() {
+    const types = new Set();
+    
+    this.items.forEach(update => {
+      if (update.type && update.type !== 'all') {
+        types.add(update.type);
+      }
+    });
+    
+    return Array.from(types).sort();
+  }
+  
+  // Create a single filter button
+  createFilterButton(filterType, text) {
+    const button = document.createElement('button');
+    button.className = 'chip sm';
+    button.setAttribute('data-filter', filterType);
+    button.textContent = text;
+    
+    // Add click event listener
+    button.addEventListener('click', () => {
+      this.filterUpdates(filterType);
+    });
+    
+    return button;
+  }
+
+  // Update filter buttons text (for language changes)
   updateFilterButtons() {
     if (!this.toolbar) return;
     

@@ -8,18 +8,13 @@
   <meta name="theme-color" content="#0b0b0e">
   
   <!-- Fonts -->
-  <!-- Local Roboto Flex font -->
-  <link rel="preload" href="../fonts/roboto-flex.woff2" as="font" type="font/woff2" crossorigin>
-  <style>
-    @font-face {
-      font-family: 'Roboto Flex';
-      src: url('../fonts/roboto-flex.woff2') format('woff2');
-      font-display: block;
-    }
-  </style>
+      <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
   
   <!-- Styles -->
-      <link rel="stylesheet" href="css/admin.css?v=20">
+      <link rel="stylesheet" href="css/admin.css?v=21">
   
   <!-- Icons -->
   <link rel="icon" href="../assets/icons/favicon.ico">
@@ -436,18 +431,9 @@
           <div class="config-section">
             <h3>Артисты</h3>
             <div class="reorder-toolbar">
-              <button type="button" id="toggleReorderArtists" class="btn btn-outline btn-sm">
-                <span class="reorder-icon">📋</span> Изменить порядок
-              </button>
-              <button type="button" id="saveOrderArtists" class="btn btn-primary btn-sm" style="display: none;">
-                💾 Сохранить порядок
-              </button>
-              <button type="button" id="cancelReorderArtists" class="btn btn-secondary btn-sm" style="display: none;">
-                ❌ Отменить
-              </button>
-              <span class="reorder-status">Порядок артистов влияет на их отображение на сайте</span>
+              <span class="reorder-status">💡 Перетаскивайте элементы для изменения порядка отображения на сайте</span>
             </div>
-            <div id="artistsContainer" class="dynamic-list">
+            <div id="artistsContainer" class="dynamic-list" data-reorderable="true">
               <!-- Artists will be added here dynamically -->
             </div>
             <button type="button" id="addArtistBtn" class="btn btn-secondary">Добавить артиста</button>
@@ -463,36 +449,18 @@
             
             <h4>Авторизованные продавцы</h4>
             <div class="reorder-toolbar">
-              <button type="button" id="toggleReorderSellers" class="btn btn-outline btn-sm">
-                <span class="reorder-icon">📋</span> Изменить порядок
-              </button>
-              <button type="button" id="saveOrderSellers" class="btn btn-primary btn-sm" style="display: none;">
-                💾 Сохранить порядок
-              </button>
-              <button type="button" id="cancelReorderSellers" class="btn btn-secondary btn-sm" style="display: none;">
-                ❌ Отменить
-              </button>
-              <span class="reorder-status">Порядок продавцов влияет на их отображение в меню билетов</span>
+              <span class="reorder-status">💡 Перетаскивайте элементы для изменения порядка отображения в меню билетов</span>
             </div>
-            <div id="sellersContainer" class="dynamic-list">
+            <div id="sellersContainer" class="dynamic-list" data-reorderable="true">
               <!-- Sellers will be added here dynamically -->
             </div>
             <button type="button" id="addSellerBtn" class="btn btn-secondary">Добавить продавца</button>
 
             <h4>Категории билетов</h4>
             <div class="reorder-toolbar">
-              <button type="button" id="toggleReorderTiers" class="btn btn-outline btn-sm">
-                <span class="reorder-icon">📋</span> Изменить порядок
-              </button>
-              <button type="button" id="saveOrderTiers" class="btn btn-primary btn-sm" style="display: none;">
-                💾 Сохранить порядок
-              </button>
-              <button type="button" id="cancelReorderTiers" class="btn btn-secondary btn-sm" style="display: none;">
-                ❌ Отменить
-              </button>
-              <span class="reorder-status">Порядок категорий влияет на их отображение в разделе билетов</span>
+              <span class="reorder-status">💡 Перетаскивайте элементы для изменения порядка отображения в разделе билетов</span>
             </div>
-            <div id="tiersContainer" class="dynamic-list">
+            <div id="tiersContainer" class="dynamic-list" data-reorderable="true">
               <!-- Tiers will be added here dynamically -->
             </div>
             <button type="button" id="addTierBtn" class="btn btn-secondary">Добавить категорию</button>
@@ -502,18 +470,9 @@
           <div class="config-section">
             <h3>Часто задаваемые вопросы</h3>
             <div class="reorder-toolbar">
-              <button type="button" id="toggleReorderFaqs" class="btn btn-outline btn-sm">
-                <span class="reorder-icon">📋</span> Изменить порядок
-              </button>
-              <button type="button" id="saveOrderFaqs" class="btn btn-primary btn-sm" style="display: none;">
-                💾 Сохранить порядок
-              </button>
-              <button type="button" id="cancelReorderFaqs" class="btn btn-secondary btn-sm" style="display: none;">
-                ❌ Отменить
-              </button>
-              <span class="reorder-status">Порядок вопросов влияет на их отображение в FAQ разделе</span>
+              <span class="reorder-status">💡 Перетаскивайте элементы для изменения порядка отображения в FAQ разделе</span>
             </div>
-            <div id="faqsContainer" class="dynamic-list">
+            <div id="faqsContainer" class="dynamic-list" data-reorderable="true">
               <!-- FAQs will be added here dynamically -->
             </div>
             <button type="button" id="addFaqBtn" class="btn btn-secondary">Добавить вопрос</button>
@@ -523,18 +482,9 @@
           <div class="config-section">
             <h3>Контакты</h3>
             <div class="reorder-toolbar">
-              <button type="button" id="toggleReorderContacts" class="btn btn-outline btn-sm">
-                <span class="reorder-icon">📋</span> Изменить порядок
-              </button>
-              <button type="button" id="saveOrderContacts" class="btn btn-primary btn-sm" style="display: none;">
-                💾 Сохранить порядок
-              </button>
-              <button type="button" id="cancelReorderContacts" class="btn btn-secondary btn-sm" style="display: none;">
-                ❌ Отменить
-              </button>
-              <span class="reorder-status">Порядок контактов влияет на их отображение в разделе контактов</span>
+              <span class="reorder-status">💡 Перетаскивайте элементы для изменения порядка отображения в разделе контактов</span>
             </div>
-            <div id="contactsContainer" class="dynamic-list">
+            <div id="contactsContainer" class="dynamic-list" data-reorderable="true">
               <!-- Contacts will be added here dynamically -->
             </div>
             <button type="button" id="addContactBtn" class="btn btn-secondary">Добавить контакт</button>

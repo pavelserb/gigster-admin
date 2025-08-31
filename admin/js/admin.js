@@ -1257,19 +1257,19 @@ class AdminPanel {
               <div class="lang-input-group">
                 <span class="lang-flag">🇬🇧</span>
                 <span class="lang-label-fallback">EN:</span>
-                <input type="text" id="tierNote${index}_en" name="notes[${index}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_en" name="notes[${index}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="${this.getTranslationValue(note?.text, 'en')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
             </div>
             <div class="compact-translation-content">
               <div class="lang-input-group">
                 <span class="lang-flag">🇨🇿</span>
                 <span class="lang-label-fallback">CS:</span>
-                <input type="text" id="tierNote${index}_cs" name="notes[${index}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_cs" name="notes[${index}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="${this.getTranslationValue(note?.text, 'cs')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
               <div class="lang-input-group">
                 <span class="lang-flag">🇺🇦</span>
                 <span class="lang-label-fallback">UK:</span>
-                <input type="text" id="tierNote${index}_uk" name="notes[${index}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_uk" name="notes[${index}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="${this.getTranslationValue(note?.text, 'uk')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
               <div class="field-actions">
                 <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote${index}')">Копировать EN</button>
@@ -3282,7 +3282,8 @@ class AdminPanel {
           }
         } else {
           // Формат: notes[0][type] -> match[4] = index, match[5] = field
-          const [, , , index, field] = match;
+          const index = match[4];
+          const field = match[5];
           if (!noteGroups[index]) {
             noteGroups[index] = { text: {}, type: '' };
           }

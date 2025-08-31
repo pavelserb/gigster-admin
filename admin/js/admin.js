@@ -3265,23 +3265,32 @@ class AdminPanel {
     // Группируем данные по индексам
     const noteGroups = {};
     noteKeys.forEach(key => {
-      const match = key.match(/notes\[(\d+)\]\[(\w+)(?:_(\w+))?\]/);
+      const match = key.match(/notes\[(\d+)\]\[(\w+)_(\w+)\]|notes\[(\d+)\]\[(\w+)\]/);
       console.log('🔧 Processing key:', key, 'match:', match, 'value:', data[key]);
       
       if (match) {
-        const [, index, field, lang] = match;
-        if (!noteGroups[index]) {
-          noteGroups[index] = { text: {}, type: '' };
-        }
-        
-        if (field === 'text' && lang) {
-          // Обрабатываем text_en, text_cs, text_uk
-          noteGroups[index].text[lang] = data[key];
-          console.log('🔧 Added text for', lang, ':', data[key]);
-        } else if (field === 'type') {
-          // Обрабатываем type
-          noteGroups[index].type = data[key];
-          console.log('🔧 Added type:', data[key]);
+        if (match[3]) {
+          // Формат: notes[0][text_en] -> match[1] = index, match[2] = field, match[3] = lang
+          const [, index, field, lang] = match;
+          if (!noteGroups[index]) {
+            noteGroups[index] = { text: {}, type: '' };
+          }
+          
+          if (field === 'text') {
+            noteGroups[index].text[lang] = data[key];
+            console.log('🔧 Added text for', lang, ':', data[key]);
+          }
+        } else {
+          // Формат: notes[0][type] -> match[4] = index, match[5] = field
+          const [, , , index, field] = match;
+          if (!noteGroups[index]) {
+            noteGroups[index] = { text: {}, type: '' };
+          }
+          
+          if (field === 'type') {
+            noteGroups[index].type = data[key];
+            console.log('🔧 Added type:', data[key]);
+          }
         }
       }
     });

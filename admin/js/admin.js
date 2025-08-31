@@ -1257,7 +1257,7 @@ class AdminPanel {
     }
     
     if (priceInput) {
-      priceInput.addEventListener('input', () => this.validate('tierPrice'));
+      priceInput.addEventListener('input', () => this.validateTierForm());
     }
   }
 

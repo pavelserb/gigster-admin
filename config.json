@@ -186,13 +186,13 @@
         "cs": "vyprodáno",
         "uk": "розпродано"
       },
-      "useIndividualLink": false
+      "useIndividualLink": false,
+      "soldout": true,
+      "buttonType": "price",
+      "hideprice": false
     },
     {
-      "price": "from 2499 Kč",
-      "note_en": "",
-      "note_cs": "",
-      "note_uk": "",
+      "price": "",
       "individualLink": "",
       "name": {
         "en": "VIP",
@@ -204,7 +204,15 @@
         "cs": "Rychlá cesta, VIP zóna",
         "uk": "Швидка доріжка, VIP зона"
       },
-      "useIndividualLink": false
+      "note": {
+        "en": "",
+        "cs": "",
+        "uk": ""
+      },
+      "useIndividualLink": false,
+      "soldout": false,
+      "buttonType": "price",
+      "hideprice": false
     }
   ],
   "artists": [

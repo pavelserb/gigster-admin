@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Ticket Logic</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-case { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+        .tier-price { color: #666; font-style: italic; }
+        .tier-link { display: inline-block; padding: 8px 16px; margin: 5px; border-radius: 4px; text-decoration: none; }
+        .price-button { background: #007bff; color: white; }
+        .buy-button { background: #28a745; color: white; }
+        .status-button { background: #ffc107; color: black; }
+        .sold-out { background: #dc3545; color: white; }
+        .disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>Test Ticket Logic</h1>
+    
+    <div id="test-results"></div>
+
+    <script>
+        // Test data
+        const testTiers = [
+            // soldout: true, hideprice: false, buttonType: "price", price: "from 1249 Kč"
+            {
+                name: "General Admission",
+                soldout: true,
+                hideprice: false,
+                buttonType: "price",
+                price: "from 1249 Kč",
+                note: "sold out"
+            },
+            // soldout: false, hideprice: true, buttonType: "price", price: "VIP price"
+            {
+                name: "VIP (hidden price)",
+                soldout: false,
+                hideprice: true,
+                buttonType: "price",
+                price: "VIP price",
+                note: "Limited availability"
+            },
+            // soldout: false, hideprice: true, buttonType: "price", price: ""
+            {
+                name: "VIP (no price)",
+                soldout: false,
+                hideprice: true,
+                buttonType: "price",
+                price: "",
+                note: ""
+            },
+            // soldout: false, hideprice: false, buttonType: "status", price: "from 2000 Kč"
+            {
+                name: "Premium",
+                soldout: false,
+                hideprice: false,
+                buttonType: "status",
+                price: "from 2000 Kč",
+                note: "Early bird price"
+            },
+            // soldout: false, hideprice: false, buttonType: "text", price: "from 1500 Kč"
+            {
+                name: "Standard",
+                soldout: false,
+                hideprice: false,
+                buttonType: "text",
+                price: "from 1500 Kč",
+                note: ""
+            },
+            // soldout: false, hideprice: false, buttonType: undefined, price: ""
+            {
+                name: "Free",
+                soldout: false,
+                hideprice: false,
+                buttonType: undefined,
+                price: "",
+                note: "Includes meet & greet"
+            },
+            // soldout: true, но note пустой
+            {
+                name: "Sold Out (no note)",
+                soldout: true,
+                hideprice: false,
+                buttonType: "text",
+                price: "from 1000 Kč",
+                note: ""
+            }
+        ];
+
+        function testTicketLogic() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '';
+
+            testTiers.forEach((tier, index) => {
+                const testCase = document.createElement('div');
+                testCase.className = 'test-case';
+                
+                // Determine button content and style
+                let buttonContent = '';
+                let buttonClass = 'tier-link';
+                let buttonDisabled = false;
+                
+                // Button logic
+                switch (tier.buttonType) {
+                    case 'price':
+                        if (tier.soldout) {
+                            buttonContent = tier.note || 'Sold out';
+                            buttonClass += ' sold-out';
+                            buttonDisabled = true;
+                        } else if (tier.price && tier.price.trim()) {
+                            buttonContent = tier.price;
+                            buttonClass += ' price-button';
+                        } else {
+                            buttonContent = 'Buy';
+                            buttonClass += ' buy-button';
+                        }
+                        break;
+                    case 'status':
+                        if (tier.soldout) {
+                            buttonContent = tier.note || 'Sold out';
+                            buttonClass += ' sold-out';
+                            buttonDisabled = true;
+                        } else {
+                            buttonContent = 'On sale';
+                            buttonClass += ' status-button';
+                        }
+                        break;
+                    case 'text':
+                    default:
+                        if (tier.soldout) {
+                            buttonContent = tier.note || 'Sold out';
+                            buttonClass += ' sold-out';
+                            buttonDisabled = true;
+                        } else {
+                            buttonContent = 'Buy';
+                            buttonClass += ' buy-button';
+                        }
+                        break;
+                }
+                
+                // tier-note logic
+                const showTierNote = tier.note && tier.note.trim();
+                
+                // tier-price logic
+                const showTierPrice = tier.price && tier.price.trim() && !tier.soldout && !tier.hideprice && tier.buttonType !== 'price';
+                
+                // Create button HTML
+                let buttonHtml = '';
+                if (!buttonDisabled) {
+                    buttonHtml = `<a href="#" class="${buttonClass}">${buttonContent}</a>`;
+                } else {
+                    buttonHtml = `<span class="${buttonClass} disabled">${buttonContent}</span>`;
+                }
+                
+                testCase.innerHTML = `
+                    <h3>Test Case ${index + 1}: ${tier.name}</h3>
+                    <p><strong>Parameters:</strong></p>
+                    <ul>
+                        <li>soldout: ${tier.soldout}</li>
+                        <li>hideprice: ${tier.hideprice}</li>
+                        <li>buttonType: ${tier.buttonType || 'undefined'}</li>
+                        <li>price: "${tier.price}"</li>
+                    </ul>
+                    <p><strong>Results:</strong></p>
+                    <div class="result">
+                        <p><strong>tier-note:</strong> ${showTierNote ? `<span class="tier-note">${tier.note}</span>` : '❌ НЕ ПОКАЗЫВАЕТСЯ'}</p>
+                        <p><strong>tier-price:</strong> ${showTierPrice ? `<span class="tier-price">${tier.price}</span>` : '❌ НЕ ПОКАЗЫВАЕТСЯ'}</p>
+                        <p><strong>Кнопка:</strong> ${buttonHtml}</p>
+                        <p><strong>Состояние кнопки:</strong> ${buttonDisabled ? 'Отключена' : 'Активна'}</p>
+                    </div>
+                `;
+                
+                resultsDiv.appendChild(testCase);
+            });
+        }
+
+        // Run test when page loads
+        window.addEventListener('load', testTicketLogic);
+    </script>
+</body>
+</html>

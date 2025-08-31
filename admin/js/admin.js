@@ -1149,6 +1149,9 @@ class AdminPanel {
         <div class="form-group">
           <label for="tierPrice">Цена</label>
           <input type="text" id="tierPrice" name="price" value="${tier?.price || ''}" required>
+          <div id="tierPriceWarning" class="warning-message" style="display: none; color: #ff6b6b; font-size: 0.9em; margin-top: 5px;">
+            ⚠️ При выборе "Цена на кнопке" поле "Цена" должно быть заполнено
+          </div>
         </div>
         <div class="form-group">
           <div class="field-label-with-counter">
@@ -1186,6 +1189,31 @@ class AdminPanel {
             </div>
           </div>
         </div>
+        
+        <!-- Новые поля для управления отображением -->
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="tierHideprice" name="hideprice" ${tier?.hideprice ? 'checked' : ''}>
+            Скрыть цену отдельно (цена будет показываться только на кнопке)
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label for="tierButtonType">Тип содержимого кнопки</label>
+          <select id="tierButtonType" name="buttonType">
+            <option value="text" ${(!tier?.buttonType || tier?.buttonType === 'text') ? 'selected' : ''}>Текст (Buy)</option>
+            <option value="price" ${tier?.buttonType === 'price' ? 'selected' : ''}>Цена на кнопке</option>
+            <option value="status" ${tier?.buttonType === 'status' ? 'selected' : ''}>Статус (On sale/Sold out)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="tierSoldout" name="soldout" ${tier?.soldout ? 'checked' : ''}>
+            Билеты проданы
+          </label>
+        </div>
+        
         <div class="form-group">
           <label>
             <input type="checkbox" id="tierUseIndividualLink" name="useIndividualLink" ${tier?.useIndividualLink ? 'checked' : ''}>
@@ -1202,6 +1230,35 @@ class AdminPanel {
         </div>
       </form>
     `;
+  }
+
+  // Функция для валидации формы tier
+  validateTierForm() {
+    const buttonType = document.getElementById('tierButtonType')?.value;
+    const price = document.getElementById('tierPrice')?.value;
+    const warning = document.getElementById('tierPriceWarning');
+    
+    if (buttonType === 'price' && (!price || price.trim() === '')) {
+      if (warning) warning.style.display = 'block';
+      return false;
+    } else {
+      if (warning) warning.style.display = 'none';
+    }
+    return true;
+  }
+
+  // Инициализация обработчиков событий для tier формы
+  initializeTierFormHandlers() {
+    const buttonTypeSelect = document.getElementById('tierButtonType');
+    const priceInput = document.getElementById('tierPrice');
+    
+    if (buttonTypeSelect) {
+      buttonTypeSelect.addEventListener('change', () => this.validateTierForm());
+    }
+    
+    if (priceInput) {
+      priceInput.addEventListener('input', () => this.validate('tierPrice'));
+    }
   }
 
   getArtistForm(artist = null) {
@@ -2741,6 +2798,9 @@ class AdminPanel {
         
         this.initializeModalTranslationCountersWithRetry();
         this.initializeModalAutoResize();
+        
+        // Инициализация обработчиков для tier формы
+        this.initializeTierFormHandlers();
       }
     }, 100);
   }
@@ -2807,6 +2867,13 @@ class AdminPanel {
     e.preventDefault();
     
     const formId = e.target.id || e.target.getAttribute('id');
+    
+    // Валидация для tier формы
+    if (formId === 'dynamicForm' && this.editingItem?.type === 'tier') {
+      if (!this.validateTierForm()) {
+        return; // Останавливаем отправку формы при ошибке валидации
+      }
+    }
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
@@ -3036,6 +3103,9 @@ class AdminPanel {
     if (processedData.type === 'tier') {
       processedData.useIndividualLink = this._getCheckboxValue(data.useIndividualLink);
       processedData.individualLink = processedData.useIndividualLink ? data.individualLink : '';
+      processedData.hideprice = this._getCheckboxValue(data.hideprice);
+      processedData.soldout = this._getCheckboxValue(data.soldout);
+      // buttonType обрабатывается как есть (string)
     }
   }
 

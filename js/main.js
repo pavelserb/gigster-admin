@@ -1183,28 +1183,89 @@ function updateTickets() {
       const row = document.createElement('div');
       row.className = 'ticket-tier';
       
-      let noteHtml = '';
-      if (t.note) {
-        noteHtml = `<div class="tier-note">${getTranslation(t.note, '')}</div>`;
+      // Determine button content and style based on buttonType and soldout status
+      let buttonContent = '';
+      let buttonClass = 'tier-link';
+      let buttonDisabled = false;
+      
+      console.log('🌐 Tier:', t.name?.en, 'soldout:', t.soldout, 'price:', `"${t.price}"`, 'buttonType:', t.buttonType);
+      
+      // Определяем содержимое кнопки на основе buttonType и soldout статуса
+      switch (t.buttonType) {
+        case 'price':
+          if (t.soldout) {
+            buttonContent = getTranslation(t.note, 'Sold out');
+            buttonClass += ' sold-out';
+            buttonDisabled = true;
+            console.log('🌐 → buttonType: price, but soldout, showing Sold out');
+          } else if (t.price && t.price.trim()) {
+            buttonContent = getTranslation(t.price, '');
+            buttonClass += ' price-button';
+            console.log('🌐 → buttonType: price, showing price on button');
+          } else {
+            buttonContent = 'Buy';
+            buttonClass += ' buy-button';
+            console.log('🌐 → buttonType: price, but no price, showing Buy');
+          }
+          break;
+        case 'status':
+          if (t.soldout) {
+            buttonContent = getTranslation(t.note, 'Sold out');
+            buttonClass += ' sold-out';
+            buttonDisabled = true;
+            console.log('🌐 → buttonType: status, soldout, showing Sold out');
+          } else {
+            buttonContent = 'On sale';
+            buttonClass += ' status-button';
+            console.log('🌐 → buttonType: status, not soldout, showing On sale');
+          }
+          break;
+        case 'text':
+        default:
+          if (t.soldout) {
+            buttonContent = getTranslation(t.note, 'Sold out');
+            buttonClass += ' sold-out';
+            buttonDisabled = true;
+            console.log('🌐 → buttonType: text/default, but soldout, showing Sold out');
+          } else {
+            buttonContent = 'Buy';
+            buttonClass += ' buy-button';
+            console.log('🌐 → buttonType: text/default, showing Buy');
+          }
+          break;
       }
       
       let linkHtml = '';
+      if (!buttonDisabled) {
       if (t.useIndividualLink && t.individualLink) {
-        linkHtml = `<a href="${t.individualLink}" class="tier-link" target="_blank" rel="noopener noreferrer" data-track="TicketButtonClick">Buy</a>`;
+          linkHtml = `<a href="${t.individualLink}" class="${buttonClass}" target="_blank" rel="noopener noreferrer" data-track="TicketButtonClick">${buttonContent}</a>`;
+          console.log('🌐 → using individual link');
       } else if (CONFIG.ticketsURL) {
-        linkHtml = `<a href="${CONFIG.ticketsURL}" class="tier-link" target="_blank" rel="noopener noreferrer" data-track="TicketButtonClick">Buy</a>`;
+          linkHtml = `<a href="${CONFIG.ticketsURL}" class="${buttonClass}" target="_blank" rel="noopener noreferrer" data-track="TicketButtonClick">${buttonContent}</a>`;
+          console.log('🌐 → using CONFIG.ticketsURL');
+        } else {
+          console.log('🌐 → NO LINK AVAILABLE!');
+        }
+      } else {
+        linkHtml = `<span class="${buttonClass} disabled">${buttonContent}</span>`;
+        console.log('🌐 → button disabled, showing span');
       }
       
+      console.log('🌐 Final linkHtml:', linkHtml ? 'EXISTS' : 'EMPTY');
+      
       row.innerHTML = `
-        <div>
+        <div class="tier-left">
+          <div class="tier-basic">
           <strong>${getTranslation(t.name, 'Ticket Tier')}</strong>
-          <div class="muted">${getTranslation(t.desc, '') ?? ''}</div>
-          ${noteHtml}
+            ${t.desc ? `<div class="tier-desc muted">${getTranslation(t.desc, '')}</div>` : ''}
+          </div>
+          ${t.note && getTranslation(t.note, '').trim() ? `<div class="tier-note muted">${getTranslation(t.note, '')}</div>` : ''}
         </div>
         <div class="tier-right">
-          <div class="nowrap">${t.price ?? ''}</div>
+          ${t.price && t.price.trim() && !t.soldout && !t.hideprice && t.buttonType !== 'price' ? `<div class="tier-price nowrap">${t.price}</div>` : ''}
           ${linkHtml}
-        </div>`;
+        </div>
+      `;
       tiersWrap.appendChild(row);
     });
   }
@@ -1553,15 +1614,30 @@ function initMediaSlider() {
 
   // Update slide visibility with smooth transitions
   function updateSlides() {
-    // First, fade out all slides
-    slides.forEach((slide) => {
-      slide.classList.remove('active');
-    });
+    // Get current active slide
+    const currentActiveSlide = Array.from(slides).find(slide => slide.classList.contains('active'));
     
-    // Then, fade in the current slide
-    setTimeout(() => {
+    if (currentActiveSlide && currentActiveSlide !== slides[currentSlide]) {
+      // Fade out current active slide first
+      currentActiveSlide.classList.add('fading-out');
+      
+      // Wait for fade out to complete, then show new slide
+      setTimeout(() => {
+        // Remove fading-out class and active class from all slides
+        slides.forEach((slide) => {
+          slide.classList.remove('active', 'fading-out');
+        });
+        
+        // Show new slide
+        slides[currentSlide].classList.add('active');
+      }, 300); // Match the CSS transition duration
+        } else {
+      // If no slide is active or same slide, just update normally
+      slides.forEach((slide) => {
+        slide.classList.remove('active', 'fading-out');
+      });
       slides[currentSlide].classList.add('active');
-    }, 0); // Slightly longer delay for smoother transition
+    }
     
     // Update dots
     const dots = dotsContainer.querySelectorAll('.slider-dot');

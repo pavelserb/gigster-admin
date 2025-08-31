@@ -1148,7 +1148,7 @@ class AdminPanel {
         </div>
         <div class="form-group">
           <label for="tierPrice">Цена</label>
-          <input type="text" id="tierPrice" name="price" value="${tier?.price || ''}" required>
+          <input type="text" id="tierPrice" name="price" value="${tier?.price || ''}">
           <div id="tierPriceWarning" class="warning-message" style="display: none; color: #ff6b6b; font-size: 0.9em; margin-top: 5px;">
             ⚠️ При выборе "Цена на кнопке" поле "Цена" должно быть заполнено
           </div>
@@ -1167,7 +1167,7 @@ class AdminPanel {
               <div class="lang-input-group">
                 <span class="lang-flag">🇬🇧</span>
                 <span class="lang-label-fallback">EN:</span>
-                <input type="text" id="tierNote_en" name="note_en" data-lang="en" class="lang-input main-lang" placeholder="Примечание на английском" value="${this.getTranslationValue(tier?.note, 'en')}" oninput="admin.updateTranslationCounter('tierNote')">
+                <input type="text" id="tierNote_en" name="note_en" data-lang="en" class="lang-input main-lang" placeholder="Примечание на английском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
               </div>
             </div>
             <!-- Дополнительные языки (скрыты по умолчанию) -->
@@ -1175,12 +1175,12 @@ class AdminPanel {
               <div class="lang-input-group">
                 <span class="lang-flag">🇨🇿</span>
                 <span class="lang-label-fallback">CS:</span>
-                <input type="text" id="tierNote_cs" name="note_cs" data-lang="cs" class="lang-input" placeholder="Примечание на чешском" value="${this.getTranslationValue(tier?.note, 'cs')}" oninput="admin.updateTranslationCounter('tierNote')">
+                <input type="text" id="tierNote_cs" name="note_cs" data-lang="cs" class="lang-input" placeholder="Примечание на чешском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
               </div>
               <div class="lang-input-group">
                 <span class="lang-flag">🇺🇦</span>
                 <span class="lang-label-fallback">UK:</span>
-                <input type="text" id="tierNote_uk" name="note_uk" data-lang="uk" class="lang-input" placeholder="Примечание на украинском" value="${this.getTranslationValue(tier?.note, 'uk')}" oninput="admin.updateTranslationCounter('tierNote')">
+                <input type="text" id="tierNote_uk" name="note_uk" data-lang="uk" class="lang-input" placeholder="Примечание на украинском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
               </div>
               <div class="field-actions">
                 <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote')">Копировать EN</button>

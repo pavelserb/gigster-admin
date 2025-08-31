@@ -3242,7 +3242,16 @@ class AdminPanel {
       // buttonType обрабатывается как есть (string)
       
       // Обработка notes
+      console.log('🔧 Processing tier notes, raw data:', data);
       processedData.notes = this._processTierNotes(data);
+      console.log('🔧 Processed notes:', processedData.notes);
+      
+      // Удаляем плоские поля notes из processedData
+      Object.keys(processedData).forEach(key => {
+        if (key.startsWith('notes[')) {
+          delete processedData[key];
+        }
+      });
     }
   }
 
@@ -3250,27 +3259,42 @@ class AdminPanel {
     const notes = [];
     const noteKeys = Object.keys(data).filter(key => key.startsWith('notes['));
     
+    console.log('🔧 Found note keys:', noteKeys);
+    
     // Группируем данные по индексам
     const noteGroups = {};
     noteKeys.forEach(key => {
-      const match = key.match(/notes\[(\d+)\]\[(\w+)_(\w+)\]/);
+      const match = key.match(/notes\[(\d+)\]\[(\w+)(?:_(\w+))?\]/);
+      console.log('🔧 Processing key:', key, 'match:', match);
+      
       if (match) {
         const [, index, field, lang] = match;
         if (!noteGroups[index]) {
           noteGroups[index] = { text: {}, type: '' };
         }
-        if (field === 'text') {
+        
+        if (field === 'text' && lang) {
+          // Обрабатываем text_en, text_cs, text_uk
           noteGroups[index].text[lang] = data[key];
+          console.log('🔧 Added text for', lang, ':', data[key]);
         } else if (field === 'type') {
+          // Обрабатываем type
           noteGroups[index].type = data[key];
+          console.log('🔧 Added type:', data[key]);
         }
       }
     });
     
-    // Преобразуем в массив
+    console.log('🔧 Note groups:', noteGroups);
+    
+    // Преобразуем в массив и удаляем пустые примечания
     Object.keys(noteGroups).forEach(index => {
       const note = noteGroups[index];
-      if (note.text.en || note.text.cs || note.text.uk) {
+      // Проверяем, что есть хотя бы один непустой текст
+      const hasText = note.text.en || note.text.cs || note.text.uk;
+      console.log('🔧 Note', index, 'has text:', hasText, 'text:', note.text);
+      
+      if (hasText) {
         notes.push({
           text: note.text,
           type: note.type || 'default'
@@ -3278,6 +3302,7 @@ class AdminPanel {
       }
     });
     
+    console.log('🔧 Final notes array:', notes);
     return notes;
   }
 

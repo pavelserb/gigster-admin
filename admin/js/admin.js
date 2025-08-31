@@ -1236,8 +1236,6 @@ class AdminPanel {
 
   // Рендеринг примечаний tier
   renderTierNotes(notes) {
-    console.log('🔧 Rendering tier notes:', notes);
-    
     if (!notes || notes.length === 0) {
       return '<div class="no-notes">Нет примечаний</div>';
     }
@@ -1257,19 +1255,19 @@ class AdminPanel {
               <div class="lang-input-group">
                 <span class="lang-flag">🇬🇧</span>
                 <span class="lang-label-fallback">EN:</span>
-                <input type="text" id="tierNote${index}_en" name="notes[${index}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="${this.getTranslationValue(note?.text, 'en')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_en" name="notes[${index}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="${note?.text?.en || ''}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
             </div>
             <div class="compact-translation-content">
               <div class="lang-input-group">
                 <span class="lang-flag">🇨🇿</span>
                 <span class="lang-label-fallback">CS:</span>
-                <input type="text" id="tierNote${index}_cs" name="notes[${index}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="${this.getTranslationValue(note?.text, 'cs')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_cs" name="notes[${index}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="${note?.text?.cs || ''}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
               <div class="lang-input-group">
                 <span class="lang-flag">🇺🇦</span>
                 <span class="lang-label-fallback">UK:</span>
-                <input type="text" id="tierNote${index}_uk" name="notes[${index}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="${this.getTranslationValue(note?.text, 'uk')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+                <input type="text" id="tierNote${index}_uk" name="notes[${index}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="${note?.text?.uk || ''}" oninput="admin.updateTranslationCounter('tierNote${index}')">
               </div>
               <div class="field-actions">
                 <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote${index}')">Копировать EN</button>
@@ -3259,14 +3257,10 @@ class AdminPanel {
     const notes = [];
     const noteKeys = Object.keys(data).filter(key => key.startsWith('notes['));
     
-    console.log('🔧 Processing notes, all data keys:', Object.keys(data));
-    console.log('🔧 Found note keys:', noteKeys);
-    
     // Группируем данные по индексам
     const noteGroups = {};
     noteKeys.forEach(key => {
       const match = key.match(/notes\[(\d+)\]\[(\w+)_(\w+)\]|notes\[(\d+)\]\[(\w+)\]/);
-      console.log('🔧 Processing key:', key, 'match:', match, 'value:', data[key]);
       
       if (match) {
         if (match[3]) {
@@ -3278,7 +3272,6 @@ class AdminPanel {
           
           if (field === 'text') {
             noteGroups[index].text[lang] = data[key];
-            console.log('🔧 Added text for', lang, ':', data[key]);
           }
         } else {
           // Формат: notes[0][type] -> match[4] = index, match[5] = field
@@ -3290,32 +3283,25 @@ class AdminPanel {
           
           if (field === 'type') {
             noteGroups[index].type = data[key];
-            console.log('🔧 Added type for index', index, ':', data[key]);
           }
         }
       }
     });
-    
-    console.log('🔧 Note groups:', noteGroups);
     
     // Преобразуем в массив и удаляем пустые примечания
     Object.keys(noteGroups).forEach(index => {
       const note = noteGroups[index];
       // Проверяем, что есть хотя бы один непустой текст
       const hasText = note.text.en || note.text.cs || note.text.uk;
-      console.log('🔧 Note', index, 'has text:', hasText, 'text:', note.text);
       
       if (hasText) {
-        const finalType = note.type || 'default';
-        console.log('🔧 Final type for note', index, ':', note.type, '->', finalType);
         notes.push({
           text: note.text,
-          type: finalType
+          type: note.type || 'default'
         });
       }
     });
     
-    console.log('🔧 Final notes array:', notes);
     return notes;
   }
 

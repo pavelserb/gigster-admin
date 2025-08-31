@@ -3242,9 +3242,7 @@ class AdminPanel {
       // buttonType обрабатывается как есть (string)
       
       // Обработка notes
-      console.log('🔧 Processing tier notes, raw data:', data);
       processedData.notes = this._processTierNotes(data);
-      console.log('🔧 Processed notes:', processedData.notes);
       
       // Удаляем плоские поля notes из processedData
       Object.keys(processedData).forEach(key => {
@@ -3259,13 +3257,10 @@ class AdminPanel {
     const notes = [];
     const noteKeys = Object.keys(data).filter(key => key.startsWith('notes['));
     
-    console.log('🔧 Found note keys:', noteKeys);
-    
     // Группируем данные по индексам
     const noteGroups = {};
     noteKeys.forEach(key => {
       const match = key.match(/notes\[(\d+)\]\[(\w+)(?:_(\w+))?\]/);
-      console.log('🔧 Processing key:', key, 'match:', match);
       
       if (match) {
         const [, index, field, lang] = match;
@@ -3276,23 +3271,18 @@ class AdminPanel {
         if (field === 'text' && lang) {
           // Обрабатываем text_en, text_cs, text_uk
           noteGroups[index].text[lang] = data[key];
-          console.log('🔧 Added text for', lang, ':', data[key]);
         } else if (field === 'type') {
           // Обрабатываем type
           noteGroups[index].type = data[key];
-          console.log('🔧 Added type:', data[key]);
         }
       }
     });
-    
-    console.log('🔧 Note groups:', noteGroups);
     
     // Преобразуем в массив и удаляем пустые примечания
     Object.keys(noteGroups).forEach(index => {
       const note = noteGroups[index];
       // Проверяем, что есть хотя бы один непустой текст
       const hasText = note.text.en || note.text.cs || note.text.uk;
-      console.log('🔧 Note', index, 'has text:', hasText, 'text:', note.text);
       
       if (hasText) {
         notes.push({
@@ -3302,7 +3292,6 @@ class AdminPanel {
       }
     });
     
-    console.log('🔧 Final notes array:', notes);
     return notes;
   }
 
@@ -3432,8 +3421,8 @@ class AdminPanel {
     }
 
     if (type === 'tier') {
-      processedData.useIndividualLink = data.useIndividualLink === 'on' || data.useIndividualLink === true;
-      processedData.individualLink = processedData.useIndividualLink ? data.individualLink : '';
+      processedData.type = 'tier';
+      this._processTierCheckboxes(processedData, data);
     }
     
     switch (type) {

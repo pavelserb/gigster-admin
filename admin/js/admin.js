@@ -3289,7 +3289,7 @@ class AdminPanel {
           
           if (field === 'type') {
             noteGroups[index].type = data[key];
-            console.log('🔧 Added type:', data[key]);
+            console.log('🔧 Added type for index', index, ':', data[key]);
           }
         }
       }
@@ -3305,9 +3305,11 @@ class AdminPanel {
       console.log('🔧 Note', index, 'has text:', hasText, 'text:', note.text);
       
       if (hasText) {
+        const finalType = note.type || 'default';
+        console.log('🔧 Final type for note', index, ':', note.type, '->', finalType);
         notes.push({
           text: note.text,
-          type: note.type || 'default'
+          type: finalType
         });
       }
     });

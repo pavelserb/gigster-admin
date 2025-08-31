@@ -2360,6 +2360,47 @@ p {
   display: inline-block;
 }
 
+.tier-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tier-note-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tier-note-badge.default {
+  background: rgba(248, 218, 47, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(248, 218, 47, 0.3);
+}
+
+.tier-note-badge.warning {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.tier-note-badge.success {
+  background: rgba(31, 209, 168, 0.15);
+  color: #1fd1a8;
+  border: 1px solid rgba(31, 209, 168, 0.3);
+}
+
+.tier-note-badge.info {
+  background: rgba(100, 149, 237, 0.15);
+  color: #6495ed;
+  border: 1px solid rgba(100, 149, 237, 0.3);
+}
+
 .tier-right {
   display: flex;
   flex-direction: column;

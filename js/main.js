@@ -1259,7 +1259,7 @@ function updateTickets() {
           <strong>${getTranslation(t.name, 'Ticket Tier')}</strong>
             ${t.desc ? `<div class="tier-desc muted">${getTranslation(t.desc, '')}</div>` : ''}
           </div>
-          ${t.note && getTranslation(t.note, '').trim() ? `<div class="tier-note muted">${getTranslation(t.note, '')}</div>` : ''}
+          ${t.notes && t.notes.length > 0 ? `<div class="tier-notes">${t.notes.map(note => `<div class="tier-note-badge ${note.type || 'default'}">${getTranslation(note.text, '')}</div>`).join('')}</div>` : ''}
         </div>
         <div class="tier-right">
           ${t.price && t.price.trim() && !t.soldout && !t.hideprice && t.buttonType !== 'price' ? `<div class="tier-price nowrap">${t.price}</div>` : ''}

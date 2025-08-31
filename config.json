@@ -181,11 +181,16 @@
         "cs": "Stojící prostor",
         "uk": "Стояча зона"
       },
-      "note": {
-        "en": "sold out",
-        "cs": "vyprodáno",
-        "uk": "розпродано"
-      },
+      "notes": [
+        {
+          "text": {
+            "en": "sold out",
+            "cs": "vyprodáno",
+            "uk": "розпродано"
+          },
+          "type": "warning"
+        }
+      ],
       "useIndividualLink": false,
       "soldout": true,
       "buttonType": "price",
@@ -204,11 +209,7 @@
         "cs": "Rychlá cesta, VIP zóna",
         "uk": "Швидка доріжка, VIP зона"
       },
-      "note": {
-        "en": "",
-        "cs": "",
-        "uk": ""
-      },
+      "notes": [],
       "useIndividualLink": false,
       "soldout": false,
       "buttonType": "price",

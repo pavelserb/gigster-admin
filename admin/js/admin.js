@@ -1154,40 +1154,13 @@ class AdminPanel {
           </div>
         </div>
         <div class="form-group">
-          <div class="field-label-with-counter">
-            <label>Примечание</label>
-            <div class="translation-counter" id="tierNote-counter">
-              <span class="counter-icon">🌐</span>
-              <span class="counter-text">0/3</span>
-            </div>
+          <label>Примечания (бейджи)</label>
+          <div id="tierNotesContainer">
+            ${this.renderTierNotes(tier?.notes || [])}
           </div>
-          <div class="compact-translation-field" data-field="tierNote">
-            <!-- Основной язык всегда видим -->
-            <div class="main-lang-container" onclick="admin.toggleTranslationField('tierNote')">
-              <div class="lang-input-group">
-                <span class="lang-flag">🇬🇧</span>
-                <span class="lang-label-fallback">EN:</span>
-                <input type="text" id="tierNote_en" name="note_en" data-lang="en" class="lang-input main-lang" placeholder="Примечание на английском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
-              </div>
-            </div>
-            <!-- Дополнительные языки (скрыты по умолчанию) -->
-            <div class="compact-translation-content">
-              <div class="lang-input-group">
-                <span class="lang-flag">🇨🇿</span>
-                <span class="lang-label-fallback">CS:</span>
-                <input type="text" id="tierNote_cs" name="note_cs" data-lang="cs" class="lang-input" placeholder="Примечание на чешском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
-              </div>
-              <div class="lang-input-group">
-                <span class="lang-flag">🇺🇦</span>
-                <span class="lang-label-fallback">UK:</span>
-                <input type="text" id="tierNote_uk" name="note_uk" data-lang="uk" class="lang-input" placeholder="Примечание на украинском" value="${this.getTranslationValue(tier?.note, '')}" oninput="admin.updateTranslationCounter('tierNote')">
-              </div>
-              <div class="field-actions">
-                <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote')">Копировать EN</button>
-                <button type="button" class="clear-all" onclick="admin.clearAllLanguagesDynamic('tierNote')">Очистить все</button>
-              </div>
-            </div>
-          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="admin.addTierNote()" style="margin-top: 0.5rem;">
+            + Добавить примечание
+          </button>
         </div>
         
         <!-- Новые поля для управления отображением -->
@@ -1258,6 +1231,167 @@ class AdminPanel {
     
     if (priceInput) {
       priceInput.addEventListener('input', () => this.validateTierForm());
+    }
+  }
+
+  // Рендеринг примечаний tier
+  renderTierNotes(notes) {
+    if (!notes || notes.length === 0) {
+      return '<div class="no-notes">Нет примечаний</div>';
+    }
+    
+    return notes.map((note, index) => `
+      <div class="tier-note-item" data-index="${index}">
+        <div class="note-content">
+          <div class="field-label-with-counter">
+            <label>Примечание ${index + 1}</label>
+            <div class="translation-counter" id="tierNote${index}-counter">
+              <span class="counter-icon">🌐</span>
+              <span class="counter-text">0/3</span>
+            </div>
+          </div>
+          <div class="compact-translation-field" data-field="tierNote${index}">
+            <div class="main-lang-container" onclick="admin.toggleTranslationField('tierNote${index}')">
+              <div class="lang-input-group">
+                <span class="lang-flag">🇬🇧</span>
+                <span class="lang-label-fallback">EN:</span>
+                <input type="text" id="tierNote${index}_en" name="notes[${index}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+              </div>
+            </div>
+            <div class="compact-translation-content">
+              <div class="lang-input-group">
+                <span class="lang-flag">🇨🇿</span>
+                <span class="lang-label-fallback">CS:</span>
+                <input type="text" id="tierNote${index}_cs" name="notes[${index}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+              </div>
+              <div class="lang-input-group">
+                <span class="lang-flag">🇺🇦</span>
+                <span class="lang-label-fallback">UK:</span>
+                <input type="text" id="tierNote${index}_uk" name="notes[${index}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="${this.getTranslationValue(note?.text, '')}" oninput="admin.updateTranslationCounter('tierNote${index}')">
+              </div>
+              <div class="field-actions">
+                <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote${index}')">Копировать EN</button>
+                <button type="button" class="clear-all" onclick="admin.clearAllLanguagesDynamic('tierNote${index}')">Очистить все</button>
+              </div>
+            </div>
+          </div>
+          <div class="note-type-selector">
+            <label>Тип бейджа:</label>
+            <select name="notes[${index}][type]">
+              <option value="default" ${note?.type === 'default' ? 'selected' : ''}>Обычный</option>
+              <option value="warning" ${note?.type === 'warning' ? 'selected' : ''}>Предупреждение</option>
+              <option value="success" ${note?.type === 'success' ? 'selected' : ''}>Успех</option>
+              <option value="info" ${note?.type === 'info' ? 'selected' : ''}>Информация</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm" onclick="admin.removeTierNote(${index})" style="margin-left: 0.5rem;">
+          Удалить
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // Добавление нового примечания
+  addTierNote() {
+    const container = document.getElementById('tierNotesContainer');
+    const currentNotes = container.querySelectorAll('.tier-note-item');
+    const newIndex = currentNotes.length;
+    
+    const newNoteHtml = `
+      <div class="tier-note-item" data-index="${newIndex}">
+        <div class="note-content">
+          <div class="field-label-with-counter">
+            <label>Примечание ${newIndex + 1}</label>
+            <div class="translation-counter" id="tierNote${newIndex}-counter">
+              <span class="counter-icon">🌐</span>
+              <span class="counter-text">0/3</span>
+            </div>
+          </div>
+          <div class="compact-translation-field" data-field="tierNote${newIndex}">
+            <div class="main-lang-container" onclick="admin.toggleTranslationField('tierNote${newIndex}')">
+              <div class="lang-input-group">
+                <span class="lang-flag">🇬🇧</span>
+                <span class="lang-label-fallback">EN:</span>
+                <input type="text" id="tierNote${newIndex}_en" name="notes[${newIndex}][text_en]" data-lang="en" class="lang-input main-lang" placeholder="Текст на английском" value="" oninput="admin.updateTranslationCounter('tierNote${newIndex}')">
+              </div>
+            </div>
+            <div class="compact-translation-content">
+              <div class="lang-input-group">
+                <span class="lang-flag">🇨🇿</span>
+                <span class="lang-label-fallback">CS:</span>
+                <input type="text" id="tierNote${newIndex}_cs" name="notes[${newIndex}][text_cs]" data-lang="cs" class="lang-input" placeholder="Текст на чешском" value="" oninput="admin.updateTranslationCounter('tierNote${newIndex}')">
+              </div>
+              <div class="lang-input-group">
+                <span class="lang-flag">🇺🇦</span>
+                <span class="lang-label-fallback">UK:</span>
+                <input type="text" id="tierNote${newIndex}_uk" name="notes[${newIndex}][text_uk]" data-lang="uk" class="lang-input" placeholder="Текст на украинском" value="" oninput="admin.updateTranslationCounter('tierNote${newIndex}')">
+              </div>
+              <div class="field-actions">
+                <button type="button" class="copy-main" onclick="admin.copyMainLanguageDynamic('tierNote${newIndex}')">Копировать EN</button>
+                <button type="button" class="clear-all" onclick="admin.clearAllLanguagesDynamic('tierNote${newIndex}')">Очистить все</button>
+              </div>
+            </div>
+          </div>
+          <div class="note-type-selector">
+            <label>Тип бейджа:</label>
+            <select name="notes[${newIndex}][type]">
+              <option value="default" selected>Обычный</option>
+              <option value="warning">Предупреждение</option>
+              <option value="success">Успех</option>
+              <option value="info">Информация</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm" onclick="admin.removeTierNote(${newIndex})" style="margin-left: 0.5rem;">
+          Удалить
+        </button>
+      </div>
+    `;
+    
+    // Убираем "Нет примечаний" если есть
+    const noNotes = container.querySelector('.no-notes');
+    if (noNotes) {
+      noNotes.remove();
+    }
+    
+    container.insertAdjacentHTML('beforeend', newNoteHtml);
+    this.initializeModalTranslationCounters();
+  }
+
+  // Удаление примечания
+  removeTierNote(index) {
+    const container = document.getElementById('tierNotesContainer');
+    const noteItem = container.querySelector(`[data-index="${index}"]`);
+    
+    if (noteItem) {
+      noteItem.remove();
+      
+      // Переиндексируем оставшиеся элементы
+      const remainingNotes = container.querySelectorAll('.tier-note-item');
+      remainingNotes.forEach((item, newIndex) => {
+        item.setAttribute('data-index', newIndex);
+        item.querySelector('label').textContent = `Примечание ${newIndex + 1}`;
+        
+        // Обновляем name атрибуты
+        const inputs = item.querySelectorAll('input, select');
+        inputs.forEach(input => {
+          if (input.name) {
+            input.name = input.name.replace(/\[\d+\]/, `[${newIndex}]`);
+          }
+        });
+        
+        // Обновляем onclick атрибуты
+        const removeBtn = item.querySelector('.btn-danger');
+        if (removeBtn) {
+          removeBtn.setAttribute('onclick', `admin.removeTierNote(${newIndex})`);
+        }
+      });
+      
+      // Если нет примечаний, показываем "Нет примечаний"
+      if (remainingNotes.length === 0) {
+        container.innerHTML = '<div class="no-notes">Нет примечаний</div>';
+      }
     }
   }
 
@@ -3106,7 +3240,45 @@ class AdminPanel {
       processedData.hideprice = this._getCheckboxValue(data.hideprice);
       processedData.soldout = this._getCheckboxValue(data.soldout);
       // buttonType обрабатывается как есть (string)
+      
+      // Обработка notes
+      processedData.notes = this._processTierNotes(data);
     }
+  }
+
+  _processTierNotes(data) {
+    const notes = [];
+    const noteKeys = Object.keys(data).filter(key => key.startsWith('notes['));
+    
+    // Группируем данные по индексам
+    const noteGroups = {};
+    noteKeys.forEach(key => {
+      const match = key.match(/notes\[(\d+)\]\[(\w+)_(\w+)\]/);
+      if (match) {
+        const [, index, field, lang] = match;
+        if (!noteGroups[index]) {
+          noteGroups[index] = { text: {}, type: '' };
+        }
+        if (field === 'text') {
+          noteGroups[index].text[lang] = data[key];
+        } else if (field === 'type') {
+          noteGroups[index].type = data[key];
+        }
+      }
+    });
+    
+    // Преобразуем в массив
+    Object.keys(noteGroups).forEach(index => {
+      const note = noteGroups[index];
+      if (note.text.en || note.text.cs || note.text.uk) {
+        notes.push({
+          text: note.text,
+          type: note.type || 'default'
+        });
+      }
+    });
+    
+    return notes;
   }
 
   _getCheckboxValue(value) {

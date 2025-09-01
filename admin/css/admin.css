@@ -3845,6 +3845,23 @@ select:focus {
   border-radius: 8px;
 }
 
+.tier-note-item .order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.tier-note-item .order-controls .order-btn {
+  padding: 2px 6px;
+  font-size: 12px;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .note-content {
   display: flex;
   flex-direction: column;

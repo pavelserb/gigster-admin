@@ -1242,6 +1242,20 @@ class AdminPanel {
     
     return notes.map((note, index) => `
       <div class="tier-note-item" data-index="${index}">
+        <div class="order-controls">
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveTierNote(${index}, 'up')" 
+                  ${index === 0 ? 'disabled' : ''} 
+                  title="Переместить вверх">
+            ↑
+          </button>
+          <button class="btn btn-xs btn-secondary order-btn" 
+                  onclick="admin.moveTierNote(${index}, 'down')" 
+                  ${index === notes.length - 1 ? 'disabled' : ''} 
+                  title="Переместить вниз">
+            ↓
+          </button>
+        </div>
         <div class="note-content">
           <div class="field-label-with-counter">
             <label>Примечание ${index + 1}</label>
@@ -1359,6 +1373,45 @@ class AdminPanel {
     this.initializeModalTranslationCounters();
   }
 
+  // Перемещение примечания
+  moveTierNote(index, direction) {
+    // Получаем текущий tier из editingItem
+    if (!this.editingItem || this.editingItem.type !== 'tier') {
+      this.showError('Ошибка: не найден редактируемый tier');
+      return;
+    }
+    
+    const tierIndex = this.editingItem.index;
+    const tier = this.config.tiers[tierIndex];
+    
+    if (!tier || !tier.notes || index < 0 || index >= tier.notes.length) {
+      this.showError('Ошибка: примечание не найдено');
+      return;
+    }
+
+    let newIndex;
+    if (direction === 'up' && index > 0) {
+      newIndex = index - 1;
+    } else if (direction === 'down' && index < tier.notes.length - 1) {
+      newIndex = index + 1;
+    } else {
+      return; // Invalid move
+    }
+
+    // Swap elements
+    [tier.notes[index], tier.notes[newIndex]] = [tier.notes[newIndex], tier.notes[index]];
+
+    // Re-render the notes in the modal
+    const container = document.getElementById('tierNotesContainer');
+    if (container) {
+      container.innerHTML = this.renderTierNotes(tier.notes);
+      this.initializeModalTranslationCounters();
+    }
+    
+    // Show success message
+    this.showSuccess(`Примечание перемещено ${direction === 'up' ? 'вверх' : 'вниз'}`);
+  }
+
   // Удаление примечания
   removeTierNote(index) {
     const container = document.getElementById('tierNotesContainer');
@@ -1385,6 +1438,18 @@ class AdminPanel {
         const removeBtn = item.querySelector('.btn-danger');
         if (removeBtn) {
           removeBtn.setAttribute('onclick', `admin.removeTierNote(${newIndex})`);
+        }
+        
+        // Обновляем onclick атрибуты для кнопок порядка
+        const upBtn = item.querySelector('.order-btn[onclick*="up"]');
+        const downBtn = item.querySelector('.order-btn[onclick*="down"]');
+        if (upBtn) {
+          upBtn.setAttribute('onclick', `admin.moveTierNote(${newIndex}, 'up')`);
+          upBtn.disabled = newIndex === 0;
+        }
+        if (downBtn) {
+          downBtn.setAttribute('onclick', `admin.moveTierNote(${newIndex}, 'down')`);
+          downBtn.disabled = newIndex === remainingNotes.length - 1;
         }
       });
       

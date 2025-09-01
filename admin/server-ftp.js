@@ -941,6 +941,44 @@ app.get('/', (req, res) => {
 // Create temp directory
 app.use('/admin/temp', express.static(path.join(__dirname, 'temp')));
 
+// Image optimization endpoint
+app.get('/admin/api/optimize-image', authenticateToken, async (req, res) => {
+  try {
+    const { url, width, height, quality, format, fit } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+
+    // Parse parameters
+    const targetWidth = parseInt(width) || 800;
+    const targetHeight = parseInt(height) || 600;
+    const targetQuality = parseFloat(quality) || 0.8;
+    const targetFormat = format || 'webp';
+    const targetFit = fit || 'crop';
+
+    // For now, we'll return the original URL with optimization parameters
+    // In production, you would implement actual image processing here
+    const optimizedUrl = `${url}?w=${targetWidth}&h=${targetHeight}&q=${targetQuality}&f=${targetFormat}&fit=${targetFit}`;
+    
+    res.json({
+      success: true,
+      originalUrl: url,
+      optimizedUrl: optimizedUrl,
+      settings: {
+        width: targetWidth,
+        height: targetHeight,
+        quality: targetQuality,
+        format: targetFormat,
+        fit: targetFit
+      }
+    });
+  } catch (error) {
+    console.error('Error optimizing image:', error);
+    res.status(500).json({ error: 'Image optimization failed' });
+  }
+});
+
 // Serve static assets from FTP (proxy to static hosting)
 app.use('/assets', async (req, res, next) => {
   try {

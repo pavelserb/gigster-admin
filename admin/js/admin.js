@@ -267,9 +267,6 @@ class AdminPanel {
     
     // Preload critical resources
     this.preloadCriticalResources();
-    
-    // Setup image optimization
-    this.setupImageOptimization();
   }
   
   // Setup form debouncing for better performance
@@ -338,94 +335,143 @@ class AdminPanel {
     // });
   }
   
-  // Image optimization functions for admin panel
-  optimizeImageForContext(imagePath, context) {
-    const optimizationSettings = {
+  // Image optimization system
+  setupImageOptimization() {
+    // Define optimal sizes for different contexts
+    this.imageOptimizationSettings = {
       hero: { width: 1920, height: 1080, quality: 0.9, format: 'webp' },
-      artist: { width: 240, height: 240, quality: 0.8, format: 'webp' },
+      artist: { width: 400, height: 400, quality: 0.8, format: 'webp' },
       venue: { width: 800, height: 400, quality: 0.8, format: 'webp' },
       update: { width: 800, height: 600, quality: 0.8, format: 'webp' },
       thumbnail: { width: 300, height: 200, quality: 0.7, format: 'webp' },
       gallery: { width: 1200, height: 800, quality: 0.9, format: 'webp' }
     };
-    
-    const settings = optimizationSettings[context] || optimizationSettings.thumbnail;
-    
-    // Create optimized URL with parameters
-    const url = new URL(imagePath, window.location.origin);
-    url.searchParams.set('w', settings.width);
-    url.searchParams.set('h', settings.height);
-    url.searchParams.set('fit', 'crop');
-    url.searchParams.set('q', settings.quality);
-    url.searchParams.set('f', settings.format);
-    
-    return url.toString();
-  }
-  
-  // Auto-optimize images when selecting them in forms
-  setupImageOptimization() {
-    // Add optimization buttons to image selection areas
+
+    // Add optimization buttons to image fields
     this.addOptimizationButtons();
     
-    // Auto-optimize when images are selected
+    // Setup auto-optimization for file manager
     this.setupAutoOptimization();
   }
-  
+
   addOptimizationButtons() {
-    // Add optimization buttons to various image selection areas
-    const imageAreas = [
-      { selector: '#heroBackground', context: 'hero' },
-      { selector: '#artistPhoto', context: 'artist' },
-      { selector: '#venuePhoto', context: 'venue' },
-      { selector: '#updateThumb', context: 'thumbnail' },
-      { selector: '#updateMedia', context: 'update' }
+    const imageFields = [
+      { selector: '#heroBackground', context: 'hero', label: 'Hero Background' },
+      { selector: '#artistPhoto', context: 'artist', label: 'Artist Photo' },
+      { selector: '#venuePhoto', context: 'venue', label: 'Venue Photo' },
+      { selector: '#updateThumb', context: 'thumbnail', label: 'Update Thumbnail' },
+      { selector: '#updateMedia', context: 'update', label: 'Update Media' }
     ];
-    
-    imageAreas.forEach(area => {
-      const element = document.querySelector(area.selector);
+
+    imageFields.forEach(field => {
+      const element = document.querySelector(field.selector);
       if (element) {
-        this.addOptimizationButton(element, area.context);
+        this.addOptimizationButton(element, field.context, field.label);
       }
     });
   }
-  
-  addOptimizationButton(container, context) {
+
+  addOptimizationButton(inputElement, context, label) {
+    const container = inputElement.parentNode;
+    
     // Create optimization button
     const optimizeBtn = document.createElement('button');
     optimizeBtn.type = 'button';
-    optimizeBtn.className = 'btn btn-secondary btn-sm';
+    optimizeBtn.className = 'btn-optimize';
     optimizeBtn.innerHTML = '🔧 Оптимизировать';
-    optimizeBtn.onclick = () => this.optimizeSelectedImage(container, context);
+    optimizeBtn.title = `Оптимизировать для ${label}`;
+    optimizeBtn.onclick = () => this.optimizeSelectedImage(inputElement, context);
     
-    // Insert button after the input
-    container.parentNode.insertBefore(optimizeBtn, container.nextSibling);
+    // Insert button after input
+    container.insertBefore(optimizeBtn, inputElement.nextSibling);
   }
-  
-  optimizeSelectedImage(container, context) {
-    const currentValue = container.value;
+
+  async optimizeSelectedImage(inputElement, context) {
+    const currentValue = inputElement.value;
     if (!currentValue) {
       this.showError('Сначала выберите изображение');
       return;
     }
-    
-    const optimizedUrl = this.optimizeImageForContext(currentValue, context);
-    container.value = optimizedUrl;
-    
-    this.showSuccess(`Изображение оптимизировано для ${context}`);
+
+    const settings = this.imageOptimizationSettings[context];
+    if (!settings) {
+      this.showError('Неизвестный контекст оптимизации');
+      return;
+    }
+
+    try {
+      // Create optimized URL
+      const optimizedUrl = await this.createOptimizedImageUrl(currentValue, settings);
+      inputElement.value = optimizedUrl;
+      
+      this.showSuccess(`Изображение оптимизировано для ${context} (${settings.width}x${settings.height})`);
+    } catch (error) {
+      this.showError('Ошибка оптимизации изображения');
+    }
   }
-  
+
+  async createOptimizedImageUrl(originalUrl, settings) {
+    try {
+      const params = new URLSearchParams({
+        url: originalUrl,
+        width: settings.width,
+        height: settings.height,
+        quality: settings.quality,
+        format: settings.format,
+        fit: 'crop'
+      });
+
+      const response = await fetch(`/admin/api/optimize-image?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.optimizedUrl;
+      } else {
+        // Fallback to simple URL parameters
+        const url = new URL(originalUrl, window.location.origin);
+        url.searchParams.set('w', settings.width);
+        url.searchParams.set('h', settings.height);
+        url.searchParams.set('fit', 'crop');
+        url.searchParams.set('q', settings.quality);
+        url.searchParams.set('f', settings.format);
+        
+        return url.toString();
+      }
+    } catch (error) {
+      // Fallback to simple URL parameters
+      const url = new URL(originalUrl, window.location.origin);
+      url.searchParams.set('w', settings.width);
+      url.searchParams.set('h', settings.height);
+      url.searchParams.set('fit', 'crop');
+      url.searchParams.set('q', settings.quality);
+      url.searchParams.set('f', settings.format);
+      
+      return url.toString();
+    }
+  }
+
   setupAutoOptimization() {
-    // Auto-optimize images when they're selected from file manager
-    document.addEventListener('imageSelected', (e) => {
+    // Auto-optimize when images are selected from file manager
+    document.addEventListener('imageSelected', async (e) => {
       const { imagePath, context } = e.detail;
       if (imagePath && context) {
-        const optimizedUrl = this.optimizeImageForContext(imagePath, context);
-        // Update the corresponding input field
-        this.updateImageField(context, optimizedUrl);
+        const settings = this.imageOptimizationSettings[context];
+        if (settings) {
+          try {
+            const optimizedUrl = await this.createOptimizedImageUrl(imagePath, settings);
+            this.updateImageField(context, optimizedUrl);
+          } catch (error) {
+            // Silent fail for auto-optimization
+          }
+        }
       }
     });
   }
-  
+
   updateImageField(context, optimizedUrl) {
     const fieldMap = {
       hero: '#heroBackground',
@@ -668,6 +714,9 @@ class AdminPanel {
 
     // Initialize auto-resize for textareas
     this.initializeAutoResize();
+
+    // Initialize image optimization
+    this.setupImageOptimization();
 
     // Bind category management events
     const addCategoryBtn = document.getElementById('addCategoryBtn');

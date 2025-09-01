@@ -7,29 +7,6 @@ const SUPPORTED_LANGS = ['en', 'cs', 'uk'];
 // Initialize UpdatesManager
 let updatesManager = null;
 
-// Image optimization settings
-const IMAGE_OPTIMIZATION = {
-  // Recommended sizes for different contexts
-  sizes: {
-    hero: { width: 1920, height: 1080 },
-    thumbnail: { width: 300, height: 200 },
-    artist: { width: 240, height: 240 },
-    venue: { width: 800, height: 400 },
-    update: { width: 800, height: 600 },
-    gallery: { width: 1200, height: 800 }
-  },
-  
-  // Quality settings
-  quality: {
-    high: 0.9,
-    medium: 0.7,
-    low: 0.5
-  },
-  
-  // Format preferences
-  formats: ['webp', 'jpg', 'png']
-};
-
 // Detect browser language and return supported language
 function detectBrowserLanguage() {
   // Priority 1: Saved language from localStorage
@@ -469,9 +446,6 @@ async function init() {
     
     // Initialize media slider
     initMediaSlider();
-    
-    // Optimize all images
-    optimizeAllImages();
 
   // Respect prefers-reduced-motion
   const heroVideo = document.getElementById('heroVideo');
@@ -2219,94 +2193,11 @@ function setupMapTouchHandling() {
 
 // Функция удалена - дублирование с escapeHTML в i18n.js
 
-// Image optimization functions
-function optimizeImage(img, context = 'general') {
-  // Add loading optimization
-  img.loading = 'lazy';
-  
-  // Add error handling
-  img.onerror = function() {
-    this.style.display = 'none';
-    console.warn('🌐 Main.js: Failed to load image:', this.src);
-  };
-  
-  // Add CSS classes based on context
-  if (context === 'hero') {
-    img.classList.add('hero-bg');
-  } else if (context === 'artist') {
-    img.classList.add('artist-photo');
-  } else if (context === 'venue') {
-    img.classList.add('venue-photo');
-  } else if (context === 'update') {
-    img.classList.add('update-media');
-  }
-  
-  // Add responsive image support
-  if (img.src && !img.src.includes('data:')) {
-    addResponsiveImageSupport(img, context);
-  }
-}
-
-function addResponsiveImageSupport(img, context) {
-  const sizes = IMAGE_OPTIMIZATION.sizes[context] || IMAGE_OPTIMIZATION.sizes.thumbnail;
-  
-  // Create srcset for different screen sizes
-  const srcset = [];
-  const baseUrl = img.src.split('?')[0]; // Remove existing query params
-  
-  // Add different sizes for responsive images
-  if (context === 'hero') {
-    srcset.push(`${baseUrl}?w=1920&h=1080&fit=crop 1920w`);
-    srcset.push(`${baseUrl}?w=1280&h=720&fit=crop 1280w`);
-    srcset.push(`${baseUrl}?w=800&h=450&fit=crop 800w`);
-  } else if (context === 'artist') {
-    srcset.push(`${baseUrl}?w=240&h=240&fit=crop 240w`);
-    srcset.push(`${baseUrl}?w=120&h=120&fit=crop 120w`);
-  } else {
-    srcset.push(`${baseUrl}?w=${sizes.width}&h=${sizes.height}&fit=crop ${sizes.width}w`);
-  }
-  
-  // Set srcset if supported
-  if (srcset.length > 0) {
-    img.srcset = srcset.join(', ');
-  }
-}
-
-function optimizeAllImages() {
-  // Optimize hero background
-  const heroBg = document.querySelector('.hero-bg');
-  if (heroBg) {
-    optimizeImage(heroBg, 'hero');
-  }
-  
-  // Optimize artist photos
-  const artistPhotos = document.querySelectorAll('.artist img');
-  artistPhotos.forEach(img => optimizeImage(img, 'artist'));
-  
-  // Optimize venue photos
-  const venuePhotos = document.querySelectorAll('.venue-photo');
-  venuePhotos.forEach(img => optimizeImage(img, 'venue'));
-  
-  // Optimize update media
-  const updateMedia = document.querySelectorAll('.update-media img, .update-media video');
-  updateMedia.forEach(media => {
-    if (media.tagName === 'IMG') {
-      optimizeImage(media, 'update');
-    }
-  });
-  
-  // Optimize all other images
-  const allImages = document.querySelectorAll('img:not(.hero-bg):not(.artist-photo):not(.venue-photo):not(.update-media)');
-  allImages.forEach(img => optimizeImage(img, 'general'));
-}
-
 // Export functions globally for other modules
-window.detectBrowserLanguage = detectBrowserLanguage;
-window.getLangName = getLangName;
-window.getLangFlagPath = getLangFlagPath;
-window.getTranslation = getTranslation;
-window.optimizeImage = optimizeImage;
-window.optimizeAllImages = optimizeAllImages;
+  window.detectBrowserLanguage = detectBrowserLanguage;
+  window.getLangName = getLangName;
+  window.getLangFlagPath = getLangFlagPath;
+  window.getTranslation = getTranslation;
 
 // Start initialization when DOM is ready
 if (document.readyState === 'loading') {

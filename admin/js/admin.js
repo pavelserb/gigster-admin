@@ -267,6 +267,9 @@ class AdminPanel {
     
     // Preload critical resources
     this.preloadCriticalResources();
+    
+    // Setup image optimization
+    this.setupImageOptimization();
   }
   
   // Setup form debouncing for better performance
@@ -333,6 +336,112 @@ class AdminPanel {
     //   link.as = 'image';
     //   document.head.appendChild(link);
     // });
+  }
+  
+  // Image optimization functions for admin panel
+  optimizeImageForContext(imagePath, context) {
+    const optimizationSettings = {
+      hero: { width: 1920, height: 1080, quality: 0.9, format: 'webp' },
+      artist: { width: 240, height: 240, quality: 0.8, format: 'webp' },
+      venue: { width: 800, height: 400, quality: 0.8, format: 'webp' },
+      update: { width: 800, height: 600, quality: 0.8, format: 'webp' },
+      thumbnail: { width: 300, height: 200, quality: 0.7, format: 'webp' },
+      gallery: { width: 1200, height: 800, quality: 0.9, format: 'webp' }
+    };
+    
+    const settings = optimizationSettings[context] || optimizationSettings.thumbnail;
+    
+    // Create optimized URL with parameters
+    const url = new URL(imagePath, window.location.origin);
+    url.searchParams.set('w', settings.width);
+    url.searchParams.set('h', settings.height);
+    url.searchParams.set('fit', 'crop');
+    url.searchParams.set('q', settings.quality);
+    url.searchParams.set('f', settings.format);
+    
+    return url.toString();
+  }
+  
+  // Auto-optimize images when selecting them in forms
+  setupImageOptimization() {
+    // Add optimization buttons to image selection areas
+    this.addOptimizationButtons();
+    
+    // Auto-optimize when images are selected
+    this.setupAutoOptimization();
+  }
+  
+  addOptimizationButtons() {
+    // Add optimization buttons to various image selection areas
+    const imageAreas = [
+      { selector: '#heroBackground', context: 'hero' },
+      { selector: '#artistPhoto', context: 'artist' },
+      { selector: '#venuePhoto', context: 'venue' },
+      { selector: '#updateThumb', context: 'thumbnail' },
+      { selector: '#updateMedia', context: 'update' }
+    ];
+    
+    imageAreas.forEach(area => {
+      const element = document.querySelector(area.selector);
+      if (element) {
+        this.addOptimizationButton(element, area.context);
+      }
+    });
+  }
+  
+  addOptimizationButton(container, context) {
+    // Create optimization button
+    const optimizeBtn = document.createElement('button');
+    optimizeBtn.type = 'button';
+    optimizeBtn.className = 'btn btn-secondary btn-sm';
+    optimizeBtn.innerHTML = '🔧 Оптимизировать';
+    optimizeBtn.onclick = () => this.optimizeSelectedImage(container, context);
+    
+    // Insert button after the input
+    container.parentNode.insertBefore(optimizeBtn, container.nextSibling);
+  }
+  
+  optimizeSelectedImage(container, context) {
+    const currentValue = container.value;
+    if (!currentValue) {
+      this.showError('Сначала выберите изображение');
+      return;
+    }
+    
+    const optimizedUrl = this.optimizeImageForContext(currentValue, context);
+    container.value = optimizedUrl;
+    
+    this.showSuccess(`Изображение оптимизировано для ${context}`);
+  }
+  
+  setupAutoOptimization() {
+    // Auto-optimize images when they're selected from file manager
+    document.addEventListener('imageSelected', (e) => {
+      const { imagePath, context } = e.detail;
+      if (imagePath && context) {
+        const optimizedUrl = this.optimizeImageForContext(imagePath, context);
+        // Update the corresponding input field
+        this.updateImageField(context, optimizedUrl);
+      }
+    });
+  }
+  
+  updateImageField(context, optimizedUrl) {
+    const fieldMap = {
+      hero: '#heroBackground',
+      artist: '#artistPhoto',
+      venue: '#venuePhoto',
+      thumbnail: '#updateThumb',
+      update: '#updateMedia'
+    };
+    
+    const selector = fieldMap[context];
+    if (selector) {
+      const field = document.querySelector(selector);
+      if (field) {
+        field.value = optimizedUrl;
+      }
+    }
   }
   
   // Handle form changes with performance optimization

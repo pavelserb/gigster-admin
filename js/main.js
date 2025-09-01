@@ -1432,13 +1432,13 @@ function loadLightboxMedia() {
   
   // Ensure proper sizing for different aspect ratios
   if (mediaClone.tagName === 'IMG') {
-    mediaClone.style.maxWidth = '100%';
+    mediaClone.style.maxWidth = '1200px';
     mediaClone.style.maxHeight = '100vh';
     mediaClone.style.width = 'auto';
     mediaClone.style.height = 'auto';
     mediaClone.style.objectFit = 'contain';
   } else if (mediaClone.tagName === 'VIDEO') {
-    mediaClone.style.maxWidth = '100%';
+    mediaClone.style.maxWidth = '1200px';
     mediaClone.style.maxHeight = '100%';
     mediaClone.style.width = 'auto';
     mediaClone.style.height = 'auto';

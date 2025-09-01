@@ -347,6 +347,27 @@ class AdminPanel {
       gallery: { width: 1200, height: 800, quality: 0.9, format: 'webp' }
     };
 
+    // SVG optimization settings (file size optimization, not size)
+    this.svgOptimizationSettings = {
+      removeComments: true,
+      removeEmptyAttrs: true,
+      removeEmptyText: true,
+      removeHiddenElems: true,
+      removeEmptyContainers: true,
+      removeViewBox: false,
+      removeUselessDefs: true,
+      removeXMLNS: false,
+      removeEditorsNSData: true,
+      removeEmptyAttrs: true,
+      removeEmptyText: true,
+      removeHiddenElems: true,
+      removeEmptyContainers: true,
+      removeViewBox: false,
+      removeUselessDefs: true,
+      removeXMLNS: false,
+      removeEditorsNSData: true
+    };
+
     // Add optimization buttons to image fields
     this.addOptimizationButtons();
     
@@ -393,6 +414,22 @@ class AdminPanel {
       return;
     }
 
+    // Check if it's an SVG file
+    const isSvg = currentValue.toLowerCase().endsWith('.svg');
+    
+    if (isSvg) {
+      // For SVG files, optimize file size, not dimensions
+      try {
+        const optimizedUrl = await this.optimizeSvgFile(currentValue);
+        inputElement.value = optimizedUrl;
+        this.showSuccess('SVG файл оптимизирован (размер файла уменьшен)');
+      } catch (error) {
+        this.showError('Ошибка оптимизации SVG файла');
+      }
+      return;
+    }
+
+    // For raster images, optimize dimensions
     const settings = this.imageOptimizationSettings[context];
     if (!settings) {
       this.showError('Неизвестный контекст оптимизации');
@@ -488,6 +525,37 @@ class AdminPanel {
         field.value = optimizedUrl;
       }
     }
+  }
+
+  async optimizeSvgFile(svgUrl) {
+    try {
+      // Fetch the SVG content
+      const response = await fetch(svgUrl);
+      const svgContent = await response.text();
+      
+      // Basic SVG optimization (remove comments, whitespace, etc.)
+      const optimizedSvg = this.optimizeSvgContent(svgContent);
+      
+      // Create a blob URL for the optimized SVG
+      const blob = new Blob([optimizedSvg], { type: 'image/svg+xml' });
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      // If optimization fails, return original URL
+      return svgUrl;
+    }
+  }
+
+  optimizeSvgContent(svgContent) {
+    // Basic SVG optimization
+    return svgContent
+      // Remove comments
+      .replace(/<!--[\s\S]*?-->/g, '')
+      // Remove unnecessary whitespace
+      .replace(/\s+/g, ' ')
+      // Remove empty lines
+      .replace(/\n\s*\n/g, '\n')
+      // Remove trailing whitespace
+      .trim();
   }
   
   // Handle form changes with performance optimization

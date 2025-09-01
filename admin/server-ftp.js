@@ -950,7 +950,21 @@ app.get('/admin/api/optimize-image', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'URL parameter is required' });
     }
 
-    // Parse parameters
+    // Check if it's an SVG file
+    if (url.toLowerCase().endsWith('.svg')) {
+      // For SVG files, optimize file size, not dimensions
+      const optimizedSvg = await optimizeSvgFile(url);
+      res.json({
+        success: true,
+        originalUrl: url,
+        optimizedUrl: optimizedSvg,
+        type: 'svg',
+        optimization: 'file_size'
+      });
+      return;
+    }
+
+    // Parse parameters for raster images
     const targetWidth = parseInt(width) || 800;
     const targetHeight = parseInt(height) || 600;
     const targetQuality = parseFloat(quality) || 0.8;
@@ -965,6 +979,7 @@ app.get('/admin/api/optimize-image', authenticateToken, async (req, res) => {
       success: true,
       originalUrl: url,
       optimizedUrl: optimizedUrl,
+      type: 'raster',
       settings: {
         width: targetWidth,
         height: targetHeight,
@@ -978,6 +993,31 @@ app.get('/admin/api/optimize-image', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Image optimization failed' });
   }
 });
+
+// SVG optimization function
+async function optimizeSvgFile(svgUrl) {
+  try {
+    // Fetch SVG content
+    const response = await fetch(svgUrl);
+    const svgContent = await response.text();
+    
+    // Basic SVG optimization
+    const optimizedSvg = svgContent
+      // Remove comments
+      .replace(/<!--[\s\S]*?-->/g, '')
+      // Remove unnecessary whitespace
+      .replace(/\s+/g, ' ')
+      // Remove empty lines
+      .replace(/\n\s*\n/g, '\n')
+      // Remove trailing whitespace
+      .trim();
+    
+    return optimizedSvg;
+  } catch (error) {
+    console.error('Error optimizing SVG:', error);
+    return svgUrl; // Return original if optimization fails
+  }
+}
 
 // Serve static assets from FTP (proxy to static hosting)
 app.use('/assets', async (req, res, next) => {

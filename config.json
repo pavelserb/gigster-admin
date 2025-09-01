@@ -45,7 +45,7 @@
       "cs": "Česká republika",
       "uk": "Чехія"
     },
-    "flag": "assets/flags/cz.png",
+    "flag": "assets/flags/flad-cz.svg",
     "heroBackground": "assets/video/hero.webm",
     "showCountdown": true,
     "about": {
